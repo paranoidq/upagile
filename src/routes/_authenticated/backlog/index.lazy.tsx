@@ -1,9 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
+import Backlog from '@/features/backlog'
 
 export const Route = createLazyFileRoute('/_authenticated/backlog/')({
-  component: RouteComponent,
+  component: Backlog,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_authenticated/backlog/"!</div>
-}

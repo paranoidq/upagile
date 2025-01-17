@@ -1,9 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
+import Requirement from '@/features/requirement'
 
 export const Route = createLazyFileRoute('/_authenticated/requirement/')({
-  component: RouteComponent,
+  component: Requirement,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_authenticated/requirement/"!</div>
-}

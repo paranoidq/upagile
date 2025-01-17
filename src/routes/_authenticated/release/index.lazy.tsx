@@ -1,9 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
+import Release from '@/features/release'
 
 export const Route = createLazyFileRoute('/_authenticated/release/')({
-  component: RouteComponent,
+  component: Release,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_authenticated/release/"!</div>
-}

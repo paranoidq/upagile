@@ -1,9 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
+import Sprint from '@/features/sprint'
 
 export const Route = createLazyFileRoute('/_authenticated/sprint/')({
-  component: RouteComponent,
+  component: Sprint,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_authenticated/sprint/"!</div>
-}

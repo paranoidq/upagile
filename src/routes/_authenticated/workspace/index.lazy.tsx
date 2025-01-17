@@ -1,9 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
+import Workspace from '@/features/workspace'
 
 export const Route = createLazyFileRoute('/_authenticated/workspace/')({
-  component: RouteComponent,
+  component: Workspace,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_authenticated/workspace/"!</div>
-}
