@@ -4,14 +4,19 @@ import {
   IconBug,
   IconChecklist,
   IconError404,
+  IconFlag,
+  IconFolderPlus,
   IconHelp,
+  IconHome,
   IconLayoutDashboard,
+  IconListCheck,
   IconLock,
   IconLockAccess,
   IconMessages,
   IconNotification,
   IconPackages,
   IconPalette,
+  IconRocket,
   IconServerOff,
   IconSettings,
   IconTool,
@@ -50,6 +55,51 @@ export const sidebarData: SidebarData = {
       title: 'General',
       items: [
         {
+          title: 'Backlog',
+          url: '/backlog',
+          icon: IconListCheck,
+        },
+        {
+          title: 'Dashboard',
+          url: '/dashboard',
+          icon: IconLayoutDashboard,
+        },
+        {
+          title: 'Workspace',
+          url: '/workspace',
+          icon: IconHome,
+        },
+        {
+          title: 'Project',
+          url: '/project',
+          icon: IconPackages,
+        },
+        {
+          title: 'Requirement',
+          url: '/requirement',
+          icon: IconFolderPlus,
+        },
+        {
+          title: 'Issue',
+          url: '/issue',
+          icon: IconChecklist,
+        },
+        {
+          title: 'Sprint',
+          url: '/sprint',
+          icon: IconFlag,
+        },
+        {
+          title: 'Release',
+          url: '/release',
+          icon: IconRocket,
+        },
+      ],
+    },
+    {
+      title: 'Pages',
+      items: [
+        {
           title: 'Dashboard',
           url: '/',
           icon: IconLayoutDashboard,
@@ -75,11 +125,6 @@ export const sidebarData: SidebarData = {
           url: '/users',
           icon: IconUsers,
         },
-      ],
-    },
-    {
-      title: 'Pages',
-      items: [
         {
           title: 'Auth',
           icon: IconLockAccess,

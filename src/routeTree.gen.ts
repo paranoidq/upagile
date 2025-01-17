@@ -34,20 +34,44 @@ const authForgotPasswordLazyImport = createFileRoute(
 const AuthenticatedSettingsRouteLazyImport = createFileRoute(
   '/_authenticated/settings',
 )()
+const AuthenticatedWorkspaceIndexLazyImport = createFileRoute(
+  '/_authenticated/workspace/',
+)()
 const AuthenticatedUsersIndexLazyImport = createFileRoute(
   '/_authenticated/users/',
 )()
 const AuthenticatedTasksIndexLazyImport = createFileRoute(
   '/_authenticated/tasks/',
 )()
+const AuthenticatedSprintIndexLazyImport = createFileRoute(
+  '/_authenticated/sprint/',
+)()
 const AuthenticatedSettingsIndexLazyImport = createFileRoute(
   '/_authenticated/settings/',
+)()
+const AuthenticatedRequirementIndexLazyImport = createFileRoute(
+  '/_authenticated/requirement/',
+)()
+const AuthenticatedReleaseIndexLazyImport = createFileRoute(
+  '/_authenticated/release/',
+)()
+const AuthenticatedProjectIndexLazyImport = createFileRoute(
+  '/_authenticated/project/',
+)()
+const AuthenticatedIssueIndexLazyImport = createFileRoute(
+  '/_authenticated/issue/',
 )()
 const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
   '/_authenticated/help-center/',
 )()
+const AuthenticatedDashboardIndexLazyImport = createFileRoute(
+  '/_authenticated/dashboard/',
+)()
 const AuthenticatedChatsIndexLazyImport = createFileRoute(
   '/_authenticated/chats/',
+)()
+const AuthenticatedBacklogIndexLazyImport = createFileRoute(
+  '/_authenticated/backlog/',
 )()
 const AuthenticatedAppsIndexLazyImport = createFileRoute(
   '/_authenticated/apps/',
@@ -171,6 +195,15 @@ const auth500Route = auth500Import.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AuthenticatedWorkspaceIndexLazyRoute =
+  AuthenticatedWorkspaceIndexLazyImport.update({
+    id: '/workspace/',
+    path: '/workspace/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/workspace/index.lazy').then((d) => d.Route),
+  )
+
 const AuthenticatedUsersIndexLazyRoute =
   AuthenticatedUsersIndexLazyImport.update({
     id: '/users/',
@@ -189,6 +222,15 @@ const AuthenticatedTasksIndexLazyRoute =
     import('./routes/_authenticated/tasks/index.lazy').then((d) => d.Route),
   )
 
+const AuthenticatedSprintIndexLazyRoute =
+  AuthenticatedSprintIndexLazyImport.update({
+    id: '/sprint/',
+    path: '/sprint/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/sprint/index.lazy').then((d) => d.Route),
+  )
+
 const AuthenticatedSettingsIndexLazyRoute =
   AuthenticatedSettingsIndexLazyImport.update({
     id: '/',
@@ -196,6 +238,44 @@ const AuthenticatedSettingsIndexLazyRoute =
     getParentRoute: () => AuthenticatedSettingsRouteLazyRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/settings/index.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedRequirementIndexLazyRoute =
+  AuthenticatedRequirementIndexLazyImport.update({
+    id: '/requirement/',
+    path: '/requirement/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/requirement/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedReleaseIndexLazyRoute =
+  AuthenticatedReleaseIndexLazyImport.update({
+    id: '/release/',
+    path: '/release/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/release/index.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedProjectIndexLazyRoute =
+  AuthenticatedProjectIndexLazyImport.update({
+    id: '/project/',
+    path: '/project/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/project/index.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedIssueIndexLazyRoute =
+  AuthenticatedIssueIndexLazyImport.update({
+    id: '/issue/',
+    path: '/issue/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/issue/index.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedHelpCenterIndexLazyRoute =
@@ -209,6 +289,15 @@ const AuthenticatedHelpCenterIndexLazyRoute =
     ),
   )
 
+const AuthenticatedDashboardIndexLazyRoute =
+  AuthenticatedDashboardIndexLazyImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/dashboard/index.lazy').then((d) => d.Route),
+  )
+
 const AuthenticatedChatsIndexLazyRoute =
   AuthenticatedChatsIndexLazyImport.update({
     id: '/chats/',
@@ -216,6 +305,15 @@ const AuthenticatedChatsIndexLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/chats/index.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedBacklogIndexLazyRoute =
+  AuthenticatedBacklogIndexLazyImport.update({
+    id: '/backlog/',
+    path: '/backlog/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/backlog/index.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedAppsIndexLazyRoute = AuthenticatedAppsIndexLazyImport.update(
@@ -409,11 +507,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/backlog/': {
+      id: '/_authenticated/backlog/'
+      path: '/backlog'
+      fullPath: '/backlog'
+      preLoaderRoute: typeof AuthenticatedBacklogIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/chats/': {
       id: '/_authenticated/chats/'
       path: '/chats'
       fullPath: '/chats'
       preLoaderRoute: typeof AuthenticatedChatsIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/help-center/': {
@@ -423,12 +535,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/issue/': {
+      id: '/_authenticated/issue/'
+      path: '/issue'
+      fullPath: '/issue'
+      preLoaderRoute: typeof AuthenticatedIssueIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/project/': {
+      id: '/_authenticated/project/'
+      path: '/project'
+      fullPath: '/project'
+      preLoaderRoute: typeof AuthenticatedProjectIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/release/': {
+      id: '/_authenticated/release/'
+      path: '/release'
+      fullPath: '/release'
+      preLoaderRoute: typeof AuthenticatedReleaseIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/requirement/': {
+      id: '/_authenticated/requirement/'
+      path: '/requirement'
+      fullPath: '/requirement'
+      preLoaderRoute: typeof AuthenticatedRequirementIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
       path: '/'
       fullPath: '/settings/'
       preLoaderRoute: typeof AuthenticatedSettingsIndexLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
+    }
+    '/_authenticated/sprint/': {
+      id: '/_authenticated/sprint/'
+      path: '/sprint'
+      fullPath: '/sprint'
+      preLoaderRoute: typeof AuthenticatedSprintIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/tasks/': {
       id: '/_authenticated/tasks/'
@@ -442,6 +589,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedUsersIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/workspace/': {
+      id: '/_authenticated/workspace/'
+      path: '/workspace'
+      fullPath: '/workspace'
+      preLoaderRoute: typeof AuthenticatedWorkspaceIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
   }
@@ -479,10 +633,18 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
+  AuthenticatedBacklogIndexLazyRoute: typeof AuthenticatedBacklogIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
+  AuthenticatedDashboardIndexLazyRoute: typeof AuthenticatedDashboardIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
+  AuthenticatedIssueIndexLazyRoute: typeof AuthenticatedIssueIndexLazyRoute
+  AuthenticatedProjectIndexLazyRoute: typeof AuthenticatedProjectIndexLazyRoute
+  AuthenticatedReleaseIndexLazyRoute: typeof AuthenticatedReleaseIndexLazyRoute
+  AuthenticatedRequirementIndexLazyRoute: typeof AuthenticatedRequirementIndexLazyRoute
+  AuthenticatedSprintIndexLazyRoute: typeof AuthenticatedSprintIndexLazyRoute
   AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
+  AuthenticatedWorkspaceIndexLazyRoute: typeof AuthenticatedWorkspaceIndexLazyRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -490,10 +652,19 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
+  AuthenticatedBacklogIndexLazyRoute: AuthenticatedBacklogIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
+  AuthenticatedDashboardIndexLazyRoute: AuthenticatedDashboardIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
+  AuthenticatedIssueIndexLazyRoute: AuthenticatedIssueIndexLazyRoute,
+  AuthenticatedProjectIndexLazyRoute: AuthenticatedProjectIndexLazyRoute,
+  AuthenticatedReleaseIndexLazyRoute: AuthenticatedReleaseIndexLazyRoute,
+  AuthenticatedRequirementIndexLazyRoute:
+    AuthenticatedRequirementIndexLazyRoute,
+  AuthenticatedSprintIndexLazyRoute: AuthenticatedSprintIndexLazyRoute,
   AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
+  AuthenticatedWorkspaceIndexLazyRoute: AuthenticatedWorkspaceIndexLazyRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -518,11 +689,19 @@ export interface FileRoutesByFullPath {
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
+  '/backlog': typeof AuthenticatedBacklogIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/issue': typeof AuthenticatedIssueIndexLazyRoute
+  '/project': typeof AuthenticatedProjectIndexLazyRoute
+  '/release': typeof AuthenticatedReleaseIndexLazyRoute
+  '/requirement': typeof AuthenticatedRequirementIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
+  '/sprint': typeof AuthenticatedSprintIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
+  '/workspace': typeof AuthenticatedWorkspaceIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
@@ -542,11 +721,19 @@ export interface FileRoutesByTo {
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
+  '/backlog': typeof AuthenticatedBacklogIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/issue': typeof AuthenticatedIssueIndexLazyRoute
+  '/project': typeof AuthenticatedProjectIndexLazyRoute
+  '/release': typeof AuthenticatedReleaseIndexLazyRoute
+  '/requirement': typeof AuthenticatedRequirementIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
+  '/sprint': typeof AuthenticatedSprintIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
+  '/workspace': typeof AuthenticatedWorkspaceIndexLazyRoute
 }
 
 export interface FileRoutesById {
@@ -570,11 +757,19 @@ export interface FileRoutesById {
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
+  '/_authenticated/backlog/': typeof AuthenticatedBacklogIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/_authenticated/issue/': typeof AuthenticatedIssueIndexLazyRoute
+  '/_authenticated/project/': typeof AuthenticatedProjectIndexLazyRoute
+  '/_authenticated/release/': typeof AuthenticatedReleaseIndexLazyRoute
+  '/_authenticated/requirement/': typeof AuthenticatedRequirementIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
+  '/_authenticated/sprint/': typeof AuthenticatedSprintIndexLazyRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
+  '/_authenticated/workspace/': typeof AuthenticatedWorkspaceIndexLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -598,11 +793,19 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/apps'
+    | '/backlog'
     | '/chats'
+    | '/dashboard'
     | '/help-center'
+    | '/issue'
+    | '/project'
+    | '/release'
+    | '/requirement'
     | '/settings/'
+    | '/sprint'
     | '/tasks'
     | '/users'
+    | '/workspace'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/500'
@@ -621,11 +824,19 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/apps'
+    | '/backlog'
     | '/chats'
+    | '/dashboard'
     | '/help-center'
+    | '/issue'
+    | '/project'
+    | '/release'
+    | '/requirement'
     | '/settings'
+    | '/sprint'
     | '/tasks'
     | '/users'
+    | '/workspace'
   id:
     | '__root__'
     | '/_authenticated'
@@ -647,11 +858,19 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/apps/'
+    | '/_authenticated/backlog/'
     | '/_authenticated/chats/'
+    | '/_authenticated/dashboard/'
     | '/_authenticated/help-center/'
+    | '/_authenticated/issue/'
+    | '/_authenticated/project/'
+    | '/_authenticated/release/'
+    | '/_authenticated/requirement/'
     | '/_authenticated/settings/'
+    | '/_authenticated/sprint/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
+    | '/_authenticated/workspace/'
   fileRoutesById: FileRoutesById
 }
 
@@ -715,10 +934,18 @@ export const routeTree = rootRoute
         "/_authenticated/settings",
         "/_authenticated/",
         "/_authenticated/apps/",
+        "/_authenticated/backlog/",
         "/_authenticated/chats/",
+        "/_authenticated/dashboard/",
         "/_authenticated/help-center/",
+        "/_authenticated/issue/",
+        "/_authenticated/project/",
+        "/_authenticated/release/",
+        "/_authenticated/requirement/",
+        "/_authenticated/sprint/",
         "/_authenticated/tasks/",
-        "/_authenticated/users/"
+        "/_authenticated/users/",
+        "/_authenticated/workspace/"
       ]
     },
     "/(auth)/500": {
@@ -789,17 +1016,45 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/apps/index.lazy.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/backlog/": {
+      "filePath": "_authenticated/backlog/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/chats/": {
       "filePath": "_authenticated/chats/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/": {
+      "filePath": "_authenticated/dashboard/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/help-center/": {
       "filePath": "_authenticated/help-center/index.lazy.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/issue/": {
+      "filePath": "_authenticated/issue/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/project/": {
+      "filePath": "_authenticated/project/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/release/": {
+      "filePath": "_authenticated/release/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/requirement/": {
+      "filePath": "_authenticated/requirement/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/settings/": {
       "filePath": "_authenticated/settings/index.lazy.tsx",
       "parent": "/_authenticated/settings"
+    },
+    "/_authenticated/sprint/": {
+      "filePath": "_authenticated/sprint/index.lazy.tsx",
+      "parent": "/_authenticated"
     },
     "/_authenticated/tasks/": {
       "filePath": "_authenticated/tasks/index.lazy.tsx",
@@ -807,6 +1062,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/users/": {
       "filePath": "_authenticated/users/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/workspace/": {
+      "filePath": "_authenticated/workspace/index.lazy.tsx",
       "parent": "/_authenticated"
     }
   }
