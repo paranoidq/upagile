@@ -13,6 +13,7 @@ import {
   IconLock,
   IconLockAccess,
   IconMessages,
+  IconNavigationBolt,
   IconNotification,
   IconPackages,
   IconPalette,
@@ -24,7 +25,7 @@ import {
   IconUserOff,
   IconUsers,
 } from '@tabler/icons-react'
-import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
+import { AudioWaveform, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -35,9 +36,9 @@ export const sidebarData: SidebarData = {
   },
   teams: [
     {
-      name: 'Shadcn Admin',
-      logo: Command,
-      plan: 'Vite + ShadcnUI',
+      name: 'The Agile',
+      logo: IconNavigationBolt,
+      plan: '',
     },
     {
       name: 'Acme Inc',
