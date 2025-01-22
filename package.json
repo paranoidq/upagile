@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "knip": "knip"
+    "knip": "knip",
+    "mock": "npx json-server mock/db.json --routes mock/routes.json --static mock/public --watch --port 3000"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -72,6 +73,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.13.0",
+    "json-server": "v0.17.4",
     "knip": "^5.41.1",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
