@@ -1,0 +1,6 @@
+{
+  "watch": ["mock/db.json", "mock/json-server.js", "mock/middlewares.js"],
+  "ext": "json,js",
+  "ignore": ["node_modules"],
+  "exec": "node mock/json-server.js"
+}

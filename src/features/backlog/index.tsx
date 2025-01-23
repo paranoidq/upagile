@@ -1,29 +1,29 @@
 import { type FC } from 'react'
-import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
+import { http } from '@/lib/axios'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
 const fetchPosts = async () => {
-  const resp = await axios.get('https://jsonplaceholder.typicode.com/posts')
-
-  return resp.data
+  const resp = await http.get('/posts')
+  return resp
 }
 
 const Backlog: FC = () => {
   const {
     data: posts,
     error,
+    isLoading,
     isSuccess,
     refetch,
-    isPending,
     isRefetching,
+    isFetching,
   } = useQuery({
     queryKey: ['queryPosts'],
     queryFn: fetchPosts,
   })
 
-  const isLoadingData = isPending
+  const isLoadingData = isLoading || isRefetching || isFetching
   return (
     <div className='container mx-auto p-6'>
       <h1 className='text-2xl font-bold mb-6'>Backlog</h1>
@@ -47,7 +47,11 @@ const Backlog: FC = () => {
             className={cn(isLoadingData && 'opacity-50 pointer-events-none')}
           >
             {!isLoadingData &&
-              posts.map((post) => <div key={post.id}>{post.title}</div>)}
+              posts.map((post) => (
+                <div key={post.id}>
+                  {post.title}，{post.authorInfo.name}
+                </div>
+              ))}
           </div>
         )}
 
