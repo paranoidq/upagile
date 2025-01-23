@@ -89,6 +89,12 @@ declare module '@tanstack/react-router' {
     router: typeof router
   }
 }
+// register global error for tanstack query
+declare module '@tanstack/react-query' {
+  interface Register {
+    defaultError: AxiosError
+  }
+}
 
 // Render the app
 const rootElement = document.getElementById('root')!
