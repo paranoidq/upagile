@@ -31,7 +31,8 @@ const queryClient = new QueryClient({
         )
       },
       refetchOnWindowFocus: import.meta.env.PROD,
-      staleTime: 10 * 1000, // 10s
+      staleTime: 60 * 1000, // 10s
+      refetchOnMount: false, // 防止组件重新挂载时自动刷新
     },
     mutations: {
       onError: (error) => {
