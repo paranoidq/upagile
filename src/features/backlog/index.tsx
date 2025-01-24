@@ -1,6 +1,8 @@
 import { type FC } from 'react'
+import { Button, FloatButton, List } from 'antd'
+import { SearchCodeIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { Main } from '@/components/layout/main'
 import { useAddPost, usePosts } from './services/posthooks'
 
 const Backlog: FC = () => {
@@ -27,28 +29,30 @@ const Backlog: FC = () => {
     })
   }
   return (
-    <div className='container mx-auto p-6'>
+    <Main>
       <h1 className='text-2xl font-bold mb-6'>Backlog</h1>
       <div className='rounded-lg bg-card text-card-foreground shadow-sm'>
         <div>
           <div className='flex gap-2'>
             <Button
+              type='primary'
               onClick={() => refetch()}
               disabled={isLoadingData}
-              className='flex items-center gap-2'
+              loading={isLoadingData}
+              icon={<SearchCodeIcon className='h-4 w-4' />}
             >
-              {isLoadingData ? '刷新中...' : '刷新数据'}
-              {isLoadingData && (
-                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white' />
-              )}
+              刷新文章
             </Button>
-            <Button
-              onClick={handleAddPost}
-              disabled={isLoadingData}
-              variant='outline'
-            >
+            <Button onClick={handleAddPost} disabled={isLoadingData}>
               新增文章
             </Button>
+            <FloatButton
+              type='primary'
+              shape='circle'
+              badge={{ count: 5, overflowCount: 999 }}
+              onClick={() => alert('哈哈')}
+              icon={<SearchCodeIcon className='h-4 w-4' />}
+            ></FloatButton>
           </div>
         </div>
 
@@ -57,12 +61,20 @@ const Backlog: FC = () => {
           <div
             className={cn(isLoadingData && 'opacity-50 pointer-events-none')}
           >
-            {!isLoadingData &&
-              posts.map((post) => (
-                <div key={post.id}>
-                  {post.id}, {post.title}，{post.authorInfo.name}
-                </div>
-              ))}
+            {!isLoadingData && (
+              <List
+                itemLayout='horizontal'
+                dataSource={posts}
+                renderItem={(post) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={post.title}
+                      description={`作者: ${post.authorInfo.name}`}
+                    />
+                  </List.Item>
+                )}
+              />
+            )}
           </div>
         )}
 
@@ -73,7 +85,7 @@ const Backlog: FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </Main>
   )
 }
 
