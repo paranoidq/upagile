@@ -1,13 +1,7 @@
 import { type FC } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { http } from '@/lib/axios'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-
-const fetchPosts = async () => {
-  const resp = await http.get('/posts')
-  return resp
-}
+import { useAddPost, usePosts } from './services/posthooks'
 
 const Backlog: FC = () => {
   const {
@@ -18,27 +12,44 @@ const Backlog: FC = () => {
     refetch,
     isRefetching,
     isFetching,
-  } = useQuery({
-    queryKey: ['queryPosts'],
-    queryFn: fetchPosts,
-  })
+  } = usePosts()
 
-  const isLoadingData = isLoading || isRefetching || isFetching
+  const { mutate: addPost } = useAddPost()
+  const isLoadingData = isLoading || isFetching || isRefetching
+
+  const handleAddPost = () => {
+    addPost({
+      title: '新文章',
+      authorInfo: {
+        name: '新作者',
+        age: 25,
+      },
+    })
+  }
   return (
     <div className='container mx-auto p-6'>
       <h1 className='text-2xl font-bold mb-6'>Backlog</h1>
       <div className='rounded-lg bg-card text-card-foreground shadow-sm'>
         <div>
-          <Button
-            onClick={() => refetch()}
-            disabled={isLoadingData}
-            className='flex items-center gap-2'
-          >
-            {isLoadingData ? '刷新中...' : '刷新数据'}
-            {isLoadingData && (
-              <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white' />
-            )}
-          </Button>
+          <div className='flex gap-2'>
+            <Button
+              onClick={() => refetch()}
+              disabled={isLoadingData}
+              className='flex items-center gap-2'
+            >
+              {isLoadingData ? '刷新中...' : '刷新数据'}
+              {isLoadingData && (
+                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white' />
+              )}
+            </Button>
+            <Button
+              onClick={handleAddPost}
+              disabled={isLoadingData}
+              variant='outline'
+            >
+              新增文章
+            </Button>
+          </div>
         </div>
 
         {error && <div>error: {error.message}</div>}
@@ -49,7 +60,7 @@ const Backlog: FC = () => {
             {!isLoadingData &&
               posts.map((post) => (
                 <div key={post.id}>
-                  {post.title}，{post.authorInfo.name}
+                  {post.id}, {post.title}，{post.authorInfo.name}
                 </div>
               ))}
           </div>
