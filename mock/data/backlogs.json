@@ -1,26 +1,15 @@
 {
-  "backlogs": [{
+  "backlogs": [
+    {
       "id": 3,
-      "title": "文章111111",
-      "authorInfo": {
-        "name": "张三",
-        "age": 20
-      }
-    },
-    {
-      "id": 2,
-      "title": "文章222",
-      "authorInfo": {
-        "name": "李四",
-        "age": 24
-      }
-    },
-    {
-      "title": "新文章",
-      "authorInfo": {
-        "name": "新作者",
-        "age": 25
-      },
-      "id": 4
-    }]
+      "desc": "文章112",
+      "priority": 1,
+      "status": 0,
+      "category": 1,
+      "crtUsr": "admin",
+      "updUsr": "admin",
+      "crtTime": "2022-02-22 22:22:22",
+      "updTime": "2022-02-22 22:22:22"
+    }
+  ]
 }

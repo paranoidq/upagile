@@ -1,13 +1,29 @@
 import { type FC } from 'react'
-import { Button, FloatButton, List } from 'antd'
-import { SearchCodeIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { IconPlus, IconRefresh } from '@tabler/icons-react'
+import { Button, Table, TableColumnsType } from 'antd'
+import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { useAddBacklog, useBacklogs } from './services/backlog-services'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { useBacklogs, useCreateBacklog } from './services/backlog-services'
+import { BacklogType } from './services/backlog-services-backup'
+
+const backlogColumns: TableColumnsType<BacklogType> = [
+  { title: 'id', dataIndex: 'id' },
+  { title: '描述', dataIndex: 'desc' },
+  { title: '状态', dataIndex: 'status' },
+  { title: '优先级', dataIndex: 'priority' },
+  { title: '分类', dataIndex: 'category' },
+  { title: '创建人', dataIndex: 'crtUsr' },
+  { title: '修改人', dataIndex: 'updUsr' },
+  { title: '创建时间', dataIndex: 'crtTime' },
+  { title: '修改时间', dataIndex: 'updTime' },
+]
 
 const Backlog: FC = () => {
   const {
-    data: posts,
+    data: backlogs,
     error,
     isLoading,
     isSuccess,
@@ -16,76 +32,73 @@ const Backlog: FC = () => {
     isFetching,
   } = useBacklogs()
 
-  const { mutate: addPost } = useAddBacklog()
+  const { mutate: createBacklogs, isPending: isCreating } = useCreateBacklog()
   const isLoadingData = isLoading || isFetching || isRefetching
 
   const handleAddPost = () => {
-    addPost({
-      title: '新文章',
-      authorInfo: {
-        name: '新作者',
-        age: 25,
-      },
+    createBacklogs({
+      desc: '文章112',
+      priority: 1,
+      status: 0,
+      category: 1,
+      crtUsr: 'admin',
+      updUsr: 'admin',
+      crtTime: '2022-02-22 22:22:22',
+      updTime: '2022-02-22 22:22:22',
     })
   }
   return (
-    <Main>
-      <h1 className='text-2xl font-bold mb-6'>Backlog</h1>
-      <div className='rounded-lg bg-card text-card-foreground shadow-sm'>
-        <div>
-          <div className='flex gap-2'>
-            <Button
-              type='primary'
-              onClick={() => refetch()}
-              disabled={isLoadingData}
-              loading={isLoadingData}
-              icon={<SearchCodeIcon className='h-4 w-4' />}
-            >
-              刷新文章
-            </Button>
-            <Button onClick={handleAddPost} disabled={isLoadingData}>
-              新增文章
-            </Button>
-            <FloatButton
-              type='primary'
-              shape='circle'
-              badge={{ count: 5, overflowCount: 999 }}
-              onClick={() => alert('哈哈')}
-              icon={<SearchCodeIcon className='h-4 w-4' />}
-            ></FloatButton>
+    <>
+      <Header fixed>
+        <Search />
+        <div className='ml-auto flex items-center space-x-4'>
+          <ThemeSwitch />
+          <ProfileDropdown />
+        </div>
+      </Header>
+      <Main>
+        <div className='mb-2 flex items-center justify-between space-y-2 flex-wrap gap-x-4'>
+          <div>
+            <h2 className='text-2xl font-bold tracking-tight'>Backlogs</h2>
+            <p className='text-muted-foreground'>
+              {`Here's a list of your backlogs`}
+            </p>
+          </div>
+          <div>
+            <div className='flex gap-2'>
+              <Button
+                type='default'
+                onClick={() => refetch()}
+                disabled={isLoadingData}
+                loading={isLoadingData}
+                icon={<IconRefresh className='h-4 w-4' />}
+              >
+                Refresh
+              </Button>
+              <Button
+                onClick={handleAddPost}
+                disabled={isLoadingData}
+                type='primary'
+                loading={isCreating}
+                icon={<IconPlus className='h-4 w-4' />}
+              >
+                Create
+              </Button>
+            </div>
           </div>
         </div>
-
-        {error && <div>error: {error.message}</div>}
-        {isSuccess && (
-          <div
-            className={cn(isLoadingData && 'opacity-50 pointer-events-none')}
-          >
-            {!isLoadingData && (
-              <List
-                itemLayout='horizontal'
-                dataSource={posts}
-                renderItem={(post) => (
-                  <List.Item>
-                    <List.Item.Meta
-                      title={post.title}
-                      description={`作者: ${post.authorInfo.name}`}
-                    />
-                  </List.Item>
-                )}
-              />
-            )}
-          </div>
-        )}
-
-        {/* 加载指示器 */}
-        {isLoadingData && (
-          <div className='absolute inset-0 flex items-center justify-center'>
-            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900' />
-          </div>
-        )}
-      </div>
-    </Main>
+        <div>
+          {isSuccess && (
+            <Table
+              dataSource={backlogs}
+              columns={backlogColumns}
+              rowKey={'id'}
+              loading={isLoadingData}
+            />
+          )}
+        </div>
+      </Main>
+    </>
   )
 }
 

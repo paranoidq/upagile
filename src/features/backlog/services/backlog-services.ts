@@ -4,45 +4,78 @@ import { http } from '@/lib/axios'
 
 const BacklogSchema = z.object({
   id: z.number(),
-  title: z.string(),
-  authorInfo: z.object({
-    name: z.string(),
-    age: z.number(),
-  }),
+  desc: z.string(),
+  status: z.number(),
+  priority: z.number(),
+  category: z.number(),
+  crtUsr: z.string(),
+  updUsr: z.string(),
+  crtTime: z.string(),
+  updTime: z.string(),
 })
 
 export type Backlog = z.infer<typeof BacklogSchema>
 
-const fetchBacklogData = async (): Promise<Backlog[]> => {
+// 获取backlogs
+const getBacklogs = async (): Promise<Backlog[]> => {
   const response = await http.get('/backlogs')
   if (!response) {
     return []
   }
-  return z.array(BacklogSchema).parse(response || [])
+
+  return z.array(BacklogSchema).parse(response)
 }
-const addBacklog = async (backlog: Omit<Backlog, 'id'>): Promise<Backlog> => {
-  const response = await http.post('/backlogs', {
-    ...backlog,
-  })
-  return response.data
+
+// 删除backlog
+export const deleteBacklog = async (id: number): Promise<void> => {
+  await http.post('/backlogs/delete', { id })
+}
+
+// 新增backlog
+export const createBacklog = async (
+  backlog: Omit<Backlog, 'id'>,
+): Promise<void> => {
+  await http.post('backlogs/create', backlog)
+}
+
+// 修改backlog
+export const updateBacklog = async (backlog: Backlog): Promise<void> => {
+  await http.post('backlogs/update', backlog)
 }
 
 export const useBacklogs = () => {
-  return useQuery<Backlog[]>({
-    queryKey: ['queryBacklogs'],
-    queryFn: fetchBacklogData,
+  return useQuery({
+    queryKey: ['backlogs'],
+    queryFn: getBacklogs,
   })
 }
 
-export const useAddBacklog = () => {
+export const useCreateBacklog = () => {
   const queryClient = useQueryClient()
-
   return useMutation({
-    mutationFn: addBacklog,
+    mutationFn: createBacklog,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['queryBacklogs'] })
+      queryClient.invalidateQueries({ queryKey: ['backlogs'] })
     },
   })
 }
 
-// delete po
+export const useUpdateBacklog = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: updateBacklog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['backlogs'] })
+    },
+  })
+}
+
+export const useDeleteBacklog = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteBacklog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['backlogs'] })
+    },
+  })
+}
