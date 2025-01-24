@@ -3,7 +3,7 @@ import { Button, FloatButton, List } from 'antd'
 import { SearchCodeIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Main } from '@/components/layout/main'
-import { useAddPost, usePosts } from './services/posthooks'
+import { useAddBacklog, useBacklogs } from './services/backlog-services'
 
 const Backlog: FC = () => {
   const {
@@ -14,9 +14,9 @@ const Backlog: FC = () => {
     refetch,
     isRefetching,
     isFetching,
-  } = usePosts()
+  } = useBacklogs()
 
-  const { mutate: addPost } = useAddPost()
+  const { mutate: addPost } = useAddBacklog()
   const isLoadingData = isLoading || isFetching || isRefetching
 
   const handleAddPost = () => {
