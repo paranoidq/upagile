@@ -1,8 +1,20 @@
 // @ts-nocheck
-import jsonServer from 'json-server'
+import fs from 'fs';
+import jsonServer from 'json-server';
 
 const server = jsonServer.create()
-const router = jsonServer.router('mock/db.json')
+
+// 读取mock/data目录下的所有json文件，并合并，然后传递给json-server的router
+const path = 'mock/data';
+const db = fs.readdirSync(path).reduce((acc, file) => {
+  if (file.endsWith('.json')) {
+    const data = JSON.parse(fs.readFileSync(`${path}/${file}`, 'utf-8'));
+    return { ...acc, ...data };
+  }
+  return acc;
+}, {});
+
+const router = jsonServer.router(db)
 const defaultMiddlewares = jsonServer.defaults()
 
 // 重写路径，必须写在 server.use(router) 之前
