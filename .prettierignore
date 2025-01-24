@@ -3,6 +3,8 @@
 
 # Except these files & folders
 !/src
+!/mock
+.env*
 !index.html
 !package.json
 !tailwind.config.js
