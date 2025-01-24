@@ -25,7 +25,7 @@ router.render = (req, res) => {
     res.jsonp(res.locals.data)
   } else {
     res.jsonp({
-      code: 1,
+      code: 0,
       data: res.locals.data,
       message: '',
     })

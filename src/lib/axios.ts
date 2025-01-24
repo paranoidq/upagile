@@ -53,10 +53,10 @@ http.interceptors.response.use(
 
     if (code == 0) {
       return data
+    } else {
+      // 处理其他状态码
+      throw new Error(message)
     }
-
-    // 处理其他状态码
-    throw new Error(message)
   },
   (error) => {
     // 统一错误处理
