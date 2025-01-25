@@ -14,10 +14,10 @@ const BacklogSchema = z.object({
   updTime: z.string(),
 })
 
-export type Backlog = z.infer<typeof BacklogSchema>
+export type TypeBacklog = z.infer<typeof BacklogSchema>
 
 // 获取backlogs
-const getBacklogs = async (): Promise<Backlog[]> => {
+const getBacklogs = async (): Promise<TypeBacklog[]> => {
   const response = await http.get('/backlogs')
   if (!response) {
     return []
@@ -33,13 +33,13 @@ export const deleteBacklog = async (id: number): Promise<void> => {
 
 // 新增backlog
 export const createBacklog = async (
-  backlog: Omit<Backlog, 'id'>,
+  backlog: Omit<TypeBacklog, 'id'>,
 ): Promise<void> => {
   await http.post('backlogs/create', backlog)
 }
 
 // 修改backlog
-export const updateBacklog = async (backlog: Backlog): Promise<void> => {
+export const updateBacklog = async (backlog: TypeBacklog): Promise<void> => {
   await http.post('backlogs/update', backlog)
 }
 

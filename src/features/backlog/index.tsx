@@ -1,15 +1,17 @@
 import { type FC } from 'react'
-import { IconPlus, IconRefresh } from '@tabler/icons-react'
 import { Button, Table, TableColumnsType } from 'antd'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { useBacklogs, useCreateBacklog } from './services/backlog-services'
-import { BacklogType } from './services/backlog-services-backup'
+import {
+  TypeBacklog,
+  useBacklogs,
+  useCreateBacklog,
+} from './services/backlog-services'
 
-const backlogColumns: TableColumnsType<BacklogType> = [
+const backlogColumns: TableColumnsType<TypeBacklog> = [
   { title: 'id', dataIndex: 'id' },
   { title: '描述', dataIndex: 'desc' },
   { title: '状态', dataIndex: 'status' },
@@ -24,7 +26,6 @@ const backlogColumns: TableColumnsType<BacklogType> = [
 const Backlog: FC = () => {
   const {
     data: backlogs,
-    error,
     isLoading,
     isSuccess,
     refetch,
@@ -71,7 +72,6 @@ const Backlog: FC = () => {
                 onClick={() => refetch()}
                 disabled={isLoadingData}
                 loading={isLoadingData}
-                icon={<IconRefresh className='h-4 w-4' />}
               >
                 Refresh
               </Button>
@@ -80,7 +80,6 @@ const Backlog: FC = () => {
                 disabled={isLoadingData}
                 type='primary'
                 loading={isCreating}
-                icon={<IconPlus className='h-4 w-4' />}
               >
                 Create
               </Button>

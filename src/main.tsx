@@ -106,10 +106,14 @@ if (!rootElement.innerHTML) {
     <StrictMode>
       <ConfigProvider
         theme={{
-          token: {
-            // Seed Token，影响范围大
-            colorPrimary: '#0F172A',
-            borderRadius: 6,
+          token: {},
+          components: {
+            Tabs: {
+              // itemSelectedColor: '#0F172A',
+              // itemHoverColor: '#0F172A',
+              // itemActiveColor: '#0F172A',
+              // inkBarColor: '#0F172A',
+            },
           },
         }}
       >
