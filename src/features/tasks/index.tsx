@@ -94,7 +94,13 @@ export default function Tasks() {
                   )}
                 </div>
               ),
-              children: <DataTable data={tasks} columns={columns} />,
+              children: (
+                <DataTable
+                  data={tasks}
+                  columns={columns}
+                  searchColumn='title'
+                />
+              ),
             }))}
           />
         </div>

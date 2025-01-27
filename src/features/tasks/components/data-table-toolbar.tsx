@@ -8,24 +8,33 @@ import { DataTableFacetedFilter } from './data-table-faceted-filter'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
+  searchColumn?: string
 }
 
 export function DataTableToolbar<TData>({
   table,
+  searchColumn,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
 
   return (
     <div className='flex items-center justify-between'>
+      {/* toolbar */}
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
-        <Input
-          placeholder='Filter tasks...'
-          value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('title')?.setFilterValue(event.target.value)
-          }
-          className='h-8 w-[150px] lg:w-[250px]'
-        />
+        {/* search */}
+        {searchColumn && (
+          <Input
+            placeholder='Filter tasks...'
+            value={
+              (table.getColumn(searchColumn)?.getFilterValue() as string) ?? ''
+            }
+            onChange={(event) =>
+              table.getColumn(searchColumn)?.setFilterValue(event.target.value)
+            }
+            className='h-8 w-[150px] lg:w-[250px]'
+          />
+        )}
+
         <div className='flex gap-x-2'>
           {table.getColumn('status') && (
             <DataTableFacetedFilter
@@ -53,6 +62,8 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
+
+      {/* 筛选cols */}
       <DataTableViewOptions table={table} />
     </div>
   )
