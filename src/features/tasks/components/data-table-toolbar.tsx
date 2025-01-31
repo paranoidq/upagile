@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Table } from '@tanstack/react-table'
 import { IconFilterCog } from '@tabler/icons-react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import { GripVertical } from 'lucide-react'
+import { GripVertical, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -22,6 +22,7 @@ interface Condition {
   operator?: string
   value?: string
   order?: 'asc' | 'desc'
+  [key: string]: string | undefined // 添加索引签名以修复类型错误
 }
 
 export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolbarProps<TData>) {
@@ -83,6 +84,41 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
     setOpen(false)
   }
 
+  const handleRemoveCondition = (index: number, type: 'filter' | 'sort' | 'group') => {
+    if (type === 'filter') {
+      const newConditions = filterConditions.filter((_, i) => i !== index)
+      setFilterConditions(newConditions)
+      filterForm.reset(
+        newConditions.reduce((acc, _, i) => {
+          acc[`field-${i}`] = filterForm.getValues()[`field-${index + i}`]
+          acc[`operator-${i}`] = filterForm.getValues()[`operator-${index + i}`]
+          acc[`value-${i}`] = filterForm.getValues()[`value-${index + i}`]
+          return acc
+        }, {}),
+      )
+    } else if (type === 'sort') {
+      const newConditions = sortConditions.filter((_, i) => i !== index)
+      setSortConditions(newConditions)
+      sortForm.reset(
+        newConditions.reduce((acc, _, i) => {
+          acc[`field-${i}`] = sortForm.getValues()[`field-${index + i}`]
+          acc[`order-${i}`] = sortForm.getValues()[`order-${index + i}`]
+          return acc
+        }, {}),
+      )
+    } else {
+      const newConditions = groupConditions.filter((_, i) => i !== index)
+      setGroupConditions(newConditions)
+      groupForm.reset(
+        newConditions.reduce((acc, _, i) => {
+          acc[`field-${i}`] = groupForm.getValues()[`field-${index + i}`]
+          acc[`order-${i}`] = groupForm.getValues()[`order-${index + i}`]
+          return acc
+        }, {}),
+      )
+    }
+  }
+
   const onDragEnd = (
     result: {
       destination: { index: number } | null
@@ -141,7 +177,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
         )}
 
         {/* popover for filter,group,sort */}
-        <Popover open={true} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button variant='outline' size='sm' className='ml-auto h-8 lg:flex'>
               <IconFilterCog className='mr-2 h-4 w-4' />
@@ -243,6 +279,14 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                       </FormItem>
                                     )}
                                   />
+                                  <Button
+                                    variant='ghost'
+                                    size='icon'
+                                    className='h-8 w-8 hover:bg-red-50 hover:text-red-600'
+                                    onClick={() => handleRemoveCondition(index, 'filter')}
+                                  >
+                                    <X className='h-4 w-4' />
+                                  </Button>
                                 </div>
                               )}
                             </Draggable>
@@ -337,6 +381,14 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                       </FormItem>
                                     )}
                                   />
+                                  <Button
+                                    variant='ghost'
+                                    size='icon'
+                                    className='h-8 w-8 hover:bg-red-50 hover:text-red-600'
+                                    onClick={() => handleRemoveCondition(index, 'sort')}
+                                  >
+                                    <X className='h-4 w-4' />
+                                  </Button>
                                 </div>
                               )}
                             </Draggable>
@@ -431,6 +483,14 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                       </FormItem>
                                     )}
                                   />
+                                  <Button
+                                    variant='ghost'
+                                    size='icon'
+                                    className='h-8 w-8 hover:bg-red-50 hover:text-red-600'
+                                    onClick={() => handleRemoveCondition(index, 'group')}
+                                  >
+                                    <X className='h-4 w-4' />
+                                  </Button>
                                 </div>
                               )}
                             </Draggable>
