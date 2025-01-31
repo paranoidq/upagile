@@ -453,7 +453,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                         <div
                           {...provided.droppableProps}
                           ref={provided.innerRef}
-                          className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden'
+                          className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'
                         >
                           {groupConditions.map((condition, index) => (
                             <Draggable key={index} draggableId={`group-${index}`} index={index}>
@@ -461,7 +461,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className='flex items-center gap-2 p-1 bg-background rounded-md w-full'
+                                  className='flex items-center gap-2 bg-background rounded-md w-full'
                                 >
                                   <div {...provided.dragHandleProps}>
                                     <GripVertical className='h-4 w-4' />
