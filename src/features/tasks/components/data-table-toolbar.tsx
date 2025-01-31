@@ -130,18 +130,25 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
   return (
     <div className='flex items-center justify-between'>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
+        {/* search input */}
         {searchColumn && (
-          <Input placeholder='Filter tasks...' value={(table.getColumn(searchColumn)?.getFilterValue() as string) ?? ''} onChange={(event) => table.getColumn(searchColumn)?.setFilterValue(event.target.value)} className='h-8 w-[150px] lg:w-[250px]' />
+          <Input
+            placeholder='Filter tasks...'
+            value={(table.getColumn(searchColumn)?.getFilterValue() as string) ?? ''}
+            onChange={(event) => table.getColumn(searchColumn)?.setFilterValue(event.target.value)}
+            className='h-8 w-[150px] lg:w-[250px]'
+          />
         )}
 
-        <Popover open={open} onOpenChange={setOpen}>
+        {/* popover for filter,group,sort */}
+        <Popover open={true} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button variant='outline' size='sm' className='ml-auto h-8 lg:flex'>
               <IconFilterCog className='mr-2 h-4 w-4' />
               Filters
             </Button>
           </PopoverTrigger>
-          <PopoverContent className='w-[600px] p-0'>
+          <PopoverContent className='w-[600px] p-2'>
             <Tabs defaultValue='filter' className='w-full'>
               <TabsList className='grid w-full grid-cols-3'>
                 <TabsTrigger value='filter'>筛选</TabsTrigger>
@@ -150,16 +157,24 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
               </TabsList>
 
               {/* Filter Tab */}
-              <TabsContent value='filter' className='p-4'>
+              <TabsContent value='filter' className=''>
                 <Form {...filterForm}>
                   <DragDropContext onDragEnd={(result) => onDragEnd(result, 'filter')}>
                     <Droppable droppableId='filterConditions'>
                       {(provided) => (
-                        <div {...provided.droppableProps} ref={provided.innerRef} className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'>
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'
+                        >
                           {filterConditions.map((condition, index) => (
                             <Draggable key={index} draggableId={`filter-${index}`} index={index}>
                               {(provided) => (
-                                <div ref={provided.innerRef} {...provided.draggableProps} className='flex items-center gap-2 p-2 bg-background rounded-md border w-full'>
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className='flex items-center gap-2 bg-background rounded-md w-full'
+                                >
                                   <div {...provided.dragHandleProps}>
                                     <GripVertical className='h-4 w-4' />
                                   </div>
@@ -167,10 +182,13 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                     control={filterForm.control}
                                     name={`field-${index}`}
                                     render={({ field }) => {
-                                      const usedFields = filterConditions.map((c) => c.field).filter((f) => f !== condition.field)
                                       return (
                                         <FormItem>
-                                          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!table.getAllColumns().some((c) => !usedFields.includes(c.id))}>
+                                          <Select
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                            disabled={!table.getAllColumns()}
+                                          >
                                             <FormControl>
                                               <SelectTrigger>
                                                 <SelectValue placeholder='选择字段' />
@@ -179,7 +197,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                             <SelectContent>
                                               {table
                                                 .getAllColumns()
-                                                .filter((column) => column.getIsVisible() && !usedFields.includes(column.id))
+                                                .filter((column) => column.id !== 'select')
                                                 .map((column) => (
                                                   <SelectItem key={column.id} value={column.id}>
                                                     {column.id}
@@ -220,7 +238,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                     render={({ field }) => (
                                       <FormItem>
                                         <FormControl>
-                                          <Input {...field} placeholder='输入值' />
+                                          <Input {...field} placeholder='输入值' className='flex-1' />
                                         </FormControl>
                                       </FormItem>
                                     )}
@@ -235,23 +253,36 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                     </Droppable>
                   </DragDropContext>
 
-                  <Button type='button' variant='outline' onClick={() => setFilterConditions([...filterConditions, {}])} className='mt-4'>
+                  <Button
+                    type='button'
+                    variant='link'
+                    onClick={() => setFilterConditions([...filterConditions, {}])}
+                    className='mt-4 hover:text-blue-600'
+                  >
                     添加条件
                   </Button>
                 </Form>
               </TabsContent>
 
               {/* Sort Tab */}
-              <TabsContent value='sort' className='p-4'>
+              <TabsContent value='sort' className='p-0'>
                 <Form {...sortForm}>
                   <DragDropContext onDragEnd={(result) => onDragEnd(result, 'sort')}>
                     <Droppable droppableId='sortConditions'>
                       {(provided) => (
-                        <div {...provided.droppableProps} ref={provided.innerRef} className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'>
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'
+                        >
                           {sortConditions.map((condition, index) => (
                             <Draggable key={index} draggableId={`sort-${index}`} index={index}>
                               {(provided) => (
-                                <div ref={provided.innerRef} {...provided.draggableProps} className='flex items-center gap-2 p-2 bg-background rounded-md border w-full'>
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className='flex items-center gap-2 bg-background rounded-md w-full'
+                                >
                                   <div {...provided.dragHandleProps}>
                                     <GripVertical className='h-4 w-4' />
                                   </div>
@@ -259,10 +290,12 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                     control={sortForm.control}
                                     name={`field-${index}`}
                                     render={({ field }) => {
-                                      const usedFields = sortConditions.map((c) => c.field).filter((f) => f !== condition.field)
+                                      const usedFields = sortConditions
+                                        .map((c) => c.field)
+                                        .filter((f) => f !== condition.field)
                                       return (
                                         <FormItem>
-                                          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!table.getAllColumns().some((c) => !usedFields.includes(c.id))}>
+                                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                               <SelectTrigger>
                                                 <SelectValue placeholder='选择字段' />
@@ -271,7 +304,9 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                             <SelectContent>
                                               {table
                                                 .getAllColumns()
-                                                .filter((column) => column.getIsVisible() && !usedFields.includes(column.id))
+                                                .filter(
+                                                  (column) => column.id !== 'select' && !usedFields.includes(column.id),
+                                                )
                                                 .map((column) => (
                                                   <SelectItem key={column.id} value={column.id}>
                                                     {column.id}
@@ -312,23 +347,36 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                     </Droppable>
                   </DragDropContext>
 
-                  <Button type='button' variant='outline' onClick={() => setSortConditions([...sortConditions, {}])} className='mt-4'>
-                    添加排序
+                  <Button
+                    type='button'
+                    variant='link'
+                    onClick={() => setSortConditions([...sortConditions, {}])}
+                    className='mt-4 hover:text-blue-600'
+                  >
+                    添加条件
                   </Button>
                 </Form>
               </TabsContent>
 
               {/* Group Tab */}
-              <TabsContent value='group' className='p-4'>
+              <TabsContent value='group' className='p-0'>
                 <Form {...groupForm}>
                   <DragDropContext onDragEnd={(result) => onDragEnd(result, 'group')}>
                     <Droppable droppableId='groupConditions'>
                       {(provided) => (
-                        <div {...provided.droppableProps} ref={provided.innerRef} className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'>
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden'
+                        >
                           {groupConditions.map((condition, index) => (
                             <Draggable key={index} draggableId={`group-${index}`} index={index}>
                               {(provided) => (
-                                <div ref={provided.innerRef} {...provided.draggableProps} className='flex items-center gap-2 p-2 bg-background rounded-md border w-full'>
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className='flex items-center gap-2 p-1 bg-background rounded-md w-full'
+                                >
                                   <div {...provided.dragHandleProps}>
                                     <GripVertical className='h-4 w-4' />
                                   </div>
@@ -336,10 +384,12 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                     control={groupForm.control}
                                     name={`field-${index}`}
                                     render={({ field }) => {
-                                      const usedFields = groupConditions.map((c) => c.field).filter((f) => f !== condition.field)
+                                      const usedFields = groupConditions
+                                        .map((c) => c.field)
+                                        .filter((f) => f !== condition.field)
                                       return (
                                         <FormItem>
-                                          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!table.getAllColumns().some((c) => !usedFields.includes(c.id))}>
+                                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                               <SelectTrigger>
                                                 <SelectValue placeholder='选择字段' />
@@ -348,7 +398,9 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                             <SelectContent>
                                               {table
                                                 .getAllColumns()
-                                                .filter((column) => column.getIsVisible() && !usedFields.includes(column.id))
+                                                .filter(
+                                                  (column) => column.id !== 'select' && !usedFields.includes(column.id),
+                                                )
                                                 .map((column) => (
                                                   <SelectItem key={column.id} value={column.id}>
                                                     {column.id}
@@ -389,15 +441,20 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                     </Droppable>
                   </DragDropContext>
 
-                  <Button type='button' variant='outline' onClick={() => setGroupConditions([...groupConditions, {}])} className='mt-4'>
-                    添加分组
+                  <Button
+                    type='button'
+                    variant='link'
+                    onClick={() => setGroupConditions([...groupConditions, {}])}
+                    className='mt-4 hover:text-blue-600'
+                  >
+                    添加条件
                   </Button>
                 </Form>
               </TabsContent>
             </Tabs>
 
             {/* 统一操作按钮 */}
-            <div className='flex justify-end space-x-2 p-4 border-t'>
+            <div className='flex justify-end space-x-2 p-4 mt-2 border-t'>
               <Button type='button' variant='outline' onClick={() => setOpen(false)}>
                 取消
               </Button>
