@@ -28,13 +28,47 @@ interface Condition {
 export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolbarProps<TData>) {
   const [open, setOpen] = useState(false)
 
-  const filterForm = useForm()
-  const sortForm = useForm()
-  const groupForm = useForm()
-
   const [filterConditions, setFilterConditions] = useState<Condition[]>([])
   const [sortConditions, setSortConditions] = useState<Condition[]>([])
   const [groupConditions, setGroupConditions] = useState<Condition[]>([])
+
+  const filterForm = useForm({
+    defaultValues: {
+      ...filterConditions.reduce(
+        (acc, _, index) => {
+          acc[`field-${index}`] = ''
+          acc[`operator-${index}`] = ''
+          acc[`value-${index}`] = ''
+          return acc
+        },
+        {} as Record<string, string>,
+      ),
+    },
+  })
+  const sortForm = useForm({
+    defaultValues: {
+      ...sortConditions.reduce(
+        (acc, _, index) => {
+          acc[`field-${index}`] = ''
+          acc[`order-${index}`] = ''
+          return acc
+        },
+        {} as Record<string, string>,
+      ),
+    },
+  })
+  const groupForm = useForm({
+    defaultValues: {
+      ...groupConditions.reduce(
+        (acc, _, index) => {
+          acc[`field-${index}`] = ''
+          acc[`order-${index}`] = ''
+          return acc
+        },
+        {} as Record<string, string>,
+      ),
+    },
+  })
 
   const handleSubmit = () => {
     // 处理筛选表单数据
