@@ -1,13 +1,5 @@
 import { useEffect, useState } from 'react'
-import {
-  IconAlignLeft,
-  IconArrowLeft,
-  IconArrowLeftFromArc,
-  IconCopy,
-  IconEdit,
-  IconPlus,
-  IconTrash,
-} from '@tabler/icons-react'
+import { IconArrowLeft, IconCopy, IconEdit, IconTrash } from '@tabler/icons-react'
 import { Button, Dropdown, Form, Input, Popconfirm, Popover, Tabs } from 'antd'
 import FormItem from 'antd/es/form/FormItem'
 import { MoreVertical } from 'lucide-react'
@@ -29,7 +21,6 @@ export default function Tasks() {
   const { data: views } = useViews()
   const [activeTab, setActiveTab] = useState<string>('0')
   const [openViewRenameDialog, setOpenViewRenameDialog] = useState(false)
-  const [openViewDuplicateDialog, setOpenViewDuplicateDialog] = useState(false)
 
   const currentView = views?.find((view) => view.id === Number(activeTab))
 
@@ -92,39 +83,10 @@ export default function Tasks() {
                           },
                           {
                             key: 'duplicate',
-                            label: (
-                              <Popover
-                                open={openViewDuplicateDialog}
-                                title={'复制视图'}
-                                trigger={'click'}
-                                content={
-                                  <Form
-                                    initialValues={{ name: view.name + ' 副本' }}
-                                    layout='vertical'
-                                    onFinish={(values) => {
-                                      setOpenViewDuplicateDialog(false)
-                                    }}
-                                  >
-                                    <FormItem required={true} label={'视图名称'} name='name'>
-                                      <Input />
-                                    </FormItem>
-                                    <FormItem>
-                                      <Button type='primary' htmlType='submit'>
-                                        确定
-                                      </Button>
-                                      <Button type={'default'} onClick={() => setOpenViewDuplicateDialog(false)}>
-                                        取消
-                                      </Button>
-                                    </FormItem>
-                                  </Form>
-                                }
-                              >
-                                复制视图
-                              </Popover>
-                            ),
+                            label: '复制视图',
                             icon: <IconCopy className='w-4 h-4' />,
                             type: 'item',
-                            onClick: () => setOpenViewDuplicateDialog(true),
+                            onClick: () => alert('todo'),
                           },
                           {
                             type: 'divider',
@@ -160,7 +122,6 @@ export default function Tasks() {
         </div>
       </Main>
       <TasksDialogs />
-
 
       {/*// todo: 如果不加openViewRenameDialog这个状态，会导致ViewRenameDialog组件在切换tab时，form表单的值不会更新*/}
       {currentView && openViewRenameDialog && (
