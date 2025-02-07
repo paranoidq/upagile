@@ -1,28 +1,29 @@
 import { useEffect, useState } from 'react'
-import { IconArrowLeft, IconCopy, IconEdit, IconTrash } from '@tabler/icons-react'
-import { Button, Dropdown, Form, Input, Popconfirm, Popover, Tabs } from 'antd'
-import FormItem from 'antd/es/form/FormItem'
+import { IconArrowLeft, IconCopy, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'
+import { Button, Dropdown, Popconfirm, Tabs } from 'antd'
 import { MoreVertical } from 'lucide-react'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ViewRenameDialog } from '@/features/tasks/components/view/view-rename-dialog.tsx'
+import { ViewDialog } from '@/features/tasks/components/view/view-dialog.tsx'
 import { columns } from './components/columns'
 import { DataTable } from './components/data-table'
 import { TasksDialogs } from './components/tasks-dialogs'
 import { TasksPrimaryButtons } from './components/tasks-primary-buttons'
 import TasksProvider from './context/tasks-context'
 import { tasks } from './data/tasks'
-import { useCreateView, useDeleteView, useViews } from './services/view-services'
+import { useDeleteView, useViews } from './services/view-services'
 
 export default function Tasks() {
   const { data: views } = useViews()
   const [activeTab, setActiveTab] = useState<string>('0')
-  const [openViewRenameDialog, setOpenViewRenameDialog] = useState(false)
+  const [openViewCreateOrRenameDialog, setOpenViewCreateOrRenameDialog] = useState(false)
+  const [viewDialogType, setViewDialogType] = useState<'create' | 'rename'>('rename')
 
   const currentView = views?.find((view) => view.id === Number(activeTab))
+  const currentViewType = currentView?.type
 
   useEffect(() => {
     if (views && views.length > 0) {
@@ -31,7 +32,6 @@ export default function Tasks() {
   }, [views])
 
   const { mutate: deleteView, isPending: isDeleting } = useDeleteView()
-  const { mutate: createView, isPending: isDuplicating } = useCreateView()
 
   return (
     <TasksProvider>
@@ -52,7 +52,10 @@ export default function Tasks() {
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
           <Tabs
-            onChange={(key) => setActiveTab(key)}
+            onChange={(key) => {
+              setActiveTab(key)
+              setViewDialogType('rename')
+            }}
             activeKey={activeTab}
             type='card'
             items={views?.map((view) => ({
@@ -63,6 +66,7 @@ export default function Tasks() {
                   {activeTab == String(view.id) && (
                     <Dropdown
                       trigger={['click']}
+                      onOpenChange={() => setViewDialogType('rename')}
                       menu={{
                         items: [
                           {
@@ -79,7 +83,7 @@ export default function Tasks() {
                             label: '重命名',
                             type: 'item',
                             icon: <IconEdit className='w-4 h-4' />,
-                            onClick: () => setOpenViewRenameDialog(true),
+                            onClick: () => setOpenViewCreateOrRenameDialog(true),
                           },
                           {
                             key: 'duplicate',
@@ -118,18 +122,41 @@ export default function Tasks() {
               ),
               children: <DataTable data={tasks} columns={columns} searchColumn='title' />,
             }))}
+            tabBarExtraContent={
+              <Button
+                icon={<IconPlus />}
+                type='primary'
+                onClick={() => {
+                  setViewDialogType('create')
+                  setOpenViewCreateOrRenameDialog(true)
+                }}
+              >
+                添加视图
+              </Button>
+            }
           />
         </div>
       </Main>
+
       <TasksDialogs />
 
       {/*// todo: 如果不加openViewRenameDialog这个状态，会导致ViewRenameDialog组件在切换tab时，form表单的值不会更新*/}
-      {currentView && openViewRenameDialog && (
-        <ViewRenameDialog
-          open={openViewRenameDialog}
-          onOpenChange={setOpenViewRenameDialog}
+      {currentView && openViewCreateOrRenameDialog && viewDialogType === 'rename' && (
+        <ViewDialog
+          open={openViewCreateOrRenameDialog}
+          onOpenChange={setOpenViewCreateOrRenameDialog}
           id={currentView.id}
           name={currentView.name}
+        />
+      )}
+
+      {openViewCreateOrRenameDialog && viewDialogType === 'create' && (
+        <ViewDialog
+          open={openViewCreateOrRenameDialog}
+          onOpenChange={setOpenViewCreateOrRenameDialog}
+          id={undefined}
+          name={'新建视图'}
+          type={currentViewType}
         />
       )}
     </TasksProvider>
