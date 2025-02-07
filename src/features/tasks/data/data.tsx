@@ -75,6 +75,7 @@ export const views: ViewType[] = [
   {
     id: 1,
     name: '这是一个很长的文本内容，当超过最大宽度时会显示省略号',
+    type: 'task',
     conditions: {
       filters: [{ field: 'title', operator: 'eq', value: 'test' }],
       sorts: [{ field: 'title', order: 'desc' }],
@@ -84,6 +85,7 @@ export const views: ViewType[] = [
   {
     id: 2,
     name: 'view2',
+    type: 'task',
     conditions: {
       filters: [{ field: 'priority', operator: 'eq', value: 'Medium' }],
       sorts: [{ field: 'title', order: 'asc' }],

@@ -1,16 +1,21 @@
 import { useState } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
+import { DialogClose } from '@radix-ui/react-dialog'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Table } from '@tanstack/react-table'
 import { IconFilterCog } from '@tabler/icons-react'
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import { GripVertical, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DataTableViewOptions } from '../components/data-table-view-options'
+import { useRenameView } from '../services/view-services'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -22,11 +27,12 @@ interface Condition {
   operator?: string
   value?: string
   order?: 'asc' | 'desc'
+
   [key: string]: string | undefined // 添加索引签名以修复类型错误
 }
 
 export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolbarProps<TData>) {
-  const [open, setOpen] = useState(false)
+  const [openViewCondition, setOpenViewCondition] = useState(false)
 
   const [filterConditions, setFilterConditions] = useState<Condition[]>([])
   const [sortConditions, setSortConditions] = useState<Condition[]>([])
@@ -115,7 +121,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
     }
 
     alert(JSON.stringify(formData, null, 2))
-    setOpen(false)
+    setOpenViewCondition(false)
   }
 
   const handleRemoveCondition = (index: number, type: 'filter' | 'sort' | 'group') => {
@@ -211,7 +217,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
         )}
 
         {/* popover for filter,group,sort */}
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={openViewCondition} onOpenChange={setOpenViewCondition}>
           <PopoverTrigger asChild>
             <Button variant='outline' size='sm' className='ml-auto h-8 lg:flex'>
               <IconFilterCog className='mr-2 h-4 w-4' />
@@ -237,7 +243,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                           ref={provided.innerRef}
                           className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'
                         >
-                          {filterConditions.map((condition, index) => (
+                          {filterConditions.map((_, index) => (
                             <Draggable key={index} draggableId={`filter-${index}`} index={index}>
                               {(provided) => (
                                 <div
@@ -549,7 +555,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
 
             {/* 统一操作按钮 */}
             <div className='flex justify-end space-x-2 p-4 mt-2 border-t'>
-              <Button type='button' variant='outline' onClick={() => setOpen(false)}>
+              <Button type='button' variant='outline' onClick={() => setOpenViewCondition(false)}>
                 取消
               </Button>
               <Button type='button' onClick={handleSubmit}>
@@ -562,5 +568,75 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
         <DataTableViewOptions table={table} />
       </div>
     </div>
+  )
+}
+
+const renameFormSchema = z.object({
+  name: z.string(),
+})
+
+type RenameDialogProps = {
+  id: string
+  open: boolean
+  currentName: string
+  onOpenChange: (open: boolean) => void
+}
+
+export function RenameDialog({ id, open, currentName, onOpenChange }: RenameDialogProps) {
+  const { mutate: renameView, isPending } = useRenameView()
+
+  const form = useForm<z.infer<typeof renameFormSchema>>({
+    resolver: zodResolver(renameFormSchema),
+    defaultValues: { name: currentName },
+  })
+
+  const nameRef = form.register('name')
+
+  const onSubmit = () => {
+    console.log({
+      id,
+      name: form.getValues('name'),
+    })
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        onOpenChange(val)
+        form.reset()
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Rename view</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form id='change-view-name-form' onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              control={form.control}
+              name='name'
+              render={() => (
+                <FormItem className='space-y-1 mb-2'>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input {...nameRef} className='h-8' />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant='outline'>Cancel</Button>
+          </DialogClose>
+          <Button type='submit' form='change-view-name-form'>
+            Save
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

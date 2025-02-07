@@ -98,3 +98,18 @@ export const useUpdateViewCondition = () => {
     },
   })
 }
+
+
+const deleteView = async (id: number): Promise<void> => {
+  await http.post('views/delete', { id })
+}
+export const useDeleteView = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: QueryKeys.view,
+    mutationFn: deleteView,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.view })
+    },
+  })
+}
