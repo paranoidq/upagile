@@ -1,21 +1,16 @@
 import { useState } from 'react'
-import { z } from 'zod'
 import { useForm } from 'react-hook-form'
-import { DialogClose } from '@radix-ui/react-dialog'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Table } from '@tanstack/react-table'
 import { IconFilterCog } from '@tabler/icons-react'
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import { GripVertical, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DataTableViewOptions } from '../components/data-table-view-options'
-import { useRenameView } from '../services/view-services'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
