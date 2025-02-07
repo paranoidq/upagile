@@ -5,13 +5,9 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import {
-  TypeBacklog,
-  useBacklogs,
-  useCreateBacklog,
-} from './services/backlog-services'
+import { BacklogType, useBacklogs, useCreateBacklog } from './services/backlog-services'
 
-const backlogColumns: TableColumnsType<TypeBacklog> = [
+const backlogColumns: TableColumnsType<BacklogType> = [
   { title: 'id', dataIndex: 'id' },
   { title: '描述', dataIndex: 'desc' },
   { title: '状态', dataIndex: 'status' },
@@ -24,14 +20,7 @@ const backlogColumns: TableColumnsType<TypeBacklog> = [
 ]
 
 const Backlog: FC = () => {
-  const {
-    data: backlogs,
-    isLoading,
-    isSuccess,
-    refetch,
-    isRefetching,
-    isFetching,
-  } = useBacklogs()
+  const { data: backlogs, isLoading, isSuccess, refetch, isRefetching, isFetching } = useBacklogs()
 
   const { mutate: createBacklogs, isPending: isCreating } = useCreateBacklog()
   const isLoadingData = isLoading || isFetching || isRefetching
@@ -61,40 +50,21 @@ const Backlog: FC = () => {
         <div className='mb-2 flex items-center justify-between space-y-2 flex-wrap gap-x-4'>
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>Backlogs</h2>
-            <p className='text-muted-foreground'>
-              {`Here's a list of your backlogs`}
-            </p>
+            <p className='text-muted-foreground'>{`Here's a list of your backlogs`}</p>
           </div>
           <div>
             <div className='flex gap-2'>
-              <Button
-                type='default'
-                onClick={() => refetch()}
-                disabled={isLoadingData}
-                loading={isLoadingData}
-              >
+              <Button type='default' onClick={() => refetch()} disabled={isLoadingData} loading={isLoadingData}>
                 Refresh
               </Button>
-              <Button
-                onClick={handleAddPost}
-                disabled={isLoadingData}
-                type='primary'
-                loading={isCreating}
-              >
+              <Button onClick={handleAddPost} disabled={isLoadingData} type='primary' loading={isCreating}>
                 Create
               </Button>
             </div>
           </div>
         </div>
         <div>
-          {isSuccess && (
-            <Table
-              dataSource={backlogs}
-              columns={backlogColumns}
-              rowKey={'id'}
-              loading={isLoadingData}
-            />
-          )}
+          {isSuccess && <Table dataSource={backlogs} columns={backlogColumns} rowKey={'id'} loading={isLoadingData} />}
         </div>
       </Main>
     </>

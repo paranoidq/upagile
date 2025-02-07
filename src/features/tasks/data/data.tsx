@@ -8,6 +8,7 @@ import {
   IconExclamationCircle,
   IconStopwatch,
 } from '@tabler/icons-react'
+import { ViewType } from '../services/view-services'
 
 export const labels = [
   {
@@ -70,14 +71,24 @@ export const priorities = [
   },
 ]
 
-export const views = [
+export const views: ViewType[] = [
   {
     id: 1,
     name: '这是一个很长的文本内容，当超过最大宽度时会显示省略号',
+    conditions: {
+      filters: [{ field: 'title', operator: 'eq', value: 'test' }],
+      sorts: [{ field: 'title', order: 'desc' }],
+      groups: [{ field: 'status', order: 'asc' }],
+    },
   },
   {
     id: 2,
     name: 'view2',
+    conditions: {
+      filters: [{ field: 'priority', operator: 'eq', value: 'Medium' }],
+      sorts: [{ field: 'title', order: 'asc' }],
+      groups: [{ field: 'status', order: 'asc' }],
+    },
   },
 ]
 

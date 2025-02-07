@@ -1,8 +1,4 @@
-import axios, {
-  AxiosHeaders,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from 'axios'
+import axios, { AxiosHeaders, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { env } from '@/config/env.config'
 
 // 定义响应数据的基础接口
@@ -43,7 +39,7 @@ http.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error)
-  }
+  },
 )
 
 // 响应拦截器
@@ -79,5 +75,5 @@ http.interceptors.response.use(
       }
     }
     return Promise.reject(error)
-  }
+  },
 )
