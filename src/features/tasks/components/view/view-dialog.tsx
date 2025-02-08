@@ -3,14 +3,19 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useCreateView, useRenameView } from '@/features/tasks/services/view-services'
 
 const formSchema = z.object({
-  id: z.number().optional(),
-  name: z.string().min(1, '请输入视图名称'),
-  type: z.string().optional(),
+  id: z.number().optional().describe('视图ID'),
+  name: z
+    .string()
+    .min(1, {
+      message: '请输入视图名称',
+    })
+    .describe('视图名称'),
+  type: z.string().optional().describe('视图类型'),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -39,7 +44,9 @@ export const ViewDialog = ({ open, id, name, type, onOpenChange }: Props) => {
   const { mutate: createView, isPending: isCreating } = useCreateView()
   const { mutate: renameView, isPending: isRenaming } = useRenameView()
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = (values: FormValues) => {
+    console.log('Submit values:', values)
+
     if (isCreate) {
       createView(values)
     } else {
@@ -49,38 +56,58 @@ export const ViewDialog = ({ open, id, name, type, onOpenChange }: Props) => {
     onOpenChange(false)
   }
 
-  const handleClose = () => {
+  const onClose = () => {
     form.reset()
     onOpenChange(false)
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+          <form
+            onSubmit={form.handleSubmit(
+              (values) => {
+                onSubmit(values)
+              },
+              (errors) => {
+                console.log('Form validation failed:', errors)
+              },
+            )}
+            className='space-y-4'
+          >
             <FormField
               control={form.control}
               name='name'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>视图名称</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder='Enter view name' />
+                    <Input {...field} placeholder='请输入视图名称' />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
-            <input type='hidden' {...form.register('id')} />
-            <input type='hidden' {...form.register('type')} />
+            <FormField
+              control={form.control}
+              name='id'
+              render={({ field }) => <input type='hidden' {...field} value={field.value || ''} />}
+            />
+
+            <FormField
+              control={form.control}
+              name='type'
+              render={({ field }) => <input type='hidden' {...field} value={field.value || ''} />}
+            />
 
             <DialogFooter>
-              <Button type='button' variant='outline' onClick={handleClose}>
+              <Button type='button' variant='outline' onClick={onClose}>
                 取消
               </Button>
               <Button type='submit' disabled={isCreating || isRenaming}>
