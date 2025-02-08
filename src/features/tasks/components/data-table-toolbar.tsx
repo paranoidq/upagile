@@ -291,7 +291,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className='flex items-center gap-2 bg-background rounded-md w-full'
+                                  className='grid grid-cols-[auto_1fr_1fr_2fr_auto] items-center gap-2 bg-background rounded-md w-full'
                                 >
                                   <div {...provided.dragHandleProps}>
                                     <GripVertical className='h-4 w-4' />
@@ -299,39 +299,33 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                   <FormField
                                     control={filterForm.control}
                                     name={`field-${index}`}
-                                    render={({ field }) => {
-                                      return (
-                                        <FormItem>
-                                          <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                            disabled={!table.getAllColumns()}
-                                          >
-                                            <FormControl>
-                                              <SelectTrigger>
-                                                <SelectValue placeholder='选择字段' />
-                                              </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                              {table
-                                                .getAllColumns()
-                                                .filter((column) => column.id !== 'select')
-                                                .map((column) => (
-                                                  <SelectItem key={column.id} value={column.id}>
-                                                    {column.id}
-                                                  </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </FormItem>
-                                      )
-                                    }}
+                                    render={({ field }) => (
+                                      <FormItem className='flex-1'>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                          <FormControl>
+                                            <SelectTrigger>
+                                              <SelectValue placeholder='选择字段' />
+                                            </SelectTrigger>
+                                          </FormControl>
+                                          <SelectContent>
+                                            {table
+                                              .getAllColumns()
+                                              .filter((column) => column.id !== 'select')
+                                              .map((column) => (
+                                                <SelectItem key={column.id} value={column.id}>
+                                                  {column.id}
+                                                </SelectItem>
+                                              ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </FormItem>
+                                    )}
                                   />
                                   <FormField
                                     control={filterForm.control}
                                     name={`operator-${index}`}
                                     render={({ field }) => (
-                                      <FormItem>
+                                      <FormItem className='flex-1'>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                           <FormControl>
                                             <SelectTrigger>
@@ -354,9 +348,9 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                     control={filterForm.control}
                                     name={`value-${index}`}
                                     render={({ field }) => (
-                                      <FormItem>
+                                      <FormItem className='flex-1'>
                                         <FormControl>
-                                          <Input {...field} placeholder='输入值' className='flex-1' />
+                                          <Input {...field} placeholder='输入值' />
                                         </FormControl>
                                       </FormItem>
                                     )}
@@ -407,7 +401,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className='flex items-center gap-2 bg-background rounded-md w-full'
+                                  className='grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2 bg-background rounded-md w-full'
                                 >
                                   <div {...provided.dragHandleProps}>
                                     <GripVertical className='h-4 w-4' />
@@ -420,7 +414,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                         .map((c) => c.field)
                                         .filter((f) => f !== condition.field)
                                       return (
-                                        <FormItem>
+                                        <FormItem className='flex-1'>
                                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                               <SelectTrigger>
@@ -448,7 +442,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                     control={sortForm.control}
                                     name={`direction-${index}`}
                                     render={({ field }) => (
-                                      <FormItem>
+                                      <FormItem className='flex-1'>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                           <FormControl>
                                             <SelectTrigger>
@@ -484,7 +478,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                   <Button
                     type='button'
                     variant='link'
-                    onClick={() => setSortConditions([...sortConditions, {}])}
+                    onClick={() => setSortConditions([...sortConditions, { direction: 'asc' }])}
                     className='mt-4 hover:text-blue-600'
                   >
                     添加条件
@@ -509,7 +503,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className='flex items-center gap-2 bg-background rounded-md w-full'
+                                  className='grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2 bg-background rounded-md w-full'
                                 >
                                   <div {...provided.dragHandleProps}>
                                     <GripVertical className='h-4 w-4' />
@@ -522,7 +516,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                         .map((c) => c.field)
                                         .filter((f) => f !== condition.field)
                                       return (
-                                        <FormItem>
+                                        <FormItem className='flex-1'>
                                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                               <SelectTrigger>
@@ -550,7 +544,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                     control={groupForm.control}
                                     name={`direction-${index}`}
                                     render={({ field }) => (
-                                      <FormItem>
+                                      <FormItem className='flex-1'>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                           <FormControl>
                                             <SelectTrigger>
@@ -586,7 +580,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                   <Button
                     type='button'
                     variant='link'
-                    onClick={() => setGroupConditions([...groupConditions, {}])}
+                    onClick={() => setGroupConditions([...groupConditions, { direction: 'asc' }])}
                     className='mt-4 hover:text-blue-600'
                   >
                     添加条件
