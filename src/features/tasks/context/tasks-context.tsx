@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import { Task } from '../data/schema'
+
+import { Task } from '@/features/tasks/types.ts'
 
 type TasksDialogType = 'create' | 'update' | 'delete' | 'import'
 

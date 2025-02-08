@@ -14,10 +14,11 @@ import { TasksDialogs } from './components/tasks-dialogs'
 import { TasksPrimaryButtons } from './components/tasks-primary-buttons'
 import TasksProvider from './context/tasks-context'
 import { tasks } from './data/tasks'
+import { useProcessedTasks } from './hooks/useProcessedTasks'
 import { useDeleteView, useViews } from './services/view-services'
 
 export default function Tasks() {
-  const { data: views } = useViews()
+  const { data: views, isLoading: isViewsLoading } = useViews()
   const [activeTab, setActiveTab] = useState<string>('0')
   const [openViewCreateOrRenameDialog, setOpenViewCreateOrRenameDialog] = useState(false)
   const [viewDialogType, setViewDialogType] = useState<'create' | 'rename'>('rename')
@@ -25,6 +26,7 @@ export default function Tasks() {
   const currentView = views?.find((view) => view.id === Number(activeTab))
   const currentViewType = currentView?.type
 
+  // 初始
   useEffect(() => {
     if (views && views.length > 0) {
       setActiveTab(views[0].id.toString())
@@ -32,6 +34,12 @@ export default function Tasks() {
   }, [views])
 
   const { mutate: deleteView, isPending: isDeleting } = useDeleteView()
+
+  const processedTasks = useProcessedTasks(tasks, currentView)
+
+  if (isViewsLoading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <TasksProvider>
@@ -120,7 +128,7 @@ export default function Tasks() {
                   )}
                 </div>
               ),
-              children: <DataTable data={tasks} columns={columns} searchColumn='title' />,
+              children: <DataTable data={processedTasks} columns={columns} searchColumn='title' />,
             }))}
             tabBarExtraContent={
               <Button

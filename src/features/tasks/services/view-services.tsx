@@ -2,44 +2,8 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '@/lib/axios'
 import { QueryKeys } from '@/utils/query-keys'
+import { viewSchema, ViewType } from '@/features/tasks/types.ts'
 import { views } from '../data/data'
-
-export const ViewSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  type: z.enum(['task', 'backlog', 'feature', 'release']),
-  conditions: z
-    .object({
-      filters: z
-        .array(
-          z.object({
-            field: z.string(),
-            operator: z.string(),
-            value: z.string(),
-          }),
-        )
-        .optional(),
-      sorts: z
-        .array(
-          z.object({
-            field: z.string(),
-            order: z.string(),
-          }),
-        )
-        .optional(),
-      groups: z
-        .array(
-          z.object({
-            field: z.string(),
-            order: z.string(),
-          }),
-        )
-        .optional(),
-    })
-    .optional(),
-})
-
-export type ViewType = z.infer<typeof ViewSchema>
 
 const fetchViews = async (): Promise<ViewType[]> => {
   // const response = await http.get('/views')
@@ -48,7 +12,7 @@ const fetchViews = async (): Promise<ViewType[]> => {
     return []
   }
 
-  return z.array(ViewSchema).parse(response)
+  return z.array(viewSchema).parse(response)
 }
 export const useViews = () => {
   return useQuery({
@@ -98,7 +62,6 @@ export const useUpdateViewCondition = () => {
     },
   })
 }
-
 
 const deleteView = async (id: number): Promise<void> => {
   await http.post('views/delete', { id })

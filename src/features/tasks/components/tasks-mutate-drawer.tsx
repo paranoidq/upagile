@@ -23,7 +23,8 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { Task } from '../data/schema'
+
+import { Task } from '@/features/tasks/types.ts'
 
 interface Props {
   open: boolean
