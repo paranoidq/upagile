@@ -10,68 +10,91 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ViewType } from '@/features/tasks/types.ts'
 import { DataTableViewOptions } from '../components/data-table-view-options'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
   searchColumn?: string
+  currentView?: ViewType
 }
 
 interface Condition {
   field?: string
   operator?: string
   value?: string
-  order?: 'asc' | 'desc'
+  direction?: 'asc' | 'desc'
 
   [key: string]: string | undefined // 添加索引签名以修复类型错误
 }
 
-export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolbarProps<TData>) {
-  const [openViewCondition, setOpenViewCondition] = useState(false)
+export function DataTableToolbar<TData>({ table, searchColumn, currentView }: DataTableToolbarProps<TData>) {
+  const [openViewConditionsDialog, setOpenViewConditionsDialog] = useState(false)
 
-  const [filterConditions, setFilterConditions] = useState<Condition[]>([])
-  const [sortConditions, setSortConditions] = useState<Condition[]>([])
-  const [groupConditions, setGroupConditions] = useState<Condition[]>([])
+  const initialFilterConditions =
+    currentView?.conditions?.filters?.map((filter) => ({
+      field: filter.field,
+      operator: filter.operator,
+      value: filter.value,
+    })) || []
+
+  const initialSortConditions =
+    currentView?.conditions?.sorts?.map((sort) => ({
+      field: sort.field,
+      direction: sort.direction,
+    })) || []
+
+  const initialGroupConditions =
+    currentView?.conditions?.groups?.map((group) => ({
+      field: group.field,
+      direction: group.direction,
+    })) || []
+
+  const [filterConditions, setFilterConditions] = useState<Condition[]>(initialFilterConditions)
+  const [sortConditions, setSortConditions] = useState<Condition[]>(initialSortConditions)
+  const [groupConditions, setGroupConditions] = useState<Condition[]>(initialGroupConditions)
 
   const filterForm = useForm({
     defaultValues: {
-      ...filterConditions.reduce(
-        (acc, _, index) => {
-          acc[`field-${index}`] = ''
-          acc[`operator-${index}`] = ''
-          acc[`value-${index}`] = ''
+      ...(filterConditions?.reduce(
+        (acc, filter, index) => {
+          acc[`field-${index}`] = filter.field
+          acc[`operator-${index}`] = filter.operator
+          acc[`value-${index}`] = filter.value
           return acc
         },
         {} as Record<string, string>,
-      ),
-    },
-  })
-  const sortForm = useForm({
-    defaultValues: {
-      ...sortConditions.reduce(
-        (acc, _, index) => {
-          acc[`field-${index}`] = ''
-          acc[`order-${index}`] = ''
-          return acc
-        },
-        {} as Record<string, string>,
-      ),
-    },
-  })
-  const groupForm = useForm({
-    defaultValues: {
-      ...groupConditions.reduce(
-        (acc, _, index) => {
-          acc[`field-${index}`] = ''
-          acc[`order-${index}`] = ''
-          return acc
-        },
-        {} as Record<string, string>,
-      ),
+      ) || {}),
     },
   })
 
-  const handleSubmit = () => {
+  const sortForm = useForm({
+    defaultValues: {
+      ...(sortConditions.reduce(
+        (acc, sort, index) => {
+          acc[`field-${index}`] = sort.field
+          acc[`direction-${index}`] = sort.direction
+          return acc
+        },
+        {} as Record<string, string>,
+      ) || {}),
+    },
+  })
+
+  const groupForm = useForm({
+    defaultValues: {
+      ...(initialGroupConditions?.reduce(
+        (acc, group, index) => {
+          acc[`field-${index}`] = group.field
+          acc[`direction-${index}`] = group.direction
+          return acc
+        },
+        {} as Record<string, string>,
+      ) || {}),
+    },
+  })
+
+  const onSubmit = () => {
     // 处理筛选表单数据
     const filterValues = filterForm.getValues()
     const filters = Object.keys(filterValues)
@@ -93,7 +116,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
         const idx = index.replace('field-', '')
         return {
           field: sortValues[`field-${idx}`],
-          order: sortValues[`order-${idx}`],
+          direction: sortValues[`direction-${idx}`],
         }
       })
 
@@ -105,7 +128,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
         const idx = index.replace('field-', '')
         return {
           field: groupValues[`field-${idx}`],
-          order: groupValues[`order-${idx}`],
+          direction: groupValues[`direction-${idx}`],
         }
       })
 
@@ -116,10 +139,17 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
     }
 
     alert(JSON.stringify(formData, null, 2))
-    setOpenViewCondition(false)
+    setOpenViewConditionsDialog(false)
   }
 
-  const handleRemoveCondition = (index: number, type: 'filter' | 'sort' | 'group') => {
+  const onCancel = () => {
+    setOpenViewConditionsDialog(false)
+    filterForm.reset()
+    sortForm.reset()
+    groupForm.reset()
+  }
+
+  const onRemoveCondition = (index: number, type: 'filter' | 'sort' | 'group') => {
     if (type === 'filter') {
       const newConditions = filterConditions.filter((_, i) => i !== index)
       setFilterConditions(newConditions)
@@ -137,7 +167,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
       sortForm.reset(
         newConditions.reduce((acc, _, i) => {
           acc[`field-${i}`] = sortForm.getValues()[`field-${index + i}`]
-          acc[`order-${i}`] = sortForm.getValues()[`order-${index + i}`]
+          acc[`direction-${i}`] = sortForm.getValues()[`direction-${index + i}`]
           return acc
         }, {}),
       )
@@ -147,7 +177,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
       groupForm.reset(
         newConditions.reduce((acc, _, i) => {
           acc[`field-${i}`] = groupForm.getValues()[`field-${index + i}`]
-          acc[`order-${i}`] = groupForm.getValues()[`order-${index + i}`]
+          acc[`direction-${i}`] = groupForm.getValues()[`direction-${index + i}`]
           return acc
         }, {}),
       )
@@ -161,7 +191,9 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
     },
     type: 'filter' | 'sort' | 'group',
   ) => {
-    if (!result.destination) return
+    if (!result.destination) {
+      return
+    }
 
     const items = Array.from(type === 'filter' ? filterConditions : type === 'sort' ? sortConditions : groupConditions)
 
@@ -183,18 +215,15 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
     }
 
     if (type === 'filter') {
-      setFilterConditions(items)
       updateFormValues(filterForm, 'field')
       updateFormValues(filterForm, 'operator')
       updateFormValues(filterForm, 'value')
     } else if (type === 'sort') {
-      setSortConditions(items)
       updateFormValues(sortForm, 'field')
-      updateFormValues(sortForm, 'order')
+      updateFormValues(sortForm, 'direction')
     } else {
-      setGroupConditions(items)
       updateFormValues(groupForm, 'field')
-      updateFormValues(groupForm, 'order')
+      updateFormValues(groupForm, 'direction')
     }
   }
 
@@ -212,7 +241,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
         )}
 
         {/* popover for filter,group,sort */}
-        <Popover open={openViewCondition} onOpenChange={setOpenViewCondition}>
+        <Popover open={openViewConditionsDialog} onOpenChange={setOpenViewConditionsDialog}>
           <PopoverTrigger asChild>
             <Button variant='outline' size='sm' className='ml-auto h-8 lg:flex'>
               <IconFilterCog className='mr-2 h-4 w-4' />
@@ -318,7 +347,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                     variant='ghost'
                                     size='icon'
                                     className='h-8 w-8 hover:bg-red-50 hover:text-red-600'
-                                    onClick={() => handleRemoveCondition(index, 'filter')}
+                                    onClick={() => onRemoveCondition(index, 'filter')}
                                   >
                                     <X className='h-4 w-4' />
                                   </Button>
@@ -399,7 +428,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                   />
                                   <FormField
                                     control={sortForm.control}
-                                    name={`order-${index}`}
+                                    name={`direction-${index}`}
                                     render={({ field }) => (
                                       <FormItem>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -420,7 +449,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                     variant='ghost'
                                     size='icon'
                                     className='h-8 w-8 hover:bg-red-50 hover:text-red-600'
-                                    onClick={() => handleRemoveCondition(index, 'sort')}
+                                    onClick={() => onRemoveCondition(index, 'sort')}
                                   >
                                     <X className='h-4 w-4' />
                                   </Button>
@@ -501,7 +530,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                   />
                                   <FormField
                                     control={groupForm.control}
-                                    name={`order-${index}`}
+                                    name={`direction-${index}`}
                                     render={({ field }) => (
                                       <FormItem>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -522,7 +551,7 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
                                     variant='ghost'
                                     size='icon'
                                     className='h-8 w-8 hover:bg-red-50 hover:text-red-600'
-                                    onClick={() => handleRemoveCondition(index, 'group')}
+                                    onClick={() => onRemoveCondition(index, 'group')}
                                   >
                                     <X className='h-4 w-4' />
                                   </Button>
@@ -550,10 +579,10 @@ export function DataTableToolbar<TData>({ table, searchColumn }: DataTableToolba
 
             {/* 统一操作按钮 */}
             <div className='flex justify-end space-x-2 p-4 mt-2 border-t'>
-              <Button type='button' variant='outline' onClick={() => setOpenViewCondition(false)}>
+              <Button type='button' variant='outline' onClick={onCancel}>
                 取消
               </Button>
-              <Button type='button' onClick={handleSubmit}>
+              <Button type='button' onClick={onSubmit}>
                 确定
               </Button>
             </div>

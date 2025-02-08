@@ -70,8 +70,6 @@ export const useProcessedTasks = (tasks: Task[], currentView: ViewType | undefin
     // 先进行筛选
     const filteredData = filterData(tasks, conditions.filters)
 
-    console.log(filteredData)
-
     // 再进行排序
     const sortedData = sortData(filteredData, conditions.sorts)
 

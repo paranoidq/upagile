@@ -26,3 +26,9 @@
 - 如果筛选和排序的字段在data-table中不存在，则忽略该字段即可
 
 请帮我实现上面的功能，实现的时候尽量做好模块拆分和优化，方便后续的维护和扩展，谢谢！
+
+
+我希望在将当前的view中的conditions展示到data-table-toolbar的筛选表单中，请帮我实现这个功能，建议你按照如下方式来思考实现
+1. 将currentView传递到data-table-toolbar
+2. 在defaultValues中将currentView中的conditions赋值给对应的form
+3. 你暂时无需处理onSubmit中将form表单中的已经修改过的数据重新赋值给currentView中的conditions

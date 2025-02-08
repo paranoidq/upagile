@@ -14,6 +14,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { ViewType } from '@/features/tasks/types.ts'
 import { DataTablePagination } from '../components/data-table-pagination'
 import { DataTableToolbar } from '../components/data-table-toolbar'
 
@@ -21,9 +22,10 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   searchColumn?: string
+  currentView?: ViewType
 }
 
-export function DataTable<TData, TValue>({ columns, data, searchColumn }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, searchColumn, currentView }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -55,7 +57,10 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn }: DataTa
 
   return (
     <div className='space-y-4'>
-      <DataTableToolbar table={table} searchColumn={searchColumn} />
+      {/* toolbar */}
+      <DataTableToolbar table={table} searchColumn={searchColumn} currentView={currentView}/>
+
+      {/* table */}
       <div className='rounded-md border'>
         <Table>
           <TableHeader>

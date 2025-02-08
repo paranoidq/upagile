@@ -128,7 +128,7 @@ export default function Tasks() {
                   )}
                 </div>
               ),
-              children: <DataTable data={processedTasks} columns={columns} searchColumn='title' />,
+              children: <DataTable data={processedTasks} columns={columns} searchColumn='title' currentView={currentView}/>,
             }))}
             tabBarExtraContent={
               <Button
