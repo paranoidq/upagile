@@ -92,4 +92,25 @@ export const views: ViewType[] = [
       groups: [{ field: 'status', direction: 'asc' }],
     },
   },
+  {
+    id: 3,
+    name: 'view3',
+    type: 'task',
+    conditions: {
+      filters: [{ field: 'status', operator: 'not_equals', value: 'done' }],
+      sorts: [{ field: 'title', direction: 'desc' }],
+      groups: [{ field: 'status', direction: 'asc' }],
+    },
+  },
+  {
+    id: 4,
+    name: 'view4',
+    type: 'task',
+    conditions: {
+      filters: [{ field: 'status', operator: 'not_equals', value: 'done' },
+        { field: 'priority', operator: 'equals', value: 'high' }],
+      sorts: [{ field: 'title', direction: 'desc' }],
+      groups: [{ field: 'status', direction: 'asc' }],
+    },
+  },
 ]
