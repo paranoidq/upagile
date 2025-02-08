@@ -35,7 +35,7 @@ export const useCreateView = () => {
   })
 }
 
-const updateViewName = async (view: Omit<ViewType, 'conditions'>): Promise<void> => {
+const updateViewName = async (view: Partial<ViewType>): Promise<void> => {
   await http.post('views/update', view)
 }
 export const useRenameView = () => {

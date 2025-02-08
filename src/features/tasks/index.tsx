@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react'
 import { IconArrowLeft, IconCopy, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'
-import { Dropdown, Popconfirm } from 'antd'
+import { Dropdown } from 'antd'
 import { MoreVertical } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Header } from '@/components/layout/header'
@@ -24,6 +34,8 @@ export default function Tasks() {
   const [activeTab, setActiveTab] = useState<string>('0')
   const [openViewCreateOrRenameDialog, setOpenViewCreateOrRenameDialog] = useState(false)
   const [viewDialogType, setViewDialogType] = useState<'create' | 'rename'>('rename')
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+  const [viewToDelete, setViewToDelete] = useState<number | null>(null)
 
   const currentView = views?.find((view) => view.id === Number(activeTab))
   const currentViewType = currentView?.type
@@ -38,6 +50,19 @@ export default function Tasks() {
   const { mutate: deleteView, isPending: isDeleting } = useDeleteView()
 
   const processedTasks = useProcessedTasks(tasks, currentView)
+
+  const handleDeleteClick = (viewId: number) => {
+    setViewToDelete(viewId)
+    setOpenDeleteDialog(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (viewToDelete) {
+      deleteView(viewToDelete)
+      setOpenDeleteDialog(false)
+      setViewToDelete(null)
+    }
+  }
 
   if (isViewsLoading) {
     return <div>Loading...</div>
@@ -111,20 +136,10 @@ export default function Tasks() {
                                   },
                                   {
                                     key: 'delete',
-                                    label: (
-                                      <Popconfirm
-                                        title={'删除视图'}
-                                        description={'删除后无法恢复，请确认是否删除'}
-                                        onConfirm={() => deleteView(view.id)}
-                                        okText='确定'
-                                        okButtonProps={{ loading: isDeleting }}
-                                        cancelText={'取消'}
-                                      >
-                                        删除视图
-                                      </Popconfirm>
-                                    ),
+                                    label: '删除视图',
                                     icon: <IconTrash className='w-4 h-4' />,
                                     type: 'item',
+                                    onClick: () => handleDeleteClick(view.id),
                                   },
                                 ],
                               }}
@@ -179,6 +194,21 @@ export default function Tasks() {
           type={currentViewType}
         />
       )}
+
+      <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>删除视图</AlertDialogTitle>
+            <AlertDialogDescription>删除后无法恢复，请确认是否删除</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting}>
+              确定
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TasksProvider>
   )
 }
