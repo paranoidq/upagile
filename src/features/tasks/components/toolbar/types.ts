@@ -1,5 +1,5 @@
-import { UseFormReturn } from 'react-hook-form'
 import { Table } from '@tanstack/react-table'
+import { ViewType } from '@/features/tasks/types.ts'
 
 export interface Condition {
   field?: string
@@ -16,10 +16,6 @@ export type FormValues = {
 export interface ToolbarProps<TData> {
   table: Table<TData>
   open: boolean
-  conditions: Condition[]
-  setConditions: (conditions: Condition[]) => void
-  form: UseFormReturn<FormValues>
+  currentView?: ViewType
   onOpenChange: (open: boolean) => void
-  onSubmit: () => void
-  onCancel: () => void
 }

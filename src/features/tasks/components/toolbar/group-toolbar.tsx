@@ -1,35 +1,127 @@
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { IconFolders } from '@tabler/icons-react'
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
+import { produce } from 'immer'
 import { GripVertical, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Condition } from '@/features/tasks/toolbar/types.ts'
 import { ToolbarProps } from './types'
 
-export function GroupToolbar<TData>({
-  table,
-  open,
-  conditions,
-  setConditions,
-  form,
-  onOpenChange,
-  onSubmit,
-  onCancel,
-}: ToolbarProps<TData>) {
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) {
+export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: ToolbarProps<TData>) {
+  const initialConditions =
+    currentView?.conditions?.groups?.map((group) => ({
+      field: group.field,
+      direction: group.direction,
+    })) || []
+
+  const [conditions, setConditions] = useState<Condition[]>(initialConditions)
+
+  const form = useForm({
+    defaultValues: {
+      ...(initialConditions?.reduce(
+        (acc, group, index) => {
+          acc[`field-${index}`] = group.field || ''
+          acc[`direction-${index}`] = group.direction || ''
+          return acc
+        },
+        {} as Record<string, string>,
+      ) || {}),
+      ...Array(10 - initialConditions.length)
+        .fill(0)
+        .reduce(
+          (acc, _, i) => ({
+            ...acc,
+            [`field-${i + initialConditions.length}`]: '',
+            [`direction-${i + initialConditions.length}`]: '',
+          }),
+          {},
+        ),
+    },
+  })
+
+  const onSubmit = () => {
+    // 处理筛选表单数据
+    const formValues = form.getValues()
+    const filters = Object.keys(formValues)
+      .filter((key) => key.startsWith('field-') && formValues[key])
+      .map((index) => {
+        const idx = index.replace('field-', '')
+        return {
+          field: formValues[`field-${idx}`],
+          direction: formValues[`direction-${idx}`],
+        }
+      })
+
+    const formData = {
+      filters,
+    }
+
+    alert(JSON.stringify(formData, null, 2))
+  }
+
+  const onCancel = () => {
+    // condition reset个数，form reset字段取值，两者都需要
+    setConditions(initialConditions)
+    form.reset()
+    onOpenChange(false)
+  }
+
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result
+    if (!destination || destination.index === source.index) {
       return
     }
-    const items = Array.from(conditions)
-    const [reorderedItem] = items.splice(result.source.index, 1)
-    items.splice(result.destination.index, 0, reorderedItem)
-    setConditions(items)
+
+    // update conditions
+    const newConditions = produce(conditions, (draft) => {
+      const [reorderedItem] = draft.splice(source.index, 1)
+      draft.splice(destination.index, 0, reorderedItem)
+    })
+    setConditions(newConditions)
+
+    // 重新构建表单值
+    const newFormValues = newConditions.reduce(
+      (acc, condition, index) => {
+        acc[`field-${index}`] = condition.field || ''
+        acc[`direction-${index}`] = condition.direction || ''
+        return acc
+      },
+      {} as Record<string, string>,
+    )
+
+    // 添加剩余的空字段
+    const remainingCount = 10 - newConditions.length
+    if (remainingCount > 0) {
+      Array(remainingCount)
+        .fill(0)
+        .forEach((_, i) => {
+          const idx = i + newConditions.length
+          newFormValues[`field-${idx}`] = ''
+          newFormValues[`direction-${idx}`] = 'asc'
+        })
+    }
+
+    // 更新表单值
+    form.reset(newFormValues)
   }
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover
+      open={open}
+      onOpenChange={(open) => {
+        onOpenChange(open)
+        if (!open) {
+          // condition reset个数，form reset字段取值，两者都需要
+          setConditions(initialConditions)
+          form.reset()
+        }
+      }}
+    >
       <PopoverTrigger asChild>
         <Button variant='outline' size='sm' className='h-8 lg:flex'>
           <IconFolders className='mr-2 h-4 w-4' />
@@ -38,7 +130,7 @@ export function GroupToolbar<TData>({
       </PopoverTrigger>
       <PopoverContent className='w-[600px] p-2' side='bottom' align='start'>
         <Form {...form}>
-          <DragDropContext onDragEnd={handleDragEnd}>
+          <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId='groupConditions'>
               {(provided) => (
                 <div
@@ -62,7 +154,7 @@ export function GroupToolbar<TData>({
                             top: 'auto',
                           }}
                         >
-                          <div {...provided.dragHandleProps}>
+                          <div {...provided.dragHandleProps} className='px-2 py-1'>
                             <GripVertical className='h-4 w-4 cursor-grab active:cursor-grabbing' />
                           </div>
 

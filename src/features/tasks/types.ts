@@ -17,6 +17,17 @@ export const filterOperatorEnum = z.enum([
   'is_empty',
   'is_not_empty',
 ])
+export const filterOperatorNames: Record<FilterOperator, string> = {
+  equals: '等于',
+  not_equals: '不等于',
+  contains: '包含',
+  not_contains: '不包含',
+  is_empty: '为空',
+  is_not_empty: '不为空',
+}
+export function getFilterOperatorName(operator: FilterOperator): string {
+  return filterOperatorNames[operator] || operator
+}
 
 export const filterConditionSchema = z.object({
   field: z.string(),

@@ -1,36 +1,136 @@
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { IconFilterCog } from '@tabler/icons-react'
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
+import { produce } from 'immer'
 import { GripVertical, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
+import { Input } from '@/components/ui/input.tsx'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Condition } from '@/features/tasks/toolbar/types.ts'
+import { filterOperatorEnum, getFilterOperatorName } from '@/features/tasks/types.ts'
 import { ToolbarProps } from './types'
-import { Input } from '@/components/ui/input.tsx'
 
-export function FilterToolbar<TData>({
-  table,
-  open,
-  conditions,
-  setConditions,
-  form,
-  onOpenChange,
-  onSubmit,
-  onCancel,
-}: ToolbarProps<TData>) {
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) {
+export function FilterToolbar<TData>({ table, open, onOpenChange, currentView }: ToolbarProps<TData>) {
+  const initialConditions =
+    currentView?.conditions?.filters?.map((filter) => ({
+      field: filter.field,
+      operator: filter.operator,
+      value: filter.value,
+    })) || []
+
+  const [conditions, setConditions] = useState<Condition[]>(initialConditions)
+
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result
+    if (!destination || destination.index === source.index) {
       return
     }
-    const items = Array.from(conditions)
-    const [reorderedItem] = items.splice(result.source.index, 1)
-    items.splice(result.destination.index, 0, reorderedItem)
-    setConditions(items)
+
+    // update conditions
+    const newConditions = produce(conditions, (draft) => {
+      const [reorderedItem] = draft.splice(source.index, 1)
+      draft.splice(destination.index, 0, reorderedItem)
+    })
+    setConditions(newConditions)
+
+    // 重新构建表单值
+    const newFormValues = newConditions.reduce(
+      (acc, condition, index) => {
+        acc[`field-${index}`] = condition.field || ''
+        acc[`operator-${index}`] = condition.operator || ''
+        acc[`value-${index}`] = condition.value || ''
+        return acc
+      },
+      {} as Record<string, string>,
+    )
+
+    // 添加剩余的空字段
+    const remainingCount = 10 - newConditions.length
+    if (remainingCount > 0) {
+      Array(remainingCount)
+        .fill(0)
+        .forEach((_, i) => {
+          const idx = i + newConditions.length
+          newFormValues[`field-${idx}`] = ''
+          newFormValues[`operator-${idx}`] = ''
+          newFormValues[`value-${idx}`] = ''
+        })
+    }
+
+    // 更新表单值
+    form.reset(newFormValues)
+  }
+
+  const form = useForm({
+    defaultValues: {
+      ...(initialConditions?.reduce(
+        (acc, filter, index) => {
+          acc[`field-${index}`] = filter.field || ''
+          acc[`operator-${index}`] = filter.operator || ''
+          acc[`value-${index}`] = filter.value || ''
+          return acc
+        },
+        {} as Record<string, string>,
+      ) || {}),
+      ...Array(10 - initialConditions.length)
+        .fill(0)
+        .reduce(
+          (acc, _, i) => ({
+            ...acc,
+            [`field-${i + initialConditions.length}`]: '',
+            [`operator-${i + initialConditions.length}`]: '',
+            [`value-${i + initialConditions.length}`]: '',
+          }),
+          {},
+        ),
+    },
+  })
+
+  const onSubmit = () => {
+    // 处理筛选表单数据
+    const formValues = form.getValues()
+    const filters = Object.keys(formValues)
+      .filter((key) => key.startsWith('field-') && formValues[key])
+      .map((index) => {
+        const idx = index.replace('field-', '')
+        return {
+          field: formValues[`field-${idx}`],
+          operator: formValues[`operator-${idx}`],
+          value: formValues[`value-${idx}`],
+        }
+      })
+
+    const formData = {
+      filters,
+    }
+    onOpenChange(false)
+
+    alert(JSON.stringify(formData, null, 2))
+  }
+
+  const onCancel = () => {
+    // condition reset个数，form reset字段取值，两者都需要
+    setConditions(initialConditions)
+    form.reset()
+    onOpenChange(false)
   }
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover
+      open={open}
+      onOpenChange={(open) => {
+        onOpenChange(open)
+        if (!open) {
+          // condition reset个数，form reset字段取值，两者都需要
+          setConditions(initialConditions)
+          form.reset()
+        }
+      }}
+    >
       <PopoverTrigger asChild>
         <Button variant='outline' size='sm' className='h-8 lg:flex'>
           <IconFilterCog className='mr-2 h-4 w-4' />
@@ -39,7 +139,7 @@ export function FilterToolbar<TData>({
       </PopoverTrigger>
       <PopoverContent className='w-[600px] p-2' side='bottom' align='start'>
         <Form {...form}>
-          <DragDropContext onDragEnd={handleDragEnd}>
+          <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId='filterConditions'>
               {(provided) => (
                 <div
@@ -47,7 +147,7 @@ export function FilterToolbar<TData>({
                   ref={provided.innerRef}
                   className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'
                 >
-                  {conditions.map((_, index) => (
+                  {conditions.map((condition, index) => (
                     <Draggable key={`filter-${index}`} draggableId={`filter-${index}`} index={index}>
                       {(provided, snapshot) => (
                         <div
@@ -70,27 +170,31 @@ export function FilterToolbar<TData>({
                           <FormField
                             control={form.control}
                             name={`field-${index}`}
-                            render={({ field }) => (
-                              <FormItem className='flex-1'>
-                                <Select value={field.value || ''} onValueChange={field.onChange}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder='选择字段' />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {table
-                                      .getAllColumns()
-                                      .filter((column) => column.id !== 'select')
-                                      .map((column) => (
-                                        <SelectItem key={column.id} value={column.id}>
-                                          {column.id}
-                                        </SelectItem>
-                                      ))}
-                                  </SelectContent>
-                                </Select>
-                              </FormItem>
-                            )}
+                            render={({ field }) => {
+                              const usedFields = conditions.map((c) => c.field).filter((f) => f !== condition.field)
+
+                              return (
+                                <FormItem className='flex-1'>
+                                  <Select value={field.value || ''} onValueChange={field.onChange}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder='选择字段' />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {table
+                                        .getAllColumns()
+                                        .filter((column) => column.id !== 'select' && !usedFields.includes(column.id))
+                                        .map((column) => (
+                                          <SelectItem key={column.id} value={column.id}>
+                                            {column.id}
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )
+                            }}
                           />
 
                           <FormField
@@ -105,12 +209,11 @@ export function FilterToolbar<TData>({
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    <SelectItem value='equals'>等于</SelectItem>
-                                    <SelectItem value='notEquals'>不等于</SelectItem>
-                                    <SelectItem value='contains'>包含</SelectItem>
-                                    <SelectItem value='notContains'>不包含</SelectItem>
-                                    <SelectItem value='empty'>空</SelectItem>
-                                    <SelectItem value='notEmpty'>不为空</SelectItem>
+                                    {filterOperatorEnum._def.values.map((value) => (
+                                      <SelectItem key={value} value={value}>
+                                        {getFilterOperatorName(value)}
+                                      </SelectItem>
+                                    ))}
                                   </SelectContent>
                                 </Select>
                               </FormItem>
