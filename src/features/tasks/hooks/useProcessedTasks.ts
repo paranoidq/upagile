@@ -53,8 +53,6 @@ const sortData = (data: Task[], sorts: SortCondition[]) => {
 }
 
 export const useProcessedTasks = (tasks: Task[], currentView: ViewType | undefined) => {
-  console.log(currentView)
-
   return useMemo(() => {
     if (!tasks?.length || !currentView) {
       return []
@@ -63,8 +61,6 @@ export const useProcessedTasks = (tasks: Task[], currentView: ViewType | undefin
     const { conditions } = currentView
     if (!conditions) {
       return tasks
-    } else {
-      console.log(conditions)
     }
 
     // 先进行筛选
