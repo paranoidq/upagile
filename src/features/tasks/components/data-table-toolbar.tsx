@@ -54,44 +54,47 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
   const [sortConditions, setSortConditions] = useState<Condition[]>(initialSortConditions)
   const [groupConditions, setGroupConditions] = useState<Condition[]>(initialGroupConditions)
 
+  const getFilterFormValues = (conditions: Condition[]) =>
+    conditions?.reduce(
+      (acc, filter, index) => {
+        acc[`field-${index}`] = filter.field
+        acc[`operator-${index}`] = filter.operator
+        acc[`value-${index}`] = filter.value
+        return acc
+      },
+      {} as Record<string, string>,
+    ) || {}
+
+  const getSortFormValues = (conditions: Condition[]) =>
+    conditions?.reduce(
+      (acc, sort, index) => {
+        acc[`field-${index}`] = sort.field
+        acc[`direction-${index}`] = sort.direction
+        return acc
+      },
+      {} as Record<string, string>,
+    ) || {}
+
+  const getGroupFormValues = (conditions: Condition[]) =>
+    conditions?.reduce(
+      (acc, group, index) => {
+        acc[`field-${index}`] = group.field
+        acc[`direction-${index}`] = group.direction
+        return acc
+      },
+      {} as Record<string, string>,
+    ) || {}
+
   const filterForm = useForm({
-    defaultValues: {
-      ...(filterConditions?.reduce(
-        (acc, filter, index) => {
-          acc[`field-${index}`] = filter.field
-          acc[`operator-${index}`] = filter.operator
-          acc[`value-${index}`] = filter.value
-          return acc
-        },
-        {} as Record<string, string>,
-      ) || {}),
-    },
+    defaultValues: getFilterFormValues(initialFilterConditions),
   })
 
   const sortForm = useForm({
-    defaultValues: {
-      ...(sortConditions.reduce(
-        (acc, sort, index) => {
-          acc[`field-${index}`] = sort.field
-          acc[`direction-${index}`] = sort.direction
-          return acc
-        },
-        {} as Record<string, string>,
-      ) || {}),
-    },
+    defaultValues: getSortFormValues(initialSortConditions),
   })
 
   const groupForm = useForm({
-    defaultValues: {
-      ...(initialGroupConditions?.reduce(
-        (acc, group, index) => {
-          acc[`field-${index}`] = group.field
-          acc[`direction-${index}`] = group.direction
-          return acc
-        },
-        {} as Record<string, string>,
-      ) || {}),
-    },
+    defaultValues: getGroupFormValues(initialGroupConditions),
   })
 
   const onSubmit = () => {
@@ -142,11 +145,26 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
     setOpenViewConditionsDialog(false)
   }
 
+  const resetToInitialValues = () => {
+    setFilterConditions(initialFilterConditions)
+    setSortConditions(initialSortConditions)
+    setGroupConditions(initialGroupConditions)
+
+    filterForm.reset(getFilterFormValues(initialFilterConditions))
+    sortForm.reset(getSortFormValues(initialSortConditions))
+    groupForm.reset(getGroupFormValues(initialGroupConditions))
+  }
+
   const onCancel = () => {
     setOpenViewConditionsDialog(false)
-    filterForm.reset()
-    sortForm.reset()
-    groupForm.reset()
+    resetToInitialValues()
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    setOpenViewConditionsDialog(open)
+    if (!open) {
+      resetToInitialValues()
+    }
   }
 
   const onRemoveCondition = (index: number, type: 'filter' | 'sort' | 'group') => {
@@ -241,7 +259,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
         )}
 
         {/* popover for filter,group,sort */}
-        <Popover open={openViewConditionsDialog} onOpenChange={setOpenViewConditionsDialog}>
+        <Popover open={openViewConditionsDialog} onOpenChange={handleOpenChange}>
           <PopoverTrigger asChild>
             <Button variant='outline' size='sm' className='ml-auto h-8 lg:flex'>
               <IconFilterCog className='mr-2 h-4 w-4' />
