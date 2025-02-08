@@ -63,7 +63,7 @@ export function FilterToolbar<TData>({
                             top: 'auto',
                           }}
                         >
-                          <div {...provided.dragHandleProps} className='px-2 py-1'>
+                          <div {...provided.dragHandleProps}>
                             <GripVertical className='h-4 w-4 cursor-grab active:cursor-grabbing' />
                           </div>
 
