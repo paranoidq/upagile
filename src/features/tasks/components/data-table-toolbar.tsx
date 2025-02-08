@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Table } from '@tanstack/react-table'
 import { IconFilterCog } from '@tabler/icons-react'
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
+import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
 import { GripVertical, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -57,9 +58,9 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
   const getFilterFormValues = (conditions: Condition[]) =>
     conditions?.reduce(
       (acc, filter, index) => {
-        acc[`field-${index}`] = filter.field
-        acc[`operator-${index}`] = filter.operator
-        acc[`value-${index}`] = filter.value
+        acc[`field-${index}`] = filter.field || ''
+        acc[`operator-${index}`] = filter.operator || ''
+        acc[`value-${index}`] = filter.value || ''
         return acc
       },
       {} as Record<string, string>,
@@ -68,8 +69,8 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
   const getSortFormValues = (conditions: Condition[]) =>
     conditions?.reduce(
       (acc, sort, index) => {
-        acc[`field-${index}`] = sort.field
-        acc[`direction-${index}`] = sort.direction
+        acc[`field-${index}`] = sort.field || ''
+        acc[`direction-${index}`] = sort.direction || 'asc'
         return acc
       },
       {} as Record<string, string>,
@@ -78,23 +79,60 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
   const getGroupFormValues = (conditions: Condition[]) =>
     conditions?.reduce(
       (acc, group, index) => {
-        acc[`field-${index}`] = group.field
-        acc[`direction-${index}`] = group.direction
+        acc[`field-${index}`] = group.field || ''
+        acc[`direction-${index}`] = group.direction || 'asc'
         return acc
       },
       {} as Record<string, string>,
     ) || {}
 
   const filterForm = useForm({
-    defaultValues: getFilterFormValues(initialFilterConditions),
+    defaultValues: {
+      ...getFilterFormValues(initialFilterConditions),
+      ...Array(10 - initialFilterConditions.length)
+        .fill(0)
+        .reduce(
+          (acc, _, i) => ({
+            ...acc,
+            [`field-${i + initialFilterConditions.length}`]: '',
+            [`operator-${i + initialFilterConditions.length}`]: '',
+            [`value-${i + initialFilterConditions.length}`]: '',
+          }),
+          {},
+        ),
+    },
   })
 
   const sortForm = useForm({
-    defaultValues: getSortFormValues(initialSortConditions),
+    defaultValues: {
+      ...getSortFormValues(initialSortConditions),
+      ...Array(10 - initialSortConditions.length)
+        .fill(0)
+        .reduce(
+          (acc, _, i) => ({
+            ...acc,
+            [`field-${i + initialSortConditions.length}`]: '',
+            [`direction-${i + initialSortConditions.length}`]: 'asc',
+          }),
+          {},
+        ),
+    },
   })
 
   const groupForm = useForm({
-    defaultValues: getGroupFormValues(initialGroupConditions),
+    defaultValues: {
+      ...getGroupFormValues(initialGroupConditions),
+      ...Array(10 - initialGroupConditions.length)
+        .fill(0)
+        .reduce(
+          (acc, _, i) => ({
+            ...acc,
+            [`field-${i + initialGroupConditions.length}`]: '',
+            [`direction-${i + initialGroupConditions.length}`]: 'asc',
+          }),
+          {},
+        ),
+    },
   })
 
   const onSubmit = () => {
@@ -150,9 +188,46 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
     setSortConditions(initialSortConditions)
     setGroupConditions(initialGroupConditions)
 
-    filterForm.reset(getFilterFormValues(initialFilterConditions))
-    sortForm.reset(getSortFormValues(initialSortConditions))
-    groupForm.reset(getGroupFormValues(initialGroupConditions))
+    filterForm.reset({
+      ...getFilterFormValues(initialFilterConditions),
+      ...Array(10 - initialFilterConditions.length)
+        .fill(0)
+        .reduce(
+          (acc, _, i) => ({
+            ...acc,
+            [`field-${i + initialFilterConditions.length}`]: '',
+            [`operator-${i + initialFilterConditions.length}`]: '',
+            [`value-${i + initialFilterConditions.length}`]: '',
+          }),
+          {},
+        ),
+    })
+    sortForm.reset({
+      ...getSortFormValues(initialSortConditions),
+      ...Array(10 - initialSortConditions.length)
+        .fill(0)
+        .reduce(
+          (acc, _, i) => ({
+            ...acc,
+            [`field-${i + initialSortConditions.length}`]: '',
+            [`direction-${i + initialSortConditions.length}`]: 'asc',
+          }),
+          {},
+        ),
+    })
+    groupForm.reset({
+      ...getGroupFormValues(initialGroupConditions),
+      ...Array(10 - initialGroupConditions.length)
+        .fill(0)
+        .reduce(
+          (acc, _, i) => ({
+            ...acc,
+            [`field-${i + initialGroupConditions.length}`]: '',
+            [`direction-${i + initialGroupConditions.length}`]: 'asc',
+          }),
+          {},
+        ),
+    })
   }
 
   const onCancel = () => {
@@ -202,47 +277,82 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
     }
   }
 
-  const onDragEnd = (
-    result: {
-      destination: { index: number } | null
-      source: { index: number }
-    },
-    type: 'filter' | 'sort' | 'group',
-  ) => {
-    if (!result.destination) {
+  const handleDragEnd = (result: DropResult, type: 'filter' | 'sort' | 'group') => {
+    const { destination, source } = result
+
+    if (!destination || destination.index === source.index) {
       return
     }
 
-    const items = Array.from(type === 'filter' ? filterConditions : type === 'sort' ? sortConditions : groupConditions)
+    const getStateAndUpdater = () => {
+      switch (type) {
+        case 'filter':
+          return {
+            conditions: filterConditions,
+            setConditions: setFilterConditions,
+            form: filterForm,
+          }
+        case 'sort':
+          return {
+            conditions: sortConditions,
+            setConditions: setSortConditions,
+            form: sortForm,
+          }
+        case 'group':
+          return {
+            conditions: groupConditions,
+            setConditions: setGroupConditions,
+            form: groupForm,
+          }
+      }
+    }
 
-    const [reorderedItem] = items.splice(result.source.index, 1)
-    items.splice(result.destination.index, 0, reorderedItem)
+    const { conditions, setConditions, form } = getStateAndUpdater()
 
-    const updateFormValues = (form: ReturnType<typeof useForm>, prefix: string) => {
-      const values = form.getValues()
-      const newValues = items.reduce<Record<string, unknown>>((acc, _, index) => {
-        Object.keys(values).forEach((key) => {
-          if (key.startsWith(`${prefix}-`)) {
-            const newKey = key.replace(new RegExp(`${prefix}-\\d+`), `${prefix}-${index}`)
-            acc[newKey] = values[key]
+    // 重新排序条件数组
+    const reorderedConditions = Array.from(conditions)
+    const [removed] = reorderedConditions.splice(source.index, 1)
+    reorderedConditions.splice(destination.index, 0, removed)
+
+    // 更新状态
+    setConditions(reorderedConditions)
+
+    // 重新构建表单值
+    const newFormValues = reorderedConditions.reduce(
+      (acc, condition, index) => {
+        if (type === 'filter') {
+          acc[`field-${index}`] = condition.field || ''
+          acc[`operator-${index}`] = condition.operator || ''
+          acc[`value-${index}`] = condition.value || ''
+        } else {
+          acc[`field-${index}`] = condition.field || ''
+          acc[`direction-${index}`] = condition.direction || 'asc'
+        }
+        return acc
+      },
+      {} as Record<string, string>,
+    )
+
+    // 添加剩余的空字段
+    const remainingCount = 10 - reorderedConditions.length
+    if (remainingCount > 0) {
+      Array(remainingCount)
+        .fill(0)
+        .forEach((_, i) => {
+          const idx = i + reorderedConditions.length
+          if (type === 'filter') {
+            newFormValues[`field-${idx}`] = ''
+            newFormValues[`operator-${idx}`] = ''
+            newFormValues[`value-${idx}`] = ''
+          } else {
+            newFormValues[`field-${idx}`] = ''
+            newFormValues[`direction-${idx}`] = 'asc'
           }
         })
-        return acc
-      }, {})
-      form.reset(newValues)
     }
 
-    if (type === 'filter') {
-      updateFormValues(filterForm, 'field')
-      updateFormValues(filterForm, 'operator')
-      updateFormValues(filterForm, 'value')
-    } else if (type === 'sort') {
-      updateFormValues(sortForm, 'field')
-      updateFormValues(sortForm, 'direction')
-    } else {
-      updateFormValues(groupForm, 'field')
-      updateFormValues(groupForm, 'direction')
-    }
+    // 更新表单值
+    form.reset(newFormValues)
   }
 
   return (
@@ -266,7 +376,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
               Filters
             </Button>
           </PopoverTrigger>
-          <PopoverContent className='w-[600px] p-2'>
+          <PopoverContent className='w-[600px] p-2' side='bottom' align='start'>
             <Tabs defaultValue='filter' className='w-full'>
               <TabsList className='grid w-full grid-cols-3'>
                 <TabsTrigger value='filter'>筛选</TabsTrigger>
@@ -277,7 +387,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
               {/* Filter Tab */}
               <TabsContent value='filter' className=''>
                 <Form {...filterForm}>
-                  <DragDropContext onDragEnd={(result) => onDragEnd(result, 'filter')}>
+                  <DragDropContext onDragEnd={(result) => handleDragEnd(result, 'filter')}>
                     <Droppable droppableId='filterConditions'>
                       {(provided) => (
                         <div
@@ -285,23 +395,32 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                           ref={provided.innerRef}
                           className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'
                         >
-                          {filterConditions.map((_, index) => (
-                            <Draggable key={index} draggableId={`filter-${index}`} index={index}>
-                              {(provided) => (
+                          {filterConditions.map((condition, index) => (
+                            <Draggable key={`filter-${index}`} draggableId={`filter-${index}`} index={index}>
+                              {(provided, snapshot) => (
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className='grid grid-cols-[auto_1fr_1fr_2fr_auto] items-center gap-2 bg-background rounded-md w-full'
+                                  className={cn(
+                                    'grid grid-cols-[auto_1fr_1fr_2fr_auto] items-center gap-2 bg-background rounded-md w-full',
+                                    snapshot.isDragging && ['opacity-50', 'shadow-lg', 'ring-2 ring-primary'],
+                                  )}
+                                  style={{
+                                    ...provided.draggableProps.style,
+                                    left: 'auto',
+                                    top: 'auto',
+                                    transform: provided.draggableProps.style?.transform,
+                                  }}
                                 >
-                                  <div {...provided.dragHandleProps}>
-                                    <GripVertical className='h-4 w-4' />
+                                  <div {...provided.dragHandleProps} className='px-2 py-1'>
+                                    <GripVertical className='h-4 w-4 cursor-grab active:cursor-grabbing' />
                                   </div>
                                   <FormField
                                     control={filterForm.control}
                                     name={`field-${index}`}
                                     render={({ field }) => (
                                       <FormItem className='flex-1'>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select value={field.value || ''} onValueChange={field.onChange}>
                                           <FormControl>
                                             <SelectTrigger>
                                               <SelectValue placeholder='选择字段' />
@@ -387,7 +506,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
               {/* Sort Tab */}
               <TabsContent value='sort' className='p-0'>
                 <Form {...sortForm}>
-                  <DragDropContext onDragEnd={(result) => onDragEnd(result, 'sort')}>
+                  <DragDropContext onDragEnd={(result) => handleDragEnd(result, 'sort')}>
                     <Droppable droppableId='sortConditions'>
                       {(provided) => (
                         <div
@@ -396,7 +515,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                           className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'
                         >
                           {sortConditions.map((condition, index) => (
-                            <Draggable key={index} draggableId={`sort-${index}`} index={index}>
+                            <Draggable key={`sort-${index}`} draggableId={`sort-${index}`} index={index}>
                               {(provided) => (
                                 <div
                                   ref={provided.innerRef}
@@ -443,7 +562,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                                     name={`direction-${index}`}
                                     render={({ field }) => (
                                       <FormItem className='flex-1'>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select value={field.value || 'asc'} onValueChange={field.onChange}>
                                           <FormControl>
                                             <SelectTrigger>
                                               <SelectValue placeholder='选择顺序' />
@@ -489,7 +608,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
               {/* Group Tab */}
               <TabsContent value='group' className='p-0'>
                 <Form {...groupForm}>
-                  <DragDropContext onDragEnd={(result) => onDragEnd(result, 'group')}>
+                  <DragDropContext onDragEnd={(result) => handleDragEnd(result, 'group')}>
                     <Droppable droppableId='groupConditions'>
                       {(provided) => (
                         <div
@@ -498,7 +617,7 @@ export function DataTableToolbar<TData>({ table, searchColumn, currentView }: Da
                           className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'
                         >
                           {groupConditions.map((condition, index) => (
-                            <Draggable key={index} draggableId={`group-${index}`} index={index}>
+                            <Draggable key={`group-${index}`} draggableId={`group-${index}`} index={index}>
                               {(provided) => (
                                 <div
                                   ref={provided.innerRef}
