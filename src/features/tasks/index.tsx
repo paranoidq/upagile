@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { IconArrowLeft, IconCopy, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'
-import { Button, Dropdown, Popconfirm, Tabs } from 'antd'
+import { Dropdown, Popconfirm } from 'antd'
 import { MoreVertical } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -26,7 +28,7 @@ export default function Tasks() {
   const currentView = views?.find((view) => view.id === Number(activeTab))
   const currentViewType = currentView?.type
 
-  // 初始
+  // 初始化
   useEffect(() => {
     if (views && views.length > 0) {
       setActiveTab(views[0].id.toString())
@@ -59,96 +61,106 @@ export default function Tasks() {
           <TasksPrimaryButtons />
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-          <Tabs
-            onChange={(key) => {
-              setActiveTab(key)
-              setViewDialogType('rename')
-            }}
-            activeKey={activeTab}
-            type='card'
-            items={views?.map((view) => ({
-              key: String(view.id),
-              label: (
-                <div className='flex items-center gap-2'>
-                  <span className='max-w-[150px] overflow-hidden text-ellipsis  block'>{view.name}</span>
-                  {activeTab == String(view.id) && (
-                    <Dropdown
-                      trigger={['click']}
-                      onOpenChange={() => setViewDialogType('rename')}
-                      menu={{
-                        items: [
-                          {
-                            key: 'moveToFirst',
-                            label: '移动到首位',
-                            type: 'item',
-                            icon: <IconArrowLeft className='w-4 h-4' />,
-                            onClick: () => {
-                              alert('todo')
-                            },
-                          },
-                          {
-                            key: 'rename',
-                            label: '重命名',
-                            type: 'item',
-                            icon: <IconEdit className='w-4 h-4' />,
-                            onClick: () => setOpenViewCreateOrRenameDialog(true),
-                          },
-                          {
-                            key: 'duplicate',
-                            label: '复制视图',
-                            icon: <IconCopy className='w-4 h-4' />,
-                            type: 'item',
-                            onClick: () => alert('todo'),
-                          },
-                          {
-                            type: 'divider',
-                          },
-                          {
-                            key: 'delete',
-                            label: (
-                              <Popconfirm
-                                title={'删除视图'}
-                                description={'删除后无法恢复，请确认是否删除'}
-                                onConfirm={() => deleteView(view.id)}
-                                okText='确定'
-                                okButtonProps={{ loading: isDeleting }}
-                                cancelText={'取消'}
-                              >
-                                删除视图
-                              </Popconfirm>
-                            ),
-                            icon: <IconTrash className='w-4 h-4' />,
-                            type: 'item',
-                          },
-                        ],
-                      }}
-                    >
-                      <MoreVertical className='h-4 w-4' />
-                    </Dropdown>
-                  )}
+          <div className='w-full'>
+            <div className='flex items-center justify-between mb-2'>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
+                <div className='flex items-center justify-between w-full'>
+                  <TabsList className='h-10 w-full justify-start gap-1'>
+                    {views?.map((view) => (
+                      <TabsTrigger
+                        key={view.id}
+                        value={String(view.id)}
+                        className='relative data-[state=active]:bg-background px-4'
+                        onClick={() => {
+                          setViewDialogType('rename')
+                        }}
+                      >
+                        <div className='flex items-center gap-2'>
+                          <span className='max-w-[150px] overflow-hidden text-ellipsis block'>{view.name}</span>
+                          {activeTab === String(view.id) && (
+                            <Dropdown
+                              trigger={['click']}
+                              onOpenChange={() => setViewDialogType('rename')}
+                              menu={{
+                                items: [
+                                  {
+                                    key: 'moveToFirst',
+                                    label: '移动到首位',
+                                    type: 'item',
+                                    icon: <IconArrowLeft className='w-4 h-4' />,
+                                    onClick: () => {
+                                      alert('todo')
+                                    },
+                                  },
+                                  {
+                                    key: 'rename',
+                                    label: '重命名',
+                                    type: 'item',
+                                    icon: <IconEdit className='w-4 h-4' />,
+                                    onClick: () => setOpenViewCreateOrRenameDialog(true),
+                                  },
+                                  {
+                                    key: 'duplicate',
+                                    label: '复制视图',
+                                    icon: <IconCopy className='w-4 h-4' />,
+                                    type: 'item',
+                                    onClick: () => alert('todo'),
+                                  },
+                                  {
+                                    type: 'divider',
+                                  },
+                                  {
+                                    key: 'delete',
+                                    label: (
+                                      <Popconfirm
+                                        title={'删除视图'}
+                                        description={'删除后无法恢复，请确认是否删除'}
+                                        onConfirm={() => deleteView(view.id)}
+                                        okText='确定'
+                                        okButtonProps={{ loading: isDeleting }}
+                                        cancelText={'取消'}
+                                      >
+                                        删除视图
+                                      </Popconfirm>
+                                    ),
+                                    icon: <IconTrash className='w-4 h-4' />,
+                                    type: 'item',
+                                  },
+                                ],
+                              }}
+                            >
+                              <MoreVertical className='h-4 w-4' />
+                            </Dropdown>
+                          )}
+                        </div>
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  <Button
+                    onClick={() => {
+                      setViewDialogType('create')
+                      setOpenViewCreateOrRenameDialog(true)
+                    }}
+                    className='ml-2'
+                  >
+                    <IconPlus className='mr-2 h-4 w-4' />
+                    添加视图
+                  </Button>
                 </div>
-              ),
-              children: <DataTable data={processedTasks} columns={columns} searchColumn='title' currentView={currentView}/>,
-            }))}
-            tabBarExtraContent={
-              <Button
-                icon={<IconPlus />}
-                type='primary'
-                onClick={() => {
-                  setViewDialogType('create')
-                  setOpenViewCreateOrRenameDialog(true)
-                }}
-              >
-                添加视图
-              </Button>
-            }
-          />
+
+                {views?.map((view) => (
+                  <TabsContent key={view.id} value={String(view.id)}>
+                    <DataTable data={processedTasks} columns={columns} searchColumn='title' currentView={currentView} />
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </div>
+          </div>
         </div>
       </Main>
 
       <TasksDialogs />
 
-      {/*// todo: 如果不加openViewRenameDialog这个状态，会导致ViewRenameDialog组件在切换tab时，form表单的值不会更新*/}
       {currentView && openViewCreateOrRenameDialog && viewDialogType === 'rename' && (
         <ViewDialog
           open={openViewCreateOrRenameDialog}
