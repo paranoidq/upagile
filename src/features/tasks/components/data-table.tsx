@@ -259,17 +259,17 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
       return (
         <>
           <span className='font-semibold'>{group.field}: 未分组</span>
-          <span className='ml-2 text-muted-foreground'>({(group.data as TData[]).length || '0'} 条记录)</span>
+          <span className='text-muted-foreground'>({(group.data as TData[]).length || '0'} 条记录)</span>
         </>
       )
     }
 
     return (
       <>
-        <span className='font-semibold'>
+        <span className=''>
           {group.field}: {group.key}
         </span>
-        <span className='ml-2 text-muted-foreground'>({(group.data as TData[]).length || '0'} 条记录)</span>
+        <span className='text-muted-foreground'>({(group.data as TData[]).length || '0'} 条记录)</span>
       </>
     )
   }
@@ -313,13 +313,11 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
             <Button
               variant='ghost'
               className={cn(
-                'h-8 w-full flex items-center justify-start hover:bg-transparent',
-                indentLevel === 1 && 'pl-4',
-                indentLevel >= 2 && 'pl-8',
+                'h-8 w-full flex items-center justify-start hover:bg-transparent pl-0.5 text-base',
               )}
               onClick={() => toggleGroup(groupKey)}
             >
-              <div className='w-4 h-4 mr-2'>
+              <div className='w-4 h-4'>
                 {isCollapsed ? (
                   <ChevronRight className='h-4 w-4 shrink-0' />
                 ) : (
@@ -329,7 +327,7 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
               {renderGroupTitle(group)}
             </Button>
           </CardHeader>
-          <CardContent className={cn('px-2 py-1', isCollapsed && 'hidden')}>
+          <CardContent className={cn('px-1 py-1', isCollapsed && 'hidden')}>
             {renderGroupedTable(group.data, groupKey, depth + 1)}
           </CardContent>
         </Card>
@@ -351,9 +349,9 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
       />
 
       {hasGroups ? (
-        <div className='rounded-md border p-2'>{renderGroupedTable(groupedData)}</div>
+        <div className=''>{renderGroupedTable(groupedData)}</div>
       ) : (
-        <GroupTable data={data} columns={columns} columnVisibility={columnVisibility} columnFilters={columnFilters} />
+        <GroupTable data={data} columns={columns} columnVisibility={columnVisibility} columnFilters={columnFilters}/>
       )}
     </div>
   )
