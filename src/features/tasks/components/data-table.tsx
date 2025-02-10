@@ -36,14 +36,14 @@ type GroupData<TData> = {
 }
 
 // 抽取表格和分页为独立组件
-function GroupTable<TData>({
+function GroupTable<TData, TValue>({
   data,
   columns,
   columnVisibility,
   columnFilters,
 }: {
   data: TData[]
-  columns: ColumnDef<TData, any>[]
+  columns: ColumnDef<TData, TValue>[]
   columnVisibility: VisibilityState
   columnFilters: ColumnFiltersState
 }) {
@@ -59,6 +59,7 @@ function GroupTable<TData>({
       rowSelection,
       columnFilters,
     },
+    enableFilters: false,
     enableSorting: false,
     enableHiding: true,
     enableRowSelection: true,
@@ -74,7 +75,7 @@ function GroupTable<TData>({
 
   return (
     <div className='space-y-2'>
-      <div className='rounded-md'>
+      <div className='round-md'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -154,7 +155,9 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
       groupFields: typeof currentView.conditions.groups,
       depth = 0,
     ): TData[] | GroupData<TData>[] => {
-      if (depth >= groupFields.length) return items
+      if (depth >= groupFields.length) {
+        return items
+      }
 
       const field = groupFields[depth].field
       const direction = groupFields[depth].direction
@@ -255,19 +258,18 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
           <CardHeader className='p-3'>
             <Button
               variant='ghost'
-              size='sm'
-              className='h-8 w-full flex items-center justify-start hover:bg-transparent'
+              className='h-8 w-full flex items-center justify-start hover:bg-transparent pl-0'
               onClick={() => toggleGroup(groupKey)}
             >
               {isCollapsed ? (
-                <ChevronRight className='h-4 w-4 mr-2 shrink-0' />
+                <ChevronRight className='h-4 w-4 shrink-0' />
               ) : (
-                <ChevronDown className='h-4 w-4 mr-2 shrink-0' />
+                <ChevronDown className='h-4 w-4 shrink-0' />
               )}
               {renderGroupTitle(group)}
             </Button>
           </CardHeader>
-          <CardContent className={cn('p-0', isCollapsed && 'hidden')}>
+          <CardContent className={cn('pl-1', isCollapsed && 'hidden')}>
             {renderGroupedTable(group.data, groupKey)}
           </CardContent>
         </Card>
