@@ -145,7 +145,6 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
-  // 优化分组缓存
   const groupedData = React.useMemo(() => {
     if (!currentView?.conditions?.groups?.length) {
       return [{ key: 'all', data }]
@@ -338,7 +337,7 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
     })
   }
 
-  const hasGroups = currentView?.conditions?.groups?.length > 0
+  const hasGroups = Boolean(currentView?.conditions?.groups?.length)
 
   return (
     <div className='space-y-2'>
@@ -350,7 +349,12 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
         onExpandAll={expandAll}
         hasGroups={hasGroups}
       />
-      <div className='rounded-md border p-2'>{renderGroupedTable(groupedData)}</div>
+
+      {hasGroups ? (
+        <div className='rounded-md border p-2'>{renderGroupedTable(groupedData)}</div>
+      ) : (
+        <GroupTable data={data} columns={columns} columnVisibility={columnVisibility} columnFilters={columnFilters} />
+      )}
     </div>
   )
 }

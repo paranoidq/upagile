@@ -125,7 +125,7 @@ export const views: ViewType[] = [
         { field: 'priority', operator: 'equals', value: 'high' },
       ],
       sorts: [{ field: 'title', direction: 'desc' }],
-      groups: [{ field: 'status', direction: 'desc' }],
+      groups: [],
     },
   },
 ]

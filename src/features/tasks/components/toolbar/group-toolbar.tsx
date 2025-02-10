@@ -1,12 +1,13 @@
 import { useFieldArray, useForm } from 'react-hook-form'
 import { IconFolders } from '@tabler/icons-react'
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
-import { GripVertical } from 'lucide-react'
+import { GripVertical, HelpCircle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { ToolbarProps } from './types'
 
 type GroupFormValues = {
@@ -152,6 +153,15 @@ export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: 
                                 </FormItem>
                               )}
                             />
+                            <Button
+                              type='button'
+                              variant='ghost'
+                              size='icon'
+                              className='h-8 w-8 hover:bg-red-50 hover:text-red-600'
+                              onClick={() => remove(index)}
+                            >
+                              <X className='h-4 w-4' />
+                            </Button>
                           </div>
                         )}
                       </Draggable>
@@ -161,6 +171,27 @@ export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: 
                 )}
               </Droppable>
             </DragDropContext>
+
+            <div className='flex items-center mt-4'>
+              <Button
+                type='button'
+                variant='link'
+                disabled={fields.length > 0}
+                onClick={() => append({ field: '', direction: 'asc' })}
+                className='hover:text-blue-600'
+              >
+                添加条件
+              </Button>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className='h-4 w-4 text-muted-foreground cursor-help' />
+                  </TooltipTrigger>
+                  <TooltipContent>当前仅支持一个分组</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
 
             <div className='flex justify-end space-x-2 p-4 mt-2 border-t'>
               <Button type='button' variant='outline' onClick={onCancel}>
