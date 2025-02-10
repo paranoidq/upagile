@@ -33,22 +33,21 @@ export function FilterToolbar<TData>({ table, open, onOpenChange, currentView }:
 
   const onSubmit = (values: FilterFormValues) => {
     const formData = {
-      filters: values.filters.filter(
-        (filter) => filter.field && filter.operator && filter.value,),
+      filters: values.filters.filter((filter) => filter.field && filter.operator && filter.value),
     }
     onOpenChange(false)
     alert(JSON.stringify(formData, null, 2))
   }
 
   const onCancel = () => {
-    form.reset({
-      filters: currentView?.conditions?.filters || [],
-    })
+    form.reset()
     onOpenChange(false)
   }
 
   const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return
+    if (!result.destination) {
+      return
+    }
     move(result.source.index, result.destination.index)
   }
 
@@ -58,9 +57,7 @@ export function FilterToolbar<TData>({ table, open, onOpenChange, currentView }:
       onOpenChange={(open) => {
         onOpenChange(open)
         if (!open) {
-          form.reset({
-            filters: currentView?.conditions?.filters || [],
-          })
+          form.reset()
         }
       }}
     >
@@ -121,7 +118,12 @@ export function FilterToolbar<TData>({ table, open, onOpenChange, currentView }:
                                       <SelectContent>
                                         {table
                                           .getAllColumns()
-                                          .filter((column) => column.id !== 'select' && !usedFields.includes(column.id))
+                                          .filter(
+                                            (column) =>
+                                              column.id !== 'select' &&
+                                              column.id !== 'actions' &&
+                                              !usedFields.includes(column.id),
+                                          )
                                           .map((column) => (
                                             <SelectItem key={column.id} value={column.id}>
                                               {column.id}

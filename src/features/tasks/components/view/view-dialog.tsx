@@ -2,7 +2,14 @@ import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useCreateView, useRenameView } from '@/features/tasks/services/view-services'
@@ -68,6 +75,8 @@ export const ViewDialog = ({ open, id, name, type, onOpenChange }: Props) => {
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
+        <DialogDescription>write your view name</DialogDescription>
+
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(
@@ -85,7 +94,7 @@ export const ViewDialog = ({ open, id, name, type, onOpenChange }: Props) => {
               name='name'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>视图名称</FormLabel>
+                  <FormLabel>name</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder='请输入视图名称' />
                   </FormControl>

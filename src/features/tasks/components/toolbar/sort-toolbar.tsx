@@ -37,9 +37,7 @@ export function SortToolbar<TData>({ table, open, onOpenChange, currentView }: T
   }
 
   const onCancel = () => {
-    form.reset({
-      sorts: currentView?.conditions?.sorts || [],
-    })
+    form.reset()
     onOpenChange(false)
   }
 
@@ -56,9 +54,7 @@ export function SortToolbar<TData>({ table, open, onOpenChange, currentView }: T
       onOpenChange={(open) => {
         onOpenChange(open)
         if (!open) {
-          form.reset({
-            sorts: currentView?.conditions?.sorts || [],
-          })
+          form.reset()
         }
       }}
     >
@@ -119,7 +115,12 @@ export function SortToolbar<TData>({ table, open, onOpenChange, currentView }: T
                                       <SelectContent>
                                         {table
                                           .getAllColumns()
-                                          .filter((column) => column.id !== 'select' && !usedFields.includes(column.id))
+                                          .filter(
+                                            (column) =>
+                                              column.id !== 'select' &&
+                                              column.id !== 'actions' &&
+                                              !usedFields.includes(column.id),
+                                          )
                                           .map((column) => (
                                             <SelectItem key={column.id} value={column.id}>
                                               {column.id}

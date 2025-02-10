@@ -37,9 +37,7 @@ export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: 
   }
 
   const onCancel = () => {
-    form.reset({
-      groups: currentView?.conditions?.groups || [],
-    })
+    form.reset()
     onOpenChange(false)
   }
 
@@ -56,9 +54,7 @@ export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: 
       onOpenChange={(open) => {
         onOpenChange(open)
         if (!open) {
-          form.reset({
-            groups: currentView?.conditions?.groups || [],
-          })
+          form.reset()
         }
       }}
     >
@@ -119,7 +115,12 @@ export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: 
                                       <SelectContent>
                                         {table
                                           .getAllColumns()
-                                          .filter((column) => column.id !== 'select' && !usedFields.includes(column.id))
+                                          .filter(
+                                            (column) =>
+                                              column.id !== 'select' &&
+                                              column.id !== 'actions' &&
+                                              !usedFields.includes(column.id),
+                                          )
                                           .map((column) => (
                                             <SelectItem key={column.id} value={column.id}>
                                               {column.id}
