@@ -122,6 +122,7 @@ export const views: ViewType[] = [
     conditions: {
       filters: [
         { field: 'status', operator: 'not_equals', value: 'done' },
+        { field: 'priority', operator: 'equals', value: 'high' },
       ],
       sorts: [{ field: 'title', direction: 'desc' }],
       groups: [],
