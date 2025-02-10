@@ -163,11 +163,18 @@ export default function Tasks() {
                   </Button>
                 </div>
 
-                {views?.map((view) => (
-                  <TabsContent key={view.id} value={String(view.id)}>
-                    <DataTable data={processedTasks} columns={columns} searchColumn='title' currentView={currentView} />
-                  </TabsContent>
-                ))}
+                {views?.map((view) =>
+                  currentView?.id == view.id ? (
+                    <TabsContent key={view.id} value={String(view.id)}>
+                      <DataTable
+                        data={processedTasks}
+                        columns={columns}
+                        searchColumn='title'
+                        currentView={currentView}
+                      />
+                    </TabsContent>
+                  ) : null,
+                )}
               </Tabs>
             </div>
           </div>
