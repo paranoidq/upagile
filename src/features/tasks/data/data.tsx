@@ -77,7 +77,7 @@ export const views: ViewType[] = [
     name: '这是一个很长的文本内容，当超过最大宽度时会显示省略号',
     type: 'task',
     conditions: {
-      filters: [{ field: 'status', operator: 'equals', value: 'done' }],
+      filters: [{ field: 'status', operator: 'not_equals', value: 'done' }],
       sorts: [{ field: 'title', direction: 'desc' }],
       groups: [{ field: 'status', direction: 'asc' }],
     },
@@ -107,8 +107,10 @@ export const views: ViewType[] = [
     name: 'view4',
     type: 'task',
     conditions: {
-      filters: [{ field: 'status', operator: 'not_equals', value: 'done' },
-        { field: 'priority', operator: 'equals', value: 'high' }],
+      filters: [
+        { field: 'status', operator: 'not_equals', value: 'done' },
+        { field: 'priority', operator: 'equals', value: 'high' },
+      ],
       sorts: [{ field: 'title', direction: 'desc' }],
       groups: [{ field: 'status', direction: 'asc' }],
     },

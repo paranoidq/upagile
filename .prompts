@@ -32,3 +32,12 @@
 1. 将currentView传递到data-table-toolbar
 2. 在defaultValues中将currentView中的conditions赋值给对应的form
 3. 你暂时无需处理onSubmit中将form表单中的已经修改过的数据重新赋值给currentView中的conditions
+
+
+请帮我实现分组功能：
+1. 根据currentview中的condition.groups数组中的顺序对filter之后的全部数据进行分组
+2. 将分组之后的数据依此以表格的方式渲染到的页面中，每个组一个table，并且在table的上方标注分组的字段和分组的方式
+3. 分组的方式包括升序和降序，按照conditions.groups数组中的顺序为优先级进行排序
+
+注意：
+1. 你需要尽量使用shadcn/ui的组件来实现
