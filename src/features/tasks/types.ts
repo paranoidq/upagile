@@ -51,7 +51,6 @@ export const viewConditionsSchema = z.object({
   groups: z.array(groupConditionSchema),
 })
 
-
 export type FilterOperator = z.infer<typeof filterOperatorEnum>
 export type FilterCondition = z.infer<typeof filterConditionSchema>
 export type SortCondition = z.infer<typeof sortConditionSchema>

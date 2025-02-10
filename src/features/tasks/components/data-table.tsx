@@ -75,7 +75,7 @@ function GroupTable<TData, TValue>({
 
   return (
     <div className='space-y-2'>
-      <div className='round-md'>
+      <div className='rounded-md'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -107,7 +107,9 @@ function GroupTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <div className='px-2'>
+        <DataTablePagination table={table} />
+      </div>
     </div>
   )
 }
@@ -143,10 +145,24 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
-  // 修改分组逻辑
+  // 优化分组缓存
   const groupedData = React.useMemo(() => {
     if (!currentView?.conditions?.groups?.length) {
       return [{ key: 'all', data }]
+    }
+
+    // 创建分组字段的值格式化函数缓存
+    const formatters = new Map<string, (value: any) => string>()
+    const getFormatter = (field: string) => {
+      if (!formatters.has(field)) {
+        formatters.set(field, (value: any) => {
+          if (value === null || value === undefined || value === '') {
+            return ''
+          }
+          return value.toString()
+        })
+      }
+      return formatters.get(field)!
     }
 
     // 递归分组函数
@@ -161,37 +177,37 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
 
       const field = groupFields[depth].field
       const direction = groupFields[depth].direction
+      const formatter = getFormatter(field)
 
-      // 按字段分组，同时收集未分组的记录
-      const { groups, ungrouped } = items.reduce(
-        (acc, item) => {
-          const value = (item as any)[field]
-          if (value === null || value === undefined || value === '') {
-            acc.ungrouped.push(item)
-          } else {
-            const key = value.toString()
-            if (!acc.groups[key]) {
-              acc.groups[key] = []
-            }
-            acc.groups[key].push(item)
+      // 使用 Map 代替普通对象来提高性能
+      const groupMap = new Map<string, TData[]>()
+      const ungrouped: TData[] = []
+
+      // 优化分组过程
+      for (const item of items) {
+        const value = (item as any)[field]
+        const formattedValue = formatter(value)
+
+        if (!formattedValue) {
+          ungrouped.push(item)
+        } else {
+          if (!groupMap.has(formattedValue)) {
+            groupMap.set(formattedValue, [])
           }
-          return acc
-        },
-        { groups: {} as Record<string, TData[]>, ungrouped: [] as TData[] },
-      )
+          groupMap.get(formattedValue)!.push(item)
+        }
+      }
 
-      // 对每个分组进行排序
-      const sortedGroups = Object.entries(groups)
-        .sort(([a], [b]) => {
-          return direction === 'asc' ? a.localeCompare(b) : b.localeCompare(a)
-        })
+      // 优化排序过程
+      const sortedGroups = Array.from(groupMap.entries())
+        .sort(([a], [b]) => (direction === 'asc' ? a.localeCompare(b) : b.localeCompare(a)))
         .map(([key, groupData]) => ({
           key,
           field,
           data: groupBy(groupData, groupFields, depth + 1),
         }))
 
-      // 如果有未分组的记录，添加到最后
+      // 添加未分组数据
       if (ungrouped.length > 0) {
         sortedGroups.push({
           key: '未分组',
@@ -206,15 +222,37 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
     return groupBy(data, currentView.conditions.groups)
   }, [data, currentView?.conditions?.groups])
 
-  // 添加折叠状态管理
-  const [collapsedGroups, setCollapsedGroups] = React.useState<Record<string, boolean>>({})
+  // 优化折叠状态管理
+  const [collapsedGroups, setCollapsedGroups] = React.useState<Map<string, boolean>>(new Map())
 
-  const toggleGroup = (groupKey: string) => {
-    setCollapsedGroups((prev) => ({
-      ...prev,
-      [groupKey]: !prev[groupKey],
-    }))
-  }
+  const toggleGroup = React.useCallback((groupKey: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Map(prev)
+      next.set(groupKey, !prev.get(groupKey))
+      return next
+    })
+  }, [])
+
+  // 优化获取所有分组 key 的函数
+  const getAllGroupKeys = React.useCallback((groups: GroupData<TData>[] | TData[]): string[] => {
+    if (Array.isArray(groups) && groups.length > 0 && !('field' in groups[0])) {
+      return []
+    }
+
+    const keys: string[] = []
+    const stack = [...(groups as GroupData<TData>[])]
+
+    while (stack.length > 0) {
+      const group = stack.pop()!
+      keys.push(group.key)
+
+      if (Array.isArray(group.data) && group.data.length > 0 && 'field' in group.data[0]) {
+        stack.push(...(group.data as GroupData<TData>[]))
+      }
+    }
+
+    return keys
+  }, [])
 
   // 修改渲染分组的标题显示
   const renderGroupTitle = (group: GroupData<TData>) => {
@@ -237,7 +275,23 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
     )
   }
 
-  const renderGroupedTable = (groupData: GroupData<TData>[] | TData[], parentKey = '') => {
+  // 折叠所有分组
+  const collapseAll = React.useCallback(() => {
+    const allGroups = getAllGroupKeys(groupedData)
+    setCollapsedGroups(
+      allGroups.reduce((acc, key) => {
+        acc.set(key, true)
+        return acc
+      }, new Map<string, boolean>()),
+    )
+  }, [groupedData, getAllGroupKeys])
+
+  // 展开所有分组
+  const expandAll = React.useCallback(() => {
+    setCollapsedGroups(new Map())
+  }, [])
+
+  const renderGroupedTable = (groupData: GroupData<TData>[] | TData[], parentKey = '', depth = 0) => {
     if (Array.isArray(groupData) && groupData.length > 0 && !('field' in groupData[0])) {
       return (
         <GroupTable
@@ -251,35 +305,51 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
 
     return (groupData as GroupData<TData>[]).map((group) => {
       const groupKey = parentKey ? `${parentKey}-${group.key}` : group.key
-      const isCollapsed = collapsedGroups[groupKey]
+      const isCollapsed = collapsedGroups.get(groupKey) ?? false
+      const indentLevel = Math.min(depth, 2) // 限制最大缩进层级为2
 
       return (
         <Card key={groupKey} className='mb-2'>
-          <CardHeader className='p-3'>
+          <CardHeader className='p-2'>
             <Button
               variant='ghost'
-              className='h-8 w-full flex items-center justify-start hover:bg-transparent pl-0'
+              className={cn(
+                'h-8 w-full flex items-center justify-start hover:bg-transparent',
+                indentLevel === 1 && 'pl-4',
+                indentLevel >= 2 && 'pl-8',
+              )}
               onClick={() => toggleGroup(groupKey)}
             >
-              {isCollapsed ? (
-                <ChevronRight className='h-4 w-4 shrink-0' />
-              ) : (
-                <ChevronDown className='h-4 w-4 shrink-0' />
-              )}
+              <div className='w-4 h-4 mr-2'>
+                {isCollapsed ? (
+                  <ChevronRight className='h-4 w-4 shrink-0' />
+                ) : (
+                  <ChevronDown className='h-4 w-4 shrink-0' />
+                )}
+              </div>
               {renderGroupTitle(group)}
             </Button>
           </CardHeader>
-          <CardContent className={cn('pl-1', isCollapsed && 'hidden')}>
-            {renderGroupedTable(group.data, groupKey)}
+          <CardContent className={cn('px-2 py-1', isCollapsed && 'hidden')}>
+            {renderGroupedTable(group.data, groupKey, depth + 1)}
           </CardContent>
         </Card>
       )
     })
   }
 
+  const hasGroups = currentView?.conditions?.groups?.length > 0
+
   return (
     <div className='space-y-2'>
-      <DataTableToolbar table={mainTable} searchColumn={searchColumn} currentView={currentView} />
+      <DataTableToolbar
+        table={mainTable}
+        searchColumn={searchColumn}
+        currentView={currentView}
+        onCollapseAll={collapseAll}
+        onExpandAll={expandAll}
+        hasGroups={hasGroups}
+      />
       <div className='rounded-md border p-2'>{renderGroupedTable(groupedData)}</div>
     </div>
   )
