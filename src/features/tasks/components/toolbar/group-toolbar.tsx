@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Condition } from '@/features/tasks/toolbar/types.ts'
-import { ToolbarProps } from './types'
+import { Condition, ToolbarProps } from './types'
 
 export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: ToolbarProps<TData>) {
   const initialConditions =

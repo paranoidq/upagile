@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { IconFilterCog } from '@tabler/icons-react'
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
@@ -10,9 +10,8 @@ import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input.tsx'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Condition } from '@/features/tasks/toolbar/types.ts'
-import { filterOperatorEnum, getFilterOperatorName } from '@/features/tasks/types.ts'
-import { ToolbarProps } from './types'
+import { filterOperatorEnum, getFilterOperatorName } from '../../types'
+import { Condition, ToolbarProps } from './types'
 
 export function FilterToolbar<TData>({ table, open, onOpenChange, currentView }: ToolbarProps<TData>) {
   const initialConditions =
@@ -23,47 +22,6 @@ export function FilterToolbar<TData>({ table, open, onOpenChange, currentView }:
     })) || []
 
   const [conditions, setConditions] = useState<Condition[]>(initialConditions)
-
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination } = result
-    if (!destination || destination.index === source.index) {
-      return
-    }
-
-    // update conditions
-    const newConditions = produce(conditions, (draft) => {
-      const [reorderedItem] = draft.splice(source.index, 1)
-      draft.splice(destination.index, 0, reorderedItem)
-    })
-    setConditions(newConditions)
-
-    // 重新构建表单值
-    const newFormValues = newConditions.reduce(
-      (acc, condition, index) => {
-        acc[`field-${index}`] = condition.field || ''
-        acc[`operator-${index}`] = condition.operator || ''
-        acc[`value-${index}`] = condition.value || ''
-        return acc
-      },
-      {} as Record<string, string>,
-    )
-
-    // 添加剩余的空字段
-    const remainingCount = 10 - newConditions.length
-    if (remainingCount > 0) {
-      Array(remainingCount)
-        .fill(0)
-        .forEach((_, i) => {
-          const idx = i + newConditions.length
-          newFormValues[`field-${idx}`] = ''
-          newFormValues[`operator-${idx}`] = ''
-          newFormValues[`value-${idx}`] = ''
-        })
-    }
-
-    // 更新表单值
-    form.reset(newFormValues)
-  }
 
   const form = useForm({
     defaultValues: {
@@ -117,6 +75,47 @@ export function FilterToolbar<TData>({ table, open, onOpenChange, currentView }:
     setConditions(initialConditions)
     form.reset()
     onOpenChange(false)
+  }
+
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result
+    if (!destination || destination.index === source.index) {
+      return
+    }
+
+    // update conditions
+    const newConditions = produce(conditions, (draft) => {
+      const [reorderedItem] = draft.splice(source.index, 1)
+      draft.splice(destination.index, 0, reorderedItem)
+    })
+    setConditions(newConditions)
+
+    // 重新构建表单值
+    const newFormValues = newConditions.reduce(
+      (acc, condition, index) => {
+        acc[`field-${index}`] = condition.field || ''
+        acc[`operator-${index}`] = condition.operator || ''
+        acc[`value-${index}`] = condition.value || ''
+        return acc
+      },
+      {} as Record<string, string>,
+    )
+
+    // 添加剩余的空字段
+    const remainingCount = 10 - newConditions.length
+    if (remainingCount > 0) {
+      Array(remainingCount)
+        .fill(0)
+        .forEach((_, i) => {
+          const idx = i + newConditions.length
+          newFormValues[`field-${idx}`] = ''
+          newFormValues[`operator-${idx}`] = ''
+          newFormValues[`value-${idx}`] = ''
+        })
+    }
+
+    // 更新表单值
+    form.reset(newFormValues)
   }
 
   return (
