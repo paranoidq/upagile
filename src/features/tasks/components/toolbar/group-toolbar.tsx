@@ -1,7 +1,7 @@
 import { useFieldArray, useForm } from 'react-hook-form'
 import { IconFolders } from '@tabler/icons-react'
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
-import { GripVertical, X } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
@@ -152,16 +152,6 @@ export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: 
                                 </FormItem>
                               )}
                             />
-
-                            <Button
-                              type='button'
-                              variant='ghost'
-                              size='icon'
-                              className='h-8 w-8 hover:bg-red-50 hover:text-red-600'
-                              onClick={() => remove(index)}
-                            >
-                              <X className='h-4 w-4' />
-                            </Button>
                           </div>
                         )}
                       </Draggable>
@@ -171,15 +161,6 @@ export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: 
                 )}
               </Droppable>
             </DragDropContext>
-
-            <Button
-              type='button'
-              variant='link'
-              onClick={() => append({ field: '', direction: 'asc' })}
-              className='mt-4 hover:text-blue-600'
-            >
-              添加条件
-            </Button>
 
             <div className='flex justify-end space-x-2 p-4 mt-2 border-t'>
               <Button type='button' variant='outline' onClick={onCancel}>
