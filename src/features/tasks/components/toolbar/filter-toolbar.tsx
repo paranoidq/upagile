@@ -3,6 +3,7 @@ import { IconFilterCog } from '@tabler/icons-react'
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
 import { GripVertical, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge.tsx'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -65,6 +66,9 @@ export function FilterToolbar<TData>({ table, open, onOpenChange, currentView }:
         <Button variant='outline' size='sm' className='h-8 lg:flex'>
           <IconFilterCog className='mr-2 h-4 w-4' />
           筛选
+          <Badge variant='secondary' className={cn('ml-2 h-5 px-1.5', fields.length > 0 ? 'bg-red-200' : 'bg-gray-200')}>
+            {fields.length}
+          </Badge>
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-[600px] p-2' side='bottom' align='start'>

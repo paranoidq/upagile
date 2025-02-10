@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { ToolbarProps } from './types'
+import { Badge } from '@/components/ui/badge.tsx'
 
 type GroupFormValues = {
   groups: {
@@ -63,6 +64,9 @@ export function GroupToolbar<TData>({ table, open, onOpenChange, currentView }: 
         <Button variant='outline' size='sm' className='h-8 lg:flex'>
           <IconFolders className='mr-2 h-4 w-4' />
           分组
+          <Badge variant='secondary' className={cn('ml-2 h-5 px-1.5', fields.length > 0 ? 'bg-red-200' : 'bg-gray-200')}>
+            {fields.length}
+          </Badge>
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-[600px] p-2' side='bottom' align='start'>
