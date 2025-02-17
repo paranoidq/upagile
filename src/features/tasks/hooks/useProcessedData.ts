@@ -2,14 +2,14 @@ import { useMemo } from 'react'
 import type { FilterCondition, SortCondition, Task, ViewType } from '../types'
 
 // 处理筛选条件
-const filterData = (data: Task[], filters: FilterCondition[]) => {
+const filterData = <T,>(data: T[], filters: FilterCondition[]) => {
   if (!filters?.length) {
     return data
   }
 
   return data.filter((item) => {
     return filters.every((filter) => {
-      const value = item[filter.field as keyof Task]
+      const value = item[filter.field as keyof T]
       switch (filter.operator) {
         case 'equals':
           return value === filter.value
@@ -31,15 +31,15 @@ const filterData = (data: Task[], filters: FilterCondition[]) => {
 }
 
 // 处理排序条件
-const sortData = (data: Task[], sorts: SortCondition[]) => {
+const sortData = <T,>(data: T[], sorts: SortCondition[]) => {
   if (!sorts?.length) {
     return data
   }
 
   return [...data].sort((a, b) => {
     for (const sort of sorts) {
-      const aValue = a[sort.field as keyof Task]
-      const bValue = b[sort.field as keyof Task]
+      const aValue = a[sort.field as keyof T]
+      const bValue = b[sort.field as keyof T]
 
       if (aValue === bValue) {
         continue
@@ -52,23 +52,23 @@ const sortData = (data: Task[], sorts: SortCondition[]) => {
   })
 }
 
-export const useProcessedTasks = (tasks: Task[], currentView: ViewType | undefined) => {
+export const useProcessedData = <T, >(rawData: T[], currentView: ViewType | undefined) => {
   return useMemo(() => {
-    if (!tasks?.length || !currentView) {
+    if (!rawData?.length || !currentView) {
       return []
     }
 
     const { conditions } = currentView
     if (!conditions) {
-      return tasks
+      return rawData
     }
 
     // 先进行筛选
-    const filteredData = filterData(tasks, conditions.filters)
+    const filteredData = filterData(rawData, conditions.filters)
 
     // 再进行排序
     const sortedData = sortData(filteredData, conditions.sorts)
 
     return sortedData
-  }, [tasks, currentView])
+  }, [rawData, currentView])
 }

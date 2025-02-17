@@ -312,14 +312,12 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
           <CardHeader className='p-2'>
             <Button
               variant='ghost'
-              className={cn(
-                'h-8 w-full flex items-center justify-start hover:bg-transparent pl-0.5 text-base',
-              )}
+              className={cn('h-8 w-full flex items-center justify-start hover:bg-transparent pl-0.5 text-base')}
               onClick={() => toggleGroup(groupKey)}
             >
               <div className='w-4 h-4'>
                 {isCollapsed ? (
-                  <ChevronRight className='h-4 w-4 shrink-0' />
+                  <ChevronDown className='h-4 w-4 shrink-0' />
                 ) : (
                   <ChevronDown className='h-4 w-4 shrink-0' />
                 )}
@@ -351,7 +349,7 @@ export function DataTable<TData, TValue>({ columns, data, searchColumn, currentV
       {hasGroups ? (
         <div className=''>{renderGroupedTable(groupedData)}</div>
       ) : (
-        <GroupTable data={data} columns={columns} columnVisibility={columnVisibility} columnFilters={columnFilters}/>
+        <GroupTable data={data} columns={columns} columnVisibility={columnVisibility} columnFilters={columnFilters} />
       )}
     </div>
   )

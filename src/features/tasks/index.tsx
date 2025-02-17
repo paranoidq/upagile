@@ -20,27 +20,28 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { ViewDialog } from '@/features/tasks/components/view/view-dialog.tsx'
+import { tasks } from '@/features/tasks/data/tasks.ts'
 import { columns } from './components/columns'
 import { DataTable } from './components/data-table'
 import { TasksDialogs } from './components/tasks-dialogs'
 import { TasksPrimaryButtons } from './components/tasks-primary-buttons'
 import TasksProvider from './context/tasks-context'
-import { tasks } from './data/tasks'
-import { useProcessedTasks } from './hooks/useProcessedTasks'
+import { useProcessedData } from './hooks/useProcessedData.ts'
 import { useDeleteView, useViews } from './services/view-services'
 
 export default function Tasks() {
-  const { data: views, isLoading: isViewsLoading } = useViews()
   const [activeTab, setActiveTab] = useState<string>('0')
   const [openViewCreateOrRenameDialog, setOpenViewCreateOrRenameDialog] = useState(false)
   const [viewDialogType, setViewDialogType] = useState<'create' | 'rename'>('rename')
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
   const [viewToDelete, setViewToDelete] = useState<number | null>(null)
 
+  const { data: views, isLoading: isViewsLoading } = useViews()
+
   const currentView = views?.find((view) => view.id === Number(activeTab))
   const currentViewType = currentView?.type
 
-  // 初始化
+  // activate first view
   useEffect(() => {
     if (views && views.length > 0) {
       setActiveTab(views[0].id.toString())
@@ -49,14 +50,14 @@ export default function Tasks() {
 
   const { mutate: deleteView, isPending: isDeleting } = useDeleteView()
 
-  const processedTasks = useProcessedTasks(tasks, currentView)
+  const processedData = useProcessedData(tasks, currentView)
 
-  const handleDeleteClick = (viewId: number) => {
+  const onDeleteViewTrigger = (viewId: number) => {
     setViewToDelete(viewId)
     setOpenDeleteDialog(true)
   }
 
-  const handleDeleteConfirm = () => {
+  const onDeleteViewConfirm = () => {
     if (viewToDelete) {
       deleteView(viewToDelete)
       setOpenDeleteDialog(false)
@@ -69,119 +70,121 @@ export default function Tasks() {
   }
 
   return (
-    <TasksProvider>
-      <Header fixed>
-        <Search />
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
-      <Main>
-        <div className='mb-2 flex items-center justify-between space-y-2 flex-wrap gap-x-4'>
-          <div>
-            <h2 className='text-2xl font-bold tracking-tight'>Tasks</h2>
-            <p className='text-muted-foreground'>Here&apos;s a list of your tasks for this month!</p>
+    <>
+      <TasksProvider>
+        <Header fixed>
+          <Search />
+          <div className='ml-auto flex items-center space-x-4'>
+            <ThemeSwitch />
+            <ProfileDropdown />
           </div>
-          <TasksPrimaryButtons />
-        </div>
-        <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-          <div className='w-full'>
-            <div className='flex items-center justify-between mb-2'>
-              <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
-                <div className='flex items-center justify-between w-full'>
-                  <TabsList className='h-10 w-full justify-start gap-1'>
-                    {views?.map((view) => (
-                      <TabsTrigger
-                        key={view.id}
-                        value={String(view.id)}
-                        className='relative data-[state=active]:bg-background px-4'
-                        onClick={() => {
-                          setViewDialogType('rename')
-                        }}
-                      >
-                        <div className='flex items-center gap-2'>
-                          <span className='max-w-[150px] overflow-hidden text-ellipsis block'>{view.name}</span>
-                          {activeTab === String(view.id) && (
-                            <Dropdown
-                              trigger={['click']}
-                              onOpenChange={() => setViewDialogType('rename')}
-                              menu={{
-                                items: [
-                                  {
-                                    key: 'moveToFirst',
-                                    label: '移动到首位',
-                                    type: 'item',
-                                    icon: <IconArrowLeft className='w-4 h-4' />,
-                                    onClick: () => {
-                                      alert('todo')
+        </Header>
+        <Main>
+          <div className='mb-2 flex items-center justify-between space-y-2 flex-wrap gap-x-4'>
+            <div>
+              <h2 className='text-2xl font-bold tracking-tight'>Tasks</h2>
+              <p className='text-muted-foreground'>Here&apos;s a list of your tasks for this month!</p>
+            </div>
+            <TasksPrimaryButtons />
+          </div>
+          <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
+            <div className='w-full'>
+              <div className='flex items-center justify-between mb-2'>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
+                  <div className='flex items-center justify-between w-full'>
+                    <TabsList className='h-10 w-full justify-start gap-1'>
+                      {views?.map((view) => (
+                        <TabsTrigger
+                          key={view.id}
+                          value={String(view.id)}
+                          className='relative data-[state=active]:bg-background px-4'
+                          onClick={() => {
+                            setViewDialogType('rename')
+                          }}
+                        >
+                          <div className='flex items-center gap-2'>
+                            <span className='max-w-[150px] overflow-hidden text-ellipsis block'>{view.name}</span>
+                            {activeTab === String(view.id) && (
+                              <Dropdown
+                                trigger={['click']}
+                                onOpenChange={() => setViewDialogType('rename')}
+                                menu={{
+                                  items: [
+                                    {
+                                      key: 'moveToFirst',
+                                      label: '移动到首位',
+                                      type: 'item',
+                                      icon: <IconArrowLeft className='w-4 h-4' />,
+                                      onClick: () => {
+                                        alert('todo')
+                                      },
                                     },
-                                  },
-                                  {
-                                    key: 'rename',
-                                    label: '重命名',
-                                    type: 'item',
-                                    icon: <IconEdit className='w-4 h-4' />,
-                                    onClick: () => setOpenViewCreateOrRenameDialog(true),
-                                  },
-                                  {
-                                    key: 'duplicate',
-                                    label: '复制视图',
-                                    icon: <IconCopy className='w-4 h-4' />,
-                                    type: 'item',
-                                    onClick: () => alert('todo'),
-                                  },
-                                  {
-                                    type: 'divider',
-                                  },
-                                  {
-                                    key: 'delete',
-                                    label: '删除视图',
-                                    icon: <IconTrash className='w-4 h-4' />,
-                                    type: 'item',
-                                    onClick: () => handleDeleteClick(view.id),
-                                  },
-                                ],
-                              }}
-                            >
-                              <MoreVertical className='h-4 w-4' />
-                            </Dropdown>
-                          )}
-                        </div>
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                  <Button
-                    onClick={() => {
-                      setViewDialogType('create')
-                      setOpenViewCreateOrRenameDialog(true)
-                    }}
-                    className='ml-2'
-                  >
-                    <IconPlus className='mr-2 h-4 w-4' />
-                    添加视图
-                  </Button>
-                </div>
+                                    {
+                                      key: 'rename',
+                                      label: '重命名',
+                                      type: 'item',
+                                      icon: <IconEdit className='w-4 h-4' />,
+                                      onClick: () => setOpenViewCreateOrRenameDialog(true),
+                                    },
+                                    {
+                                      key: 'duplicate',
+                                      label: '复制视图',
+                                      icon: <IconCopy className='w-4 h-4' />,
+                                      type: 'item',
+                                      onClick: () => alert('todo'),
+                                    },
+                                    {
+                                      type: 'divider',
+                                    },
+                                    {
+                                      key: 'delete',
+                                      label: '删除视图',
+                                      icon: <IconTrash className='w-4 h-4' />,
+                                      type: 'item',
+                                      onClick: () => onDeleteViewTrigger(view.id),
+                                    },
+                                  ],
+                                }}
+                              >
+                                <MoreVertical className='h-4 w-4' />
+                              </Dropdown>
+                            )}
+                          </div>
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                    <Button
+                      onClick={() => {
+                        setViewDialogType('create')
+                        setOpenViewCreateOrRenameDialog(true)
+                      }}
+                      className='ml-2'
+                    >
+                      <IconPlus className='mr-2 h-4 w-4' />
+                      添加视图
+                    </Button>
+                  </div>
 
-                {views?.map((view) =>
-                  currentView?.id == view.id ? (
-                    <TabsContent key={view.id} value={String(view.id)}>
-                      <DataTable
-                        data={processedTasks}
-                        columns={columns}
-                        searchColumn='title'
-                        currentView={currentView}
-                      />
-                    </TabsContent>
-                  ) : null,
-                )}
-              </Tabs>
+                  {views?.map((view) =>
+                    currentView?.id == view.id ? (
+                      <TabsContent key={view.id} value={String(view.id)}>
+                        <DataTable
+                          data={processedData}
+                          columns={columns}
+                          searchColumn='title'
+                          currentView={currentView}
+                        />
+                      </TabsContent>
+                    ) : null,
+                  )}
+                </Tabs>
+              </div>
             </div>
           </div>
-        </div>
-      </Main>
+        </Main>
 
-      <TasksDialogs />
+        <TasksDialogs />
+      </TasksProvider>
 
       {currentView && openViewCreateOrRenameDialog && viewDialogType === 'rename' && (
         <ViewDialog
@@ -210,12 +213,12 @@ export default function Tasks() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting}>
+            <AlertDialogAction onClick={onDeleteViewConfirm} disabled={isDeleting}>
               确定
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </TasksProvider>
+    </>
   )
 }
