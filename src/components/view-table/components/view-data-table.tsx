@@ -7,7 +7,7 @@ import { DataTablePagination } from './data-table-pagination'
 
 interface ViewDataTableProps<TData extends BaseData> {
   data: TData[]
-  columns: ColumnDef<TData, any>[]
+  columns: ColumnDef<TData>[]
   searchColumn?: keyof TData
   currentView?: ViewType
   table: Table<TData>
