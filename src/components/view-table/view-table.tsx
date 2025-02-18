@@ -1,7 +1,21 @@
-import React, { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  ColumnFiltersState,
+  getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+  VisibilityState,
+} from '@tanstack/react-table'
 import { IconArrowLeft, IconCopy, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'
 import { Dropdown } from 'antd'
-import { MoreVertical } from 'lucide-react'
+import { produce } from 'immer'
+import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react'
+import { cn } from '@/lib/utils.ts'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +29,9 @@ import {
 import { Button } from '@/components/ui/button.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import { useProcessedData } from '@/components/view-table/hooks/useProcessedData.ts'
+import { Card, CardContent, CardHeader } from '../ui/card.tsx'
+import { DataTable } from './components/data-table.tsx'
+import { DataTableToolbar } from './components/view-table-toolbar.tsx'
 import { ViewDialog } from './components/view/view-dialog.tsx'
 import { useDeleteView, useViews } from './components/view/view-services.tsx'
 import { BaseData, GroupData, ViewTableProps } from './types'
@@ -62,15 +79,28 @@ export function ViewTable<TData extends BaseData>({ data, columns }: ViewTablePr
   /*
    * handle groups
    */
-  const [collapsedGroups, setCollapsedGroups] = React.useState<Map<string, boolean>>(new Map())
-
-  const toggleGroup = React.useCallback((groupKey: string) => {
-    setCollapsedGroups((prev) => {
-      const next = new Map(prev)
-      next.set(groupKey, !prev.get(groupKey))
-      return next
-    })
-  }, [])
+  const [collapsedGroups, setCollapsedGroups] = useState<string[]>([])
+  const toggleGroup = useCallback(
+    (groupKey: string) => {
+      setCollapsedGroups(
+        produce(collapsedGroups, (draft: string[]) => {
+          if (draft.includes(groupKey)) {
+            draft.splice(draft.indexOf(groupKey), 1)
+          } else {
+            draft.push(groupKey)
+          }
+        }),
+      )
+    },
+    [collapsedGroups],
+  )
+  const collapseAll = () => {
+    setCollapsedGroups([])
+  }
+  const expandAll = () => {
+    setCollapsedGroups(processedData?.map((group) => group.key) || [])
+  }
+  const isCollapsed = (groupKey: string) => collapsedGroups.includes(groupKey)
 
   /*
    * render group title
@@ -92,6 +122,37 @@ export function ViewTable<TData extends BaseData>({ data, columns }: ViewTablePr
       </>
     )
   }
+
+  /*
+   * handle table data
+   */
+  const [rowSelection, setRowSelection] = useState({})
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = useState<SortingState>([])
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+    },
+    enableSorting: false,
+    enableHiding: true,
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+  })
 
   if (isViewsLoading) {
     return <div>Loading...</div>
@@ -181,14 +242,48 @@ export function ViewTable<TData extends BaseData>({ data, columns }: ViewTablePr
                 currentView?.id == view.id ? (
                   <TabsContent key={view.id} value={String(view.id)}>
                     {processedData && processedData.length > 0 ? (
-                      processedData.map((group) => {
-                        return (
-                          <>
-                            {renderGroupTitle(group)}
-                            {/* <ViewDataTable key={group.key} columns={columns} data={group.data} /> */}
-                          </>
-                        )
-                      })
+                      <div className='space-y-2'>
+                        {/* toolbar */}
+                        <DataTableToolbar
+                          table={table}
+                          searchColumn={'title'}
+                          currentView={currentView}
+                          onCollapseAll={collapseAll}
+                          onExpandAll={expandAll}
+                        />
+                        {/* grouped tables */}
+                        {processedData.map((group) => {
+                          return (
+                            <>
+                              {
+                                <Card key={group.key} className='mb-2'>
+                                  <CardHeader className='p-2'>
+                                    <Button
+                                      variant='ghost'
+                                      className={cn(
+                                        'h-8 w-full flex items-center justify-start hover:bg-transparent pl-0.5 text-base',
+                                      )}
+                                      onClick={() => toggleGroup(group.key)}
+                                    >
+                                      <div className='w-4 h-4'>
+                                        {isCollapsed(group.key) ? (
+                                          <ChevronRight className='h-4 w-4 shrink-0' />
+                                        ) : (
+                                          <ChevronDown className='h-4 w-4 shrink-0' />
+                                        )}
+                                      </div>
+                                      {renderGroupTitle(group)}
+                                    </Button>
+                                  </CardHeader>
+                                  <CardContent className={cn('px-1 py-1', isCollapsed(group.key) && 'hidden')}>
+                                    <DataTable table={table} />
+                                  </CardContent>
+                                </Card>
+                              }
+                            </>
+                          )
+                        })}
+                      </div>
                     ) : (
                       <div className='flex items-center justify-center h-full'>
                         <span className='text-muted-foreground'>暂无数据</span>

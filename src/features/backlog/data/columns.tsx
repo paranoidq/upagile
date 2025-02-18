@@ -3,7 +3,7 @@ import { labels, priorities, statuses } from '@/consts/enums'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/view-table/components/data-table-column-header'
-import { DataTableRowActions } from '../data-table-row-actions'
+import { DataTableRowActions } from '../../../components/view-table/components/data-table-row-actions'
 import { BacklogType } from '../types'
 
 export const columns: ColumnDef<BacklogType>[] = [

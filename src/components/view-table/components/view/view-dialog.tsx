@@ -1,6 +1,7 @@
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -82,7 +83,10 @@ export const ViewDialog = ({ open, id, name, type, onOpenChange }: Props) => {
                 onSubmit(values)
               },
               (errors) => {
-                console.log('Form validation failed:', errors)
+                toast({
+                  title: 'form validation failed',
+                  description: errors.name?.message,
+                })
               },
             )}
             className='space-y-4'

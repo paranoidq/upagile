@@ -11,17 +11,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTableData } from '@/components/view-table/view-table-context'
-import { taskSchema } from '@/features/tasks/types.ts'
-import { BacklogType } from './types'
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
 }
 
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
-  const task = taskSchema.parse(row.original)
+  const item = row.original
 
-  const { setOpen, setCurrentRow } = useTableData<BacklogType>()
+  const { setOpen, setCurrentRow } = useTableData()
 
   return (
     <DropdownMenu modal={false}>
@@ -34,7 +32,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
       <DropdownMenuContent align='end' className='w-[160px]'>
         <DropdownMenuItem
           onClick={() => {
-            setCurrentRow(task)
+            setCurrentRow(item)
             setOpen('update')
           }}
         >
@@ -45,7 +43,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
         <DropdownMenuItem
           className='text-red-600'
           onClick={() => {
-            setCurrentRow(task)
+            setCurrentRow(item)
             setOpen('delete')
           }}
         >
