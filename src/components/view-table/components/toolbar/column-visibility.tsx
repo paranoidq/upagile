@@ -1,28 +1,31 @@
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
+import { MixerHorizontalIcon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
-import { FilesIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { BaseData } from '../../types'
 
-interface ColumnVisibilityProps<TData extends BaseData> {
+interface ColumnVisibilityProps<TData> {
   table: Table<TData>
 }
 
-export function ColumnVisibility<TData extends BaseData>({ table }: ColumnVisibilityProps<TData>) {
+export function ColumnVisibility<TData>({ table }: ColumnVisibilityProps<TData>) {
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button variant='outline' size='sm' className='ml-auto h-8'>
-          <FilesIcon className='mr-2 h-4 w-4' />
-          显示列
+        <Button variant='outline' size='sm' className='ml-auto h-8 lg:flex'>
+          <MixerHorizontalIcon className='mr-2 h-4 w-4' />
+          Columns
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end'>
+      <DropdownMenuContent align='end' className='w-[150px]'>
+        <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+        <DropdownMenuSeparator />
         {table
           .getAllColumns()
           .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide())

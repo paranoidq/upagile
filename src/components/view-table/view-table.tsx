@@ -1,16 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import {
-  ColumnFiltersState,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
-  useReactTable,
-  VisibilityState,
-} from '@tanstack/react-table'
 import { IconArrowLeft, IconCopy, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'
 import { Dropdown } from 'antd'
 import { MoreVertical } from 'lucide-react'
@@ -26,10 +14,10 @@ import {
 } from '@/components/ui/alert-dialog.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
-import { ViewDialog } from '@/features/tasks/components/view/view-dialog.tsx'
-import { useProcessedData } from '@/features/tasks/hooks/useProcessedData.ts'
-import { useDeleteView, useViews } from '@/features/tasks/services/view-services.tsx'
-import { BaseData, ViewTableProps } from './types'
+import { useProcessedData } from '@/components/view-table/hooks/useProcessedData.ts'
+import { ViewDialog } from './components/view/view-dialog.tsx'
+import { useDeleteView, useViews } from './components/view/view-services.tsx'
+import { BaseData, GroupData, ViewTableProps } from './types'
 
 export function ViewTable<TData extends BaseData>({ data, columns }: ViewTableProps<TData>) {
   /*
@@ -67,39 +55,43 @@ export function ViewTable<TData extends BaseData>({ data, columns }: ViewTablePr
   }
 
   /*
-   * handle data
+   * process data
    */
   const processedData = useProcessedData(data, currentView)
 
-  const [rowSelection, setRowSelection] = React.useState({})
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  /*
+   * handle groups
+   */
+  const [collapsedGroups, setCollapsedGroups] = React.useState<Map<string, boolean>>(new Map())
 
-  // 创建主表格实例（仅用于工具栏）
-  const mainTable = useReactTable({
-    data,
-    columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-    },
-    enableSorting: false,
-    enableHiding: true,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-  })
+  const toggleGroup = React.useCallback((groupKey: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Map(prev)
+      next.set(groupKey, !prev.get(groupKey))
+      return next
+    })
+  }, [])
+
+  /*
+   * render group title
+   */
+  const renderGroupTitle = (group: GroupData<TData>) => {
+    if (group.key === '未分组') {
+      return (
+        <>
+          <span className='font-semibold'>{group.key}: 未分组</span>
+          <span className='text-muted-foreground'>({(group.data as TData[]).length || '0'} 条记录)</span>
+        </>
+      )
+    }
+
+    return (
+      <>
+        <span className=''>{group.key}</span>
+        <span className='text-muted-foreground'>({(group.data as TData[]).length || '0'} 条记录)</span>
+      </>
+    )
+  }
 
   if (isViewsLoading) {
     return <div>Loading...</div>
@@ -188,8 +180,20 @@ export function ViewTable<TData extends BaseData>({ data, columns }: ViewTablePr
               {views?.map((view) =>
                 currentView?.id == view.id ? (
                   <TabsContent key={view.id} value={String(view.id)}>
-                    data-table-for-view-{view.id}
-                    {/*<DataTable data={processedData} columns={columns} searchColumn='title' currentView={currentView} />*/}
+                    {processedData && processedData.length > 0 ? (
+                      processedData.map((group) => {
+                        return (
+                          <>
+                            {renderGroupTitle(group)}
+                            {/* <ViewDataTable key={group.key} columns={columns} data={group.data} /> */}
+                          </>
+                        )
+                      })
+                    ) : (
+                      <div className='flex items-center justify-center h-full'>
+                        <span className='text-muted-foreground'>暂无数据</span>
+                      </div>
+                    )}
                   </TabsContent>
                 ) : null,
               )}
@@ -221,7 +225,7 @@ export function ViewTable<TData extends BaseData>({ data, columns }: ViewTablePr
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>删除视图</AlertDialogTitle>
-            <AlertDialogDescription>删除后无法恢复，请确认是否删除</AlertDialogDescription>
+            <AlertDialogDescription className={'text-red-500'}>确认删除么？此操作无法撤销</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>

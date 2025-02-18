@@ -1,20 +1,7 @@
 import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '@/lib/axios'
-
-const BacklogSchema = z.object({
-  id: z.number(),
-  desc: z.string(),
-  status: z.number(),
-  priority: z.number(),
-  category: z.number(),
-  crtUsr: z.string(),
-  updUsr: z.string(),
-  crtTime: z.string(),
-  updTime: z.string(),
-})
-
-export type BacklogType = z.infer<typeof BacklogSchema>
+import { backlogSchema, BacklogType } from '../types'
 
 // 获取backlogs
 const getBacklogs = async (): Promise<BacklogType[]> => {
@@ -23,7 +10,7 @@ const getBacklogs = async (): Promise<BacklogType[]> => {
     return []
   }
 
-  return z.array(BacklogSchema).parse(response)
+  return z.array(backlogSchema).parse(response)
 }
 
 // 删除backlog

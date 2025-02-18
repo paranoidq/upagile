@@ -3,7 +3,7 @@ import { ColumnDef } from '@tanstack/react-table'
 
 // 基础数据类型
 export const baseSchema = z.object({
-  id: z.string() || z.number(),
+  id: z.string(),
 })
 export type BaseData = z.infer<typeof baseSchema>
 
@@ -82,4 +82,9 @@ export interface ViewTableProps<TData extends BaseData> {
     group?: boolean
     columnVisibility?: boolean
   }
+}
+
+export type GroupData<TData> = {
+  key: string
+  data: TData[]
 }

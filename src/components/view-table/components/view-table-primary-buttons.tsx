@@ -1,9 +1,9 @@
 import { IconDownload, IconPlus } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
-import { useTasks } from '../context/tasks-context'
+import { useTableData } from '../view-table-context'
 
-export function TasksPrimaryButtons() {
-  const { setOpen } = useTasks()
+export function ViewTablePrimaryButtons() {
+  const { setOpen } = useTableData()
   return (
     <div className='flex gap-2'>
       <Button variant='outline' className='space-x-1' onClick={() => setOpen('import')}>

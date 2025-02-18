@@ -1,18 +1,16 @@
-import { useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
-import { FilterIcon, GripVertical, PlusIcon, X } from 'lucide-react'
+import { IconFilterCog } from '@tabler/icons-react'
+import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
+import { GripVertical, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge.tsx'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ViewType } from '../../types'
-
-interface FilterToolbarProps {
-  currentView?: ViewType
-  onUpdate?: (view: ViewType) => Promise<void>
-}
+import { filterOperatorEnum, getFilterOperatorName } from '../../types'
+import { ToolbarProps } from './types'
 
 type FilterFormValues = {
   filters: {
@@ -22,9 +20,7 @@ type FilterFormValues = {
   }[]
 }
 
-export function FilterToolbar({ currentView, onUpdate }: FilterToolbarProps) {
-  const [isOpen, setIsOpen] = useState(false)
-
+export function FilterToolbar<TData>({ table, open, onOpenChange, currentView }: ToolbarProps<TData>) {
   const form = useForm<FilterFormValues>({
     defaultValues: {
       filters: currentView?.conditions?.filters || [],
@@ -36,111 +32,159 @@ export function FilterToolbar({ currentView, onUpdate }: FilterToolbarProps) {
     name: 'filters',
   })
 
-  const onSubmit = async (values: FilterFormValues) => {
-    if (!currentView || !onUpdate) return
-
-    await onUpdate({
-      ...currentView,
-      conditions: {
-        ...currentView.conditions,
-        filters: values.filters,
-      },
-    })
-
-    setIsOpen(false)
+  const onSubmit = (values: FilterFormValues) => {
+    const formData = {
+      filters: values.filters.filter((filter) => filter.field && filter.operator && filter.value),
+    }
+    onOpenChange(false)
+    alert(JSON.stringify(formData, null, 2))
   }
 
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return
+  const onCancel = () => {
+    form.reset()
+    onOpenChange(false)
+  }
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) {
+      return
+    }
     move(result.source.index, result.destination.index)
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(open) => {
+        onOpenChange(open)
+        if (!open) {
+          form.reset()
+        }
+      }}
+    >
       <PopoverTrigger asChild>
-        <Button variant='outline' size='sm' className='h-8'>
-          <PlusIcon className='mr-2 h-4 w-4' />
-          添加筛选
-          <FilterIcon className='ml-2 h-4 w-4' />
+        <Button variant='outline' size='sm' className='h-8 lg:flex'>
+          <IconFilterCog className='mr-2 h-4 w-4' />
+          筛选
+          <Badge
+            variant='secondary'
+            className={cn('ml-2 h-5 px-1.5', fields.length > 0 ? 'bg-red-200' : 'bg-gray-200')}
+          >
+            {fields.length}
+          </Badge>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-96 p-4' align='start'>
+      <PopoverContent className='w-[600px] p-2' side='bottom' align='start'>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId='filters'>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId='filterConditions'>
                 {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef} className='space-y-4'>
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className='space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden p-1'
+                  >
                     {fields.map((field, index) => (
                       <Draggable key={field.id} draggableId={field.id} index={index}>
-                        {(provided) => (
+                        {(provided, snapshot) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className='flex items-center gap-2 rounded-lg border p-4'
+                            className={cn(
+                              'grid grid-cols-[auto_1fr_1fr_2fr_auto] items-center gap-2 bg-background rounded-md w-full',
+                              snapshot.isDragging && ['shadow-lg', 'ring-2 ring-primary'],
+                            )}
+                            style={{
+                              ...provided.draggableProps.style,
+                              left: 'auto',
+                              top: 'auto',
+                            }}
                           >
-                            <div {...provided.dragHandleProps} className='cursor-move'>
-                              <GripVertical className='h-5 w-5 text-muted-foreground' />
+                            <div {...provided.dragHandleProps} className='px-2'>
+                              <GripVertical className='h-4 w-4 cursor-grab active:cursor-grabbing' />
                             </div>
-                            <div className='flex flex-1 gap-2'>
-                              <FormField
-                                control={form.control}
-                                name={`filters.${index}.field`}
-                                render={({ field }) => (
+
+                            <FormField
+                              control={form.control}
+                              name={`filters.${index}.field`}
+                              render={({ field: formField }) => {
+                                const usedFields = form
+                                  .getValues()
+                                  .filters.map((f) => f.field)
+                                  .filter((f) => f !== formField.value)
+
+                                return (
                                   <FormItem className='flex-1'>
-                                    <FormControl>
-                                      <Select value={field.value} onValueChange={field.onChange}>
+                                    <Select value={formField.value} onValueChange={formField.onChange}>
+                                      <FormControl>
                                         <SelectTrigger>
                                           <SelectValue placeholder='选择字段' />
                                         </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value='title'>标题</SelectItem>
-                                          <SelectItem value='status'>状态</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </FormControl>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {table
+                                          .getAllColumns()
+                                          .filter(
+                                            (column) =>
+                                              column.id !== 'select' &&
+                                              column.id !== 'actions' &&
+                                              !usedFields.includes(column.id),
+                                          )
+                                          .map((column) => (
+                                            <SelectItem key={column.id} value={column.id}>
+                                              {column.id}
+                                            </SelectItem>
+                                          ))}
+                                      </SelectContent>
+                                    </Select>
                                   </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name={`filters.${index}.operator`}
-                                render={({ field }) => (
-                                  <FormItem className='flex-1'>
+                                )
+                              }}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name={`filters.${index}.operator`}
+                              render={({ field: formField }) => (
+                                <FormItem className='flex-1'>
+                                  <Select value={formField.value} onValueChange={formField.onChange}>
                                     <FormControl>
-                                      <Select value={field.value} onValueChange={field.onChange}>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder='选择操作符' />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value='equals'>等于</SelectItem>
-                                          <SelectItem value='contains'>包含</SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder='选择条件' />
+                                      </SelectTrigger>
                                     </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name={`filters.${index}.value`}
-                                render={({ field }) => (
-                                  <FormItem className='flex-1'>
-                                    <FormControl>
-                                      <Input {...field} placeholder='输入值' />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
+                                    <SelectContent>
+                                      {filterOperatorEnum._def.values.map((value) => (
+                                        <SelectItem key={value} value={value}>
+                                          {getFilterOperatorName(value)}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name={`filters.${index}.value`}
+                              render={({ field: formField }) => (
+                                <FormItem className='flex-1'>
+                                  <FormControl>
+                                    <Input {...formField} placeholder='输入值' />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+
                             <Button
                               type='button'
                               variant='ghost'
-                              size='sm'
-                              className='h-8 w-8 p-0 text-muted-foreground hover:text-foreground'
+                              size='icon'
+                              className='h-8 w-8 hover:bg-red-50 hover:text-red-600'
                               onClick={() => remove(index)}
                             >
-                              <span className='sr-only'>删除</span>
                               <X className='h-4 w-4' />
                             </Button>
                           </div>
@@ -155,17 +199,15 @@ export function FilterToolbar({ currentView, onUpdate }: FilterToolbarProps) {
 
             <Button
               type='button'
-              variant='outline'
-              size='sm'
-              className='mt-2'
+              variant='link'
               onClick={() => append({ field: '', operator: '', value: '' })}
+              className='mt-4 hover:text-blue-600'
             >
-              <PlusIcon className='mr-2 h-4 w-4' />
               添加条件
             </Button>
 
-            <div className='flex justify-end space-x-2'>
-              <Button type='button' variant='outline' onClick={() => setIsOpen(false)}>
+            <div className='flex justify-end space-x-2 p-4 mt-2 border-t'>
+              <Button type='button' variant='outline' onClick={onCancel}>
                 取消
               </Button>
               <Button type='submit'>确定</Button>
