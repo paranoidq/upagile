@@ -28,7 +28,7 @@ export const columns: ColumnDef<BacklogType>[] = [
   },
   {
     accessorKey: 'id',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Task' />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Backlog' />,
     cell: ({ row }) => <div className='w-[80px]'>{row.getValue('id')}</div>,
   },
   {

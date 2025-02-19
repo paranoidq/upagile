@@ -19,15 +19,14 @@ type Props<TData extends BaseData> = {
 
 export const DataTable = <TData extends BaseData>({ table: parentTable, groupData = [], pageSize }: Props<TData>) => {
   const [pageIndex, setPageIndex] = useState(0)
-  const [rowSelection, setRowSelection] = useState({})
 
   const table = useReactTable({
     data: groupData,
-    columns: parentTable.getAllColumns(),
+    columns: parentTable.options.columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: {
-      rowSelection,
+      rowSelection: parentTable.getState().rowSelection,
       columnVisibility: parentTable.getState().columnVisibility,
       pagination: {
         pageSize: pageSize,
@@ -49,7 +48,8 @@ export const DataTable = <TData extends BaseData>({ table: parentTable, groupDat
     enableSorting: false,
     enableHiding: true,
     enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
+    enableMultiRowSelection: true,
+    onRowSelectionChange: parentTable.options.onRowSelectionChange,
   })
 
   return (

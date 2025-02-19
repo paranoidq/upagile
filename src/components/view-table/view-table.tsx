@@ -142,6 +142,7 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
     enableSorting: false,
     enableHiding: true,
     enableRowSelection: true,
+    enableMultiRowSelection: true, // 如果需要多选的话
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -259,33 +260,29 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
                       <div>
                         {processedData.map((group) => {
                           return (
-                            <>
-                              {
-                                <Card key={group.key} className='mb-2'>
-                                  <CardHeader className='p-2'>
-                                    <Button
-                                      variant='ghost'
-                                      className={cn(
-                                        'h-8 w-full flex items-center justify-start hover:bg-transparent pl-0.5 text-base',
-                                      )}
-                                      onClick={() => toggleGroup(group.key)}
-                                    >
-                                      <div className='w-4 h-4'>
-                                        {isCollapsed(group.key) ? (
-                                          <ChevronRight className='h-4 w-4 shrink-0' />
-                                        ) : (
-                                          <ChevronDown className='h-4 w-4 shrink-0' />
-                                        )}
-                                      </div>
-                                      {renderGroupTitle(group)}
-                                    </Button>
-                                  </CardHeader>
-                                  <CardContent className={cn('px-1 py-1', isCollapsed(group.key) && 'hidden')}>
-                                    <DataTable table={table} groupData={group.data as TData[]} pageSize={pageSize} />
-                                  </CardContent>
-                                </Card>
-                              }
-                            </>
+                            <Card key={group.key} className='mb-2'>
+                              <CardHeader className='p-2'>
+                                <Button
+                                  variant='ghost'
+                                  className={cn(
+                                    'h-8 w-full flex items-center justify-start hover:bg-transparent pl-0.5 text-base',
+                                  )}
+                                  onClick={() => toggleGroup(group.key)}
+                                >
+                                  <div className='w-4 h-4'>
+                                    {isCollapsed(group.key) ? (
+                                      <ChevronRight className='h-4 w-4 shrink-0' />
+                                    ) : (
+                                      <ChevronDown className='h-4 w-4 shrink-0' />
+                                    )}
+                                  </div>
+                                  {renderGroupTitle(group)}
+                                </Button>
+                              </CardHeader>
+                              <CardContent className={cn('px-1 py-1', isCollapsed(group.key) && 'hidden')}>
+                                <DataTable table={table} groupData={group.data as TData[]} pageSize={pageSize} />
+                              </CardContent>
+                            </Card>
                           )
                         })}
                       </div>
