@@ -71,10 +71,8 @@ export interface ViewTableProps<TData extends BaseData> {
   data: TData[]
   // 列定义
   columns: ColumnDef<TData>[]
-  // 视图配置
-  views: ViewType[]
   // 搜索字段
-  searchColumn?: keyof TData
+  searchColumn?: string
   // 工具栏配置
   toolbar?: {
     filter?: boolean

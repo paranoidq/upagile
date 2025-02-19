@@ -36,7 +36,7 @@ import { ViewDialog } from './components/view/view-dialog.tsx'
 import { useDeleteView, useViews } from './components/view/view-services.tsx'
 import { BaseData, GroupData, ViewTableProps } from './types'
 
-export function ViewTable<TData extends BaseData>({ data, columns }: ViewTableProps<TData>) {
+export function ViewTable<TData extends BaseData>({ data, columns, searchColumn }: ViewTableProps<TData>) {
   /*
    * handle views
    */
@@ -244,7 +244,7 @@ export function ViewTable<TData extends BaseData>({ data, columns }: ViewTablePr
                     {/* toolbar */}
                     <DataTableToolbar
                       table={table}
-                      searchColumn={'title'}
+                      searchColumn={searchColumn}
                       currentView={currentView}
                       onCollapseAll={collapseAll}
                       onExpandAll={expandAll}
