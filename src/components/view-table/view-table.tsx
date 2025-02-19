@@ -240,18 +240,18 @@ export function ViewTable<TData extends BaseData>({ data, columns }: ViewTablePr
 
               {views?.map((view) =>
                 currentView?.id == view.id ? (
-                  <TabsContent key={view.id} value={String(view.id)}>
+                  <TabsContent key={view.id} value={String(view.id)} className='space-y-2'>
+                    {/* toolbar */}
+                    <DataTableToolbar
+                      table={table}
+                      searchColumn={'title'}
+                      currentView={currentView}
+                      onCollapseAll={collapseAll}
+                      onExpandAll={expandAll}
+                    />
+                    {/* grouped tables */}
                     {processedData && processedData.length > 0 ? (
-                      <div className='space-y-2'>
-                        {/* toolbar */}
-                        <DataTableToolbar
-                          table={table}
-                          searchColumn={'title'}
-                          currentView={currentView}
-                          onCollapseAll={collapseAll}
-                          onExpandAll={expandAll}
-                        />
-                        {/* grouped tables */}
+                      <div>
                         {processedData.map((group) => {
                           return (
                             <>

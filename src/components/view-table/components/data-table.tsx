@@ -35,8 +35,8 @@ export const DataTable = <TData extends BaseData>({ table }: Props<TData>) => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className='h-24 text-center'>
-                  No results.
+                <TableCell colSpan={columns.length} className='h-24 text-center text-muted-foreground'>
+                  没有符合筛选条件的数据
                 </TableCell>
               </TableRow>
             )}
