@@ -4,6 +4,7 @@ import { Table } from '@tanstack/react-table'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ColumnVisibility } from '@/components/view-table/components/toolbar/column-visibility'
 import { ViewType } from '@/components/view-table/types.ts'
 import { FilterToolbar } from './toolbar/filter-toolbar'
@@ -17,6 +18,8 @@ interface DataTableToolbarProps<TData> {
   onCollapseAll?: () => void
   onExpandAll?: () => void
   hasGroups?: boolean
+  pageSize: number
+  onPageSizeChange: (size: number) => void
 }
 
 export function DataTableToolbar<TData>({
@@ -26,6 +29,8 @@ export function DataTableToolbar<TData>({
   onCollapseAll,
   onExpandAll,
   hasGroups,
+  pageSize,
+  onPageSizeChange,
 }: DataTableToolbarProps<TData>) {
   const [openFilterDialog, setOpenFilterDialog] = useState(false)
   const [openSortDialog, setOpenSortDialog] = useState(false)
@@ -84,6 +89,21 @@ export function DataTableToolbar<TData>({
 
         {/* 列可见性 */}
         <ColumnVisibility table={table} />
+
+        <DividerVerticalIcon />
+
+        <Select value={pageSize.toString()} onValueChange={(value) => onPageSizeChange(Number(value))}>
+          <SelectTrigger className='w-[120px]'>
+            <SelectValue placeholder='每页显示' />
+          </SelectTrigger>
+          <SelectContent>
+            {[10, 20, 30, 40, 50].map((size) => (
+              <SelectItem key={size} value={size.toString()}>
+                每页 {size} 条
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   )

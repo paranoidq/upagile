@@ -154,6 +154,9 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
+  // 添加页面大小状态
+  const [pageSize, setPageSize] = useState<number>(10)
+
   if (isViewsLoading) {
     return <div>Loading...</div>
   }
@@ -248,6 +251,8 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
                       currentView={currentView}
                       onCollapseAll={collapseAll}
                       onExpandAll={expandAll}
+                      pageSize={pageSize}
+                      onPageSizeChange={setPageSize}
                     />
                     {/* grouped tables */}
                     {processedData && processedData.length > 0 ? (
@@ -276,7 +281,7 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
                                     </Button>
                                   </CardHeader>
                                   <CardContent className={cn('px-1 py-1', isCollapsed(group.key) && 'hidden')}>
-                                    <DataTable table={table} groupData={group.data as TData[]} />
+                                    <DataTable table={table} groupData={group.data as TData[]} pageSize={pageSize} />
                                   </CardContent>
                                 </Card>
                               }

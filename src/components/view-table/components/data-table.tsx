@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   flexRender,
   getCoreRowModel,
@@ -13,18 +14,42 @@ import { DataTablePagination } from './data-table-pagination'
 type Props<TData extends BaseData> = {
   table: TableType<TData>
   groupData?: TData[]
+  pageSize: number
 }
 
-export const DataTable = <TData extends BaseData>({ table: parentTable, groupData = [] }: Props<TData>) => {
-  // 为每个分组创建独立的表格实例
+export const DataTable = <TData extends BaseData>({ table: parentTable, groupData = [], pageSize }: Props<TData>) => {
+  const [pageIndex, setPageIndex] = useState(0)
+  const [rowSelection, setRowSelection] = useState({})
+
   const table = useReactTable({
     data: groupData,
     columns: parentTable.getAllColumns(),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: {
+      rowSelection,
       columnVisibility: parentTable.getState().columnVisibility,
+      pagination: {
+        pageSize: pageSize,
+        pageIndex: pageIndex,
+      },
     },
+    onPaginationChange: (updater) => {
+      if (typeof updater === 'function') {
+        const newState = updater({
+          pageIndex,
+          pageSize,
+        })
+        setPageIndex(newState.pageIndex)
+      }
+    },
+    manualPagination: false,
+    pageCount: Math.ceil(groupData.length / pageSize),
+    enableFilters: false,
+    enableSorting: false,
+    enableHiding: true,
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
   })
 
   return (
