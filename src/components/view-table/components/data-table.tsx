@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   flexRender,
   getCoreRowModel,
@@ -51,6 +51,10 @@ export const DataTable = <TData extends BaseData>({ table: parentTable, groupDat
     enableMultiRowSelection: true,
     onRowSelectionChange: parentTable.options.onRowSelectionChange,
   })
+
+  useEffect(() => {
+    table.setPageIndex(0)
+  }, [pageSize, table])
 
   return (
     <div className='space-y-2'>
