@@ -28,7 +28,6 @@ export function DataTableToolbar<TData>({
   currentView,
   onCollapseAll,
   onExpandAll,
-  hasGroups,
   pageSize,
   onPageSizeChange,
 }: DataTableToolbarProps<TData>) {
@@ -78,12 +77,10 @@ export function DataTableToolbar<TData>({
         <DividerVerticalIcon />
 
         {/* 合并后的折叠/展开按钮 */}
-        {hasGroups && (
-          <Button variant='outline' size='sm' className='h-8 ml-4' onClick={handleToggleExpand} disabled={!hasGroups}>
-            {isExpanded ? <ChevronRight className='h-4 w-4 mr-1' /> : <ChevronDown className='h-4 w-4 mr-1' />}
-            {isExpanded ? '折叠分组' : '展开分组'}
-          </Button>
-        )}
+        <Button variant='outline' size='sm' className='h-8 ml-4' onClick={handleToggleExpand}>
+          {isExpanded ? <ChevronDown className='h-4 w-4 mr-1' /> : <ChevronRight className='h-4 w-4 mr-1' />}
+          {isExpanded ? '折叠分组' : '展开分组'}
+        </Button>
 
         <DividerVerticalIcon />
 

@@ -29,6 +29,7 @@ import {
 import { Button } from '@/components/ui/button.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import { useProcessedData } from '@/components/view-table/hooks/useProcessedData.ts'
+import { Badge } from '../ui/badge.tsx'
 import { Card, CardContent, CardHeader } from '../ui/card.tsx'
 import { DataTable } from './components/data-table.tsx'
 import { DataTableToolbar } from './components/view-table-toolbar.tsx'
@@ -95,10 +96,10 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
     [collapsedGroups],
   )
   const collapseAll = () => {
-    setCollapsedGroups([])
+    setCollapsedGroups(processedData?.map((group) => group.key) || [])
   }
   const expandAll = () => {
-    setCollapsedGroups(processedData?.map((group) => group.key) || [])
+    setCollapsedGroups([])
   }
   const isCollapsed = (groupKey: string) => collapsedGroups.includes(groupKey)
 
@@ -106,19 +107,12 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
    * render group title
    */
   const renderGroupTitle = (group: GroupData<TData>) => {
-    if (group.key === '未分组') {
-      return (
-        <>
-          <span className='font-semibold'>{group.key}: 未分组</span>
-          <span className='text-muted-foreground'>({(group.data as TData[]).length || '0'} 条记录)</span>
-        </>
-      )
-    }
-
     return (
       <>
         <span className=''>{group.key}</span>
-        <span className='text-muted-foreground'>({(group.data as TData[]).length || '0'} 条记录)</span>
+        <Badge variant={'secondary'} className='text-xs'>
+          {(group.data as TData[]).length || '0'}
+        </Badge>
       </>
     )
   }
@@ -269,7 +263,7 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
                                   )}
                                   onClick={() => toggleGroup(group.key)}
                                 >
-                                  <div className='w-4 h-4'>
+                                  <div>
                                     {isCollapsed(group.key) ? (
                                       <ChevronRight className='h-4 w-4 shrink-0' />
                                     ) : (
