@@ -1,7 +1,6 @@
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -11,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useCreateView, useRenameView } from '@/features/tasks/services/view-services'
 
@@ -74,7 +73,7 @@ export const ViewDialog = ({ open, id, name, type, onOpenChange }: Props) => {
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
-        <DialogDescription>write your view name</DialogDescription>
+        <DialogDescription></DialogDescription>
 
         <Form {...form}>
           <form
@@ -83,10 +82,7 @@ export const ViewDialog = ({ open, id, name, type, onOpenChange }: Props) => {
                 onSubmit(values)
               },
               (errors) => {
-                toast({
-                  title: 'form validation failed',
-                  description: errors.name?.message,
-                })
+                console.error(errors)
               },
             )}
             className='space-y-4'
@@ -96,7 +92,6 @@ export const ViewDialog = ({ open, id, name, type, onOpenChange }: Props) => {
               name='name'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>name</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder='请输入视图名称' />
                   </FormControl>
