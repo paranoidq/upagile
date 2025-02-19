@@ -276,7 +276,7 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
                                     </Button>
                                   </CardHeader>
                                   <CardContent className={cn('px-1 py-1', isCollapsed(group.key) && 'hidden')}>
-                                    <DataTable table={table} />
+                                    <DataTable table={table} groupData={group.data as TData[]} />
                                   </CardContent>
                                 </Card>
                               }

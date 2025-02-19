@@ -1,4 +1,10 @@
-import { flexRender, Table as TableType } from '@tanstack/react-table'
+import {
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  Table as TableType,
+  useReactTable,
+} from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { columns } from '@/features/users/components/users-columns'
 import { BaseData } from '../types'
@@ -6,9 +12,21 @@ import { DataTablePagination } from './data-table-pagination'
 
 type Props<TData extends BaseData> = {
   table: TableType<TData>
+  groupData?: TData[]
 }
 
-export const DataTable = <TData extends BaseData>({ table }: Props<TData>) => {
+export const DataTable = <TData extends BaseData>({ table: parentTable, groupData = [] }: Props<TData>) => {
+  // 为每个分组创建独立的表格实例
+  const table = useReactTable({
+    data: groupData,
+    columns: parentTable.getAllColumns(),
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      columnVisibility: parentTable.getState().columnVisibility,
+    },
+  })
+
   return (
     <div className='space-y-2'>
       <div className='rounded-md'>
