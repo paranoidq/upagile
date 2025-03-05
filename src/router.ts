@@ -1,11 +1,11 @@
 import { createRouter } from '@tanstack/react-router'
 import Backlog from '@/features/backlog'
-import DashboardPage from '@/features/dashboard/components/DashboardPage'
 import Issue from '@/features/issue'
 import Project from '@/features/project'
 import Requirement from '@/features/requirement'
 import Sprint from '@/features/sprint'
 import Workspace from '@/features/workspace'
+import Dashboard from './features/dashboard'
 
 const router = createRouter({
   routes: [
@@ -15,7 +15,7 @@ const router = createRouter({
     },
     {
       path: '/dashboard',
-      component: DashboardPage,
+      component: Dashboard,
     },
     {
       path: '/issue',

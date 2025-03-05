@@ -1,9 +1,10 @@
 import axios, { AxiosHeaders, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { env } from '@/config/env.config'
+import router from '@/router'
+import { useAuthStore } from '@/stores/authStore'
 
 // 定义响应数据的基础接口
 interface BaseResponse<T = unknown> {
-  code: number
+  code: string
   data: T
   message: string
 }
@@ -15,11 +16,12 @@ interface RequestConfig extends InternalAxiosRequestConfig {
 }
 
 // 创建 axios 实例
+const API_BASE_URL = import.meta.env.DEV ? '/api' : import.meta.env.VITE_API_BASE_URL
 export const http = axios.create({
-  baseURL: env.API_BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json; charset=utf-8',
+    'Content-Type': 'application/json',
   },
 })
 
@@ -28,7 +30,7 @@ http.interceptors.request.use(
   (config: RequestConfig) => {
     if (!config.skipAuth) {
       // 可以在这里添加 token 等认证信息
-      const token = localStorage.getItem('token')
+      const token = useAuthStore.getState().auth.accessToken
       if (token) {
         const headers = new AxiosHeaders(config.headers)
         headers.set('Authorization', `Bearer ${token}`)
@@ -47,10 +49,9 @@ http.interceptors.response.use(
   <T>(response: AxiosResponse<BaseResponse<T>>) => {
     const { code, data, message } = response.data
 
-    if (code == 0) {
+    if (code === '0000000') {
       return data
     } else {
-      // 处理其他状态码
       throw new Error(message)
     }
   },
@@ -60,16 +61,22 @@ http.interceptors.response.use(
       if (error.response) {
         switch (error.response.status) {
           case 401:
-            // 处理未授权
-            break
           case 403:
-            // 处理禁止访问
+            useAuthStore.getState().auth.reset()
+            router.navigate({
+              to: '/sign-in',
+              search: { redirect: window.location.pathname },
+            })
             break
           case 404:
-            // 处理未找到
+            router.navigate({
+              to: '/404',
+            })
             break
           case 500:
-            // 处理服务器错误
+            router.navigate({
+              to: '/500',
+            })
             break
         }
       }

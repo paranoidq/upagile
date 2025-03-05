@@ -7,6 +7,12 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 export default defineConfig({
   server: {
     port: 9898,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:9999',
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react(), TanStackRouterVite()],
   resolve: {
