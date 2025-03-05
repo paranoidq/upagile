@@ -28,6 +28,14 @@ interface LoginResponse {
     id: string
     username: string
     name: string
+    avatar: string
+    teams: [
+      {
+        id: string
+        name: string
+        owner: string
+      },
+    ]
   }
 }
 
@@ -58,9 +66,10 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
       auth.setAccessToken(response.accessToken)
       auth.setUser({
-        id: response.account.id,
         username: response.account.username,
         name: response.account.name,
+        avatar: response.account.avatar,
+        email: response.account.email,
       })
 
       // 使用获取到的 redirectTo

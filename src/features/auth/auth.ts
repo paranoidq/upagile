@@ -1,8 +1,7 @@
 import { useAuthStore } from '@/stores/authStore'
 
 export const handleLogout = () => {
-  const { auth } = useAuthStore.getState()
-  auth.setAccessToken(null)
-  auth.setUser(null)
+  const { reset } = useAuthStore.getState().auth
+  reset()
   window.location.href = '/sign-in'
 }
