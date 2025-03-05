@@ -42,3 +42,24 @@ Follow these rules when you write code:
 - Use consts instead of functions, for example, “const toggle = () =>”. Also, define a type if possible.
 - Use type instead of interface in TypeScript.
 - Use zod for validation and type declaration as you can.
+- Always use tansTackQuery and hooks to wrap axios invoke. DO NOT use axios directly
+
+e.g.
+
+```js
+const listMyTeams = async (): Promise<TeamType[]> => {
+  const response = await http.post('/teams/my')
+  if (!response) {
+    return []
+  }
+
+  return z.array(teamSchema).parse(response)
+}
+
+export const useListMyTeams = () => {
+  return useQuery({
+    queryKey: ['teams'],
+    queryFn: listMyTeams,
+  })
+}
+```

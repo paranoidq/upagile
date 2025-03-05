@@ -13,7 +13,6 @@ import {
   IconLock,
   IconLockAccess,
   IconMessages,
-  IconNavigationBolt,
   IconNotification,
   IconPackages,
   IconPalette,
@@ -25,51 +24,11 @@ import {
   IconUserOff,
   IconUsers,
 } from '@tabler/icons-react'
-import { AudioWaveform, GalleryVerticalEnd } from 'lucide-react'
-import { useAuthStore } from '@/stores/authStore'
 import { type SidebarData } from '../types'
 
 // 创建一个函数来生成侧边栏数据
 export const getSidebarData = (): SidebarData => {
-  // 从认证存储中获取用户信息
-  const { user } = useAuthStore.getState().auth
-
-  // 如果 user 为空，尝试从 localStorage 获取
-  let userData = user
-  if (!userData) {
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      try {
-        userData = JSON.parse(storedUser)
-      } catch (e) {
-        console.error('无法解析存储的用户数据', e)
-      }
-    }
-  }
-
   return {
-    user: {
-      name: userData?.name || 'Guest',
-      email: userData?.email || '',
-      avatar: '/avatars/shadcn.jpg',
-    },
-    teams: [
-      {
-        name: 'The Agile',
-        logo: IconNavigationBolt,
-        plan: '',
-      },
-      {
-        name: 'Acme Inc',
-        logo: GalleryVerticalEnd,
-        plan: 'Enterprise',
-      },
-      {
-        name: 'Acme Corp.',
-        logo: AudioWaveform,
-        plan: 'Startup',
-      },
-    ],
     navGroups: [
       {
         title: 'General',
