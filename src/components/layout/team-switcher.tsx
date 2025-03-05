@@ -1,5 +1,6 @@
-import { IconNavigationBolt } from '@tabler/icons-react'
+import { IconCrown, IconNavigationBolt } from '@tabler/icons-react'
 import { ChevronsUpDown, Plus } from 'lucide-react'
+import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import {
   DropdownMenu,
@@ -7,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
@@ -15,6 +15,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/c
 export function TeamSwitcher() {
   const { isMobile } = useSidebar()
   const { teams, currentTeam } = useTeamStore()
+  const { user } = useAuthStore().auth
 
   const handleTeamChange = (teamId: string) => {
     const activeTeam = teams.find((team) => team.id === teamId)
@@ -49,13 +50,15 @@ export function TeamSwitcher() {
           >
             <DropdownMenuLabel className='text-xs text-muted-foreground'>Teams</DropdownMenuLabel>
             {teams &&
-              teams.map((team, index) => (
+              teams.map((team) => (
                 <DropdownMenuItem key={team.name} onClick={() => handleTeamChange(team.id)} className='gap-2 p-2'>
                   <div className='flex size-6 items-center justify-center rounded-sm border'>
                     <IconNavigationBolt className='size-4 shrink-0' />
                   </div>
                   {team.name}
-                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                  {team.owner.username === user?.username && (
+                    <IconCrown className='ml-auto size-4 shrink-0' fill='#FFD700' stroke='#FFD700' strokeWidth={1.5} />
+                  )}
                 </DropdownMenuItem>
               ))}
             <DropdownMenuSeparator />
