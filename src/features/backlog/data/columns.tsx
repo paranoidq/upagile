@@ -1,10 +1,9 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { labels, priorities, statuses } from '@/consts/enums'
-import { Badge } from '@/components/ui/badge'
+import { priorities } from '@/consts/enums'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/view-table/components/data-table-column-header'
 import { DataTableRowActions } from '../../../components/view-table/components/data-table-row-actions'
-import { BacklogType } from '../types'
+import { BacklogType, backlogTypes } from '../types'
 
 export const columns: ColumnDef<BacklogType>[] = [
   {
@@ -27,43 +26,14 @@ export const columns: ColumnDef<BacklogType>[] = [
     ),
   },
   {
-    accessorKey: 'id',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Backlog' />,
-    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('id')}</div>,
-  },
-  {
-    accessorKey: 'title',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Title' />,
+    accessorKey: 'name',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Name' />,
     cell: ({ row }) => {
-      const label = labels.find((label) => label.value === row.original.label)
-
       return (
         <div className='flex space-x-2'>
-          {label && <Badge variant='outline'>{label.label}</Badge>}
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>{row.getValue('title')}</span>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>{row.getValue('name')}</span>
         </div>
       )
-    },
-  },
-  {
-    accessorKey: 'status',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Status' />,
-    cell: ({ row }) => {
-      const status = statuses.find((status) => status.value === row.getValue('status'))
-
-      if (!status) {
-        return null
-      }
-
-      return (
-        <div className='flex w-[100px] items-center'>
-          {status.icon && <status.icon className='mr-2 h-4 w-4 text-muted-foreground' />}
-          <span>{status.label}</span>
-        </div>
-      )
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
     },
   },
   {
@@ -86,6 +56,25 @@ export const columns: ColumnDef<BacklogType>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
+  },
+  {
+    accessorKey: 'backlogType',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Backlog Type' />,
+    cell: ({ row }) => (
+      <div className='w-[80px]'>
+        {backlogTypes.find((backlogType) => backlogType.value === row.getValue('backlogType'))?.label}
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'dueTime',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Due Time' />,
+    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('dueTime')}</div>,
+  },
+  {
+    accessorKey: 'estimatedTime',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Estimated Time' />,
+    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('estimatedTime')}</div>,
   },
   {
     id: 'actions',

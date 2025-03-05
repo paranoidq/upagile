@@ -4,8 +4,8 @@ import { http } from '@/lib/axios'
 import { backlogSchema, BacklogType } from '../types'
 
 // 获取backlogs
-const getBacklogs = async (): Promise<BacklogType[]> => {
-  const response = await http.get('/backlogs')
+const listBacklogs = async (): Promise<BacklogType[]> => {
+  const response = await http.post('/backlogs')
   if (!response) {
     return []
   }
@@ -31,7 +31,7 @@ export const updateBacklog = async (backlog: BacklogType): Promise<void> => {
 export const useBacklogs = () => {
   return useQuery({
     queryKey: ['backlogs'],
-    queryFn: getBacklogs,
+    queryFn: listBacklogs,
   })
 }
 

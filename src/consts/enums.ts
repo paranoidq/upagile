@@ -1,4 +1,6 @@
 import {
+  IconAlertCircle,
+  IconAlertHexagon,
   IconArrowDown,
   IconArrowRight,
   IconArrowUp,
@@ -55,17 +57,27 @@ export const statuses = [
 export const priorities = [
   {
     label: 'Low',
-    value: 'low',
+    value: 'LOW',
     icon: IconArrowDown,
   },
   {
     label: 'Medium',
-    value: 'medium',
+    value: 'MEDIUM',
     icon: IconArrowRight,
   },
   {
     label: 'High',
-    value: 'high',
+    value: 'HIGH',
     icon: IconArrowUp,
+  },
+  {
+    label: 'Critical',
+    value: 'CRITICAL',
+    icon: IconAlertHexagon,
+  },
+  {
+    label: 'Blocker',
+    value: 'BLOCKER',
+    icon: IconAlertCircle,
   },
 ]

@@ -8,11 +8,13 @@ import { ViewTablePrimaryButtons } from '@/components/view-table/components/view
 import { ViewTable } from '@/components/view-table/view-table'
 import ViewTableProvider from '@/components/view-table/view-table-context'
 import { BacklogDialogs } from './components/backlog-dialogs'
-import { backlogs } from './data/backlogs'
 import { columns } from './data/columns'
+import { useBacklogs } from './services/backlog-services'
 import { BacklogType } from './types'
 
 const Backlog: FC = () => {
+  const { data: backlogs } = useBacklogs()
+
   return (
     <>
       {/* common header */}
@@ -36,7 +38,7 @@ const Backlog: FC = () => {
           </div>
 
           {/* view table*/}
-          <ViewTable data={backlogs} columns={columns} searchColumn='title' />
+          <ViewTable data={backlogs ?? []} columns={columns} searchColumn='name' />
 
           {/* customized dialogs */}
           <BacklogDialogs />

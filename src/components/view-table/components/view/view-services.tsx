@@ -2,8 +2,8 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '@/lib/axios'
 import { QueryKeys } from '@/utils/query-keys'
-import { views } from '@/components/view-table/components/view/data.tsx'
 import { viewSchema, ViewType } from '@/components/view-table/types.ts'
+import { views } from './data'
 
 const fetchViews = async (): Promise<ViewType[]> => {
   // const response = await http.get('/views')
