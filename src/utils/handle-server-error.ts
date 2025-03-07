@@ -6,19 +6,18 @@ export function handleServerError(error: unknown) {
   console.log(error)
 
   let errMsg = 'Something went wrong!'
+  let reason = ''
 
-  if (
-    error &&
-    typeof error === 'object' &&
-    'status' in error &&
-    Number(error.status) === 204
-  ) {
+  if (error && typeof error === 'object' && 'status' in error && Number(error.status) === 204) {
     errMsg = 'Content not found.'
   }
 
   if (error instanceof AxiosError) {
     errMsg = error.response?.data.title
+  } else {
+    errMsg = error.msg
+    reason = error.reason
   }
 
-  toast({ variant: 'destructive', title: errMsg })
+  toast({ variant: 'destructive', title: errMsg, description: reason })
 }

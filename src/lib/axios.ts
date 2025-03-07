@@ -7,6 +7,7 @@ interface BaseResponse<T = unknown> {
   code: string
   data: T
   message: string
+  reason: string
 }
 
 // 定义请求配置的扩展接口
@@ -47,12 +48,12 @@ http.interceptors.request.use(
 // 响应拦截器
 http.interceptors.response.use(
   <T>(response: AxiosResponse<BaseResponse<T>>) => {
-    const { code, data, message } = response.data
+    const { code, data, message, reason } = response.data
 
     if (code === '0000000') {
       return data
     } else {
-      throw new Error(message)
+      return Promise.reject(response.data)
     }
   },
   (error) => {
