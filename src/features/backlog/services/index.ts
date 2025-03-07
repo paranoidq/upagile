@@ -1,11 +1,16 @@
 import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTeamStore } from '@/stores/teamStore'
 import { http } from '@/lib/axios'
 import { backlogSchema, BacklogType } from '../types'
 
 // 获取backlogs
-const listBacklogs = async (): Promise<BacklogType[]> => {
-  const response = await http.post('/backlogs')
+const listBacklogs = async (teamId: string): Promise<BacklogType[]> => {
+  if (!teamId) {
+    return []
+  }
+
+  const response = await http.post('/backlogs', { teamId })
   if (!response) {
     return []
   }
@@ -29,9 +34,12 @@ export const updateBacklog = async (backlog: BacklogType): Promise<void> => {
 }
 
 export const useBacklogs = () => {
+  const currentTeam = useTeamStore().currentTeam
+
   return useQuery({
-    queryKey: ['backlogs'],
-    queryFn: listBacklogs,
+    queryKey: ['backlogs', currentTeam?.id],
+    queryFn: () => listBacklogs(currentTeam?.id || ''),
+    enabled: !!currentTeam?.id,
   })
 }
 

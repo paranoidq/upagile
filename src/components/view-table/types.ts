@@ -80,6 +80,8 @@ export interface ViewTableProps<TData extends BaseData> {
     group?: boolean
     columnVisibility?: boolean
   }
+  // 是否加载中
+  isLoading?: boolean
 }
 
 export type GroupData<TData> = {

@@ -9,11 +9,11 @@ import { ViewTable } from '@/components/view-table/view-table'
 import ViewTableProvider from '@/components/view-table/view-table-context'
 import { BacklogDialogs } from './components/backlog-dialogs'
 import { columns } from './data/columns'
-import { useBacklogs } from './services/backlog-services'
+import { useBacklogs } from './services'
 import { BacklogType } from './types'
 
 const Backlog: FC = () => {
-  const { data: backlogs } = useBacklogs()
+  const { data: backlogs, isLoading } = useBacklogs()
 
   return (
     <>
@@ -38,7 +38,7 @@ const Backlog: FC = () => {
           </div>
 
           {/* view table*/}
-          <ViewTable data={backlogs ?? []} columns={columns} searchColumn='name' />
+          <ViewTable data={backlogs ?? []} columns={columns} searchColumn='name' isLoading={isLoading} />
 
           {/* customized dialogs */}
           <BacklogDialogs />

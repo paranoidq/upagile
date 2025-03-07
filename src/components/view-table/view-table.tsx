@@ -11,7 +11,7 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import { IconArrowLeft, IconCopy, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'
+import { IconArrowLeft, IconCopy, IconEdit, IconLoader, IconPlus, IconTrash } from '@tabler/icons-react'
 import { Dropdown } from 'antd'
 import { produce } from 'immer'
 import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react'
@@ -37,7 +37,12 @@ import { ViewDialog } from './components/view/view-dialog.tsx'
 import { useDeleteView, useViews } from './components/view/view-services.tsx'
 import { BaseData, GroupData, ViewTableProps } from './types'
 
-export function ViewTable<TData extends BaseData>({ data, columns, searchColumn }: ViewTableProps<TData>) {
+export function ViewTable<TData extends BaseData>({
+  data,
+  columns,
+  searchColumn,
+  isLoading: isDataLoading,
+}: ViewTableProps<TData>) {
   /*
    * handle views
    */
@@ -250,7 +255,15 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
                       onPageSizeChange={setPageSize}
                     />
                     {/* grouped tables */}
-                    {processedData && processedData.length > 0 ? (
+                    {isDataLoading && (
+                      <div className='flex items-center justify-center h-full'>
+                        <span className='text-muted-foreground'>
+                          <IconLoader className='w-10 h-10  animate-spin' />
+                        </span>
+                      </div>
+                    )}
+
+                    {!isDataLoading && processedData && processedData.length > 0 && (
                       <div>
                         {processedData.map((group) => {
                           return (
@@ -280,7 +293,9 @@ export function ViewTable<TData extends BaseData>({ data, columns, searchColumn 
                           )
                         })}
                       </div>
-                    ) : (
+                    )}
+
+                    {!isDataLoading && (!processedData || processedData.length === 0) && (
                       <div className='flex items-center justify-center h-full'>
                         <span className='text-muted-foreground'>暂无数据</span>
                       </div>
