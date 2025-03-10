@@ -1,4 +1,5 @@
 import { type FC } from 'react'
+import { toast } from 'sonner'
 import { Header } from '@/components/layout/header.tsx'
 import { Main } from '@/components/layout/main.tsx'
 import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
@@ -20,6 +21,8 @@ const Backlog: FC = () => {
       {/* common header */}
       <Header fixed>
         <Search />
+
+        <button onClick={() => toast.success('My first toast')}>Give me a toast</button>
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <ProfileDropdown />
