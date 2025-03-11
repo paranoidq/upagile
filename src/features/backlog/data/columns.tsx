@@ -3,9 +3,9 @@ import { priorities } from '@/consts/enums'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/view-table/components/data-table-column-header'
 import { DataTableRowActions } from '../../../components/view-table/components/data-table-row-actions'
-import { BacklogType, backlogTypes } from '../types'
+import { Backlog, backlogTypes } from '../types'
 
-export const columns: ColumnDef<BacklogType>[] = [
+export const columns: ColumnDef<Backlog>[] = [
   {
     id: 'select',
     header: ({ table }) => (

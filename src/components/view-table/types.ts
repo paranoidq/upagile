@@ -51,7 +51,7 @@ export const viewConditionsSchema = z.object({
   groups: z.array(groupConditionSchema).optional(),
 })
 
-export const viewSchema = z.object({
+export const ViewSchema = z.object({
   id: z.number(),
   name: z.string(),
   type: z.string().optional(),
@@ -63,7 +63,7 @@ export type FilterCondition = z.infer<typeof filterConditionSchema>
 export type SortCondition = z.infer<typeof sortConditionSchema>
 export type GroupCondition = z.infer<typeof groupConditionSchema>
 export type ViewConditions = z.infer<typeof viewConditionsSchema>
-export type ViewType = z.infer<typeof viewSchema>
+export type View = z.infer<typeof ViewSchema>
 
 // 组件Props类型
 export interface ViewTableProps<TData extends BaseData> {

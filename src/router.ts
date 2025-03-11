@@ -1,5 +1,5 @@
 import { createRouter } from '@tanstack/react-router'
-import Backlog from '@/features/backlog'
+import BacklogTable from '@/features/backlog'
 import Issue from '@/features/issue'
 import Project from '@/features/project'
 import Requirement from '@/features/requirement'
@@ -11,7 +11,7 @@ const router = createRouter({
   routes: [
     {
       path: '/backlog',
-      component: Backlog,
+      component: BacklogTable,
     },
     {
       path: '/dashboard',

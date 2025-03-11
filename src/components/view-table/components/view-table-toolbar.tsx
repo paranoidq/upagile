@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ColumnVisibility } from '@/components/view-table/components/toolbar/column-visibility'
-import { ViewType } from '@/components/view-table/types.ts'
+import { View } from '@/components/view-table/types.ts'
 import { FilterToolbar } from './toolbar/filter-toolbar'
 import { GroupToolbar } from './toolbar/group-toolbar'
 import { SortToolbar } from './toolbar/sort-toolbar'
@@ -14,7 +14,7 @@ import { SortToolbar } from './toolbar/sort-toolbar'
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
   searchColumn?: string
-  currentView?: ViewType
+  currentView?: View
   onCollapseAll?: () => void
   onExpandAll?: () => void
   hasGroups?: boolean

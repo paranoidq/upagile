@@ -1,54 +1,93 @@
-import { type FC } from 'react'
+import React, { type FC } from 'react'
+import { priorities } from '@/consts/enums'
 import { toast } from 'sonner'
+import { DataTable } from '@/components/advance-table/components/data-table'
+import { DataTableSkeleton } from '@/components/advance-table/components/data-table-skeleton'
+import { useDataTable } from '@/components/advance-table/hooks/use-data-table'
+import { TableInstanceProvider } from '@/components/advance-table/table-instance-provider'
+import { DataTableFilterField } from '@/components/advance-table/types'
 import { Header } from '@/components/layout/header.tsx'
 import { Main } from '@/components/layout/main.tsx'
 import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
-import { Search } from '@/components/search.tsx'
 import { ThemeSwitch } from '@/components/theme-switch.tsx'
-import { ViewTablePrimaryButtons } from '@/components/view-table/components/view-table-primary-buttons'
-import { ViewTable } from '@/components/view-table/view-table'
-import ViewTableProvider from '@/components/view-table/view-table-context'
-import { BacklogDialogs } from './components/backlog-dialogs'
-import { columns } from './data/columns'
+import { useViews } from '../tasks/services/view-services'
+import { BacklogTableFloatingBar } from './components/backlog-table-floating-bar'
 import { useBacklogs } from './services'
-import { BacklogType } from './types'
+import { Backlog } from './types'
 
-const Backlog: FC = () => {
-  const { data: backlogs, isLoading } = useBacklogs()
+const BacklogPage: FC = () => {
+  const { data: views } = useViews()
+  const { data: backlogs, isPending, isSuccess, isError } = useBacklogs()
+
+  if (isError) {
+    toast.error('Failed to fetch backlogs')
+  }
 
   return (
     <>
       {/* common header */}
       <Header fixed>
-        <Search />
+        <div className='flex items-center space-x-4'>
+          <span className='text-lg font-bold'>Backlogs</span>
+        </div>
 
-        <button onClick={() => toast.success('My first toast')}>Give me a toast</button>
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <ProfileDropdown />
         </div>
       </Header>
-      <Main>
-        <ViewTableProvider<BacklogType>>
-          {/* title and button */}
-          <div className='mb-2 flex items-center justify-between space-y-2 flex-wrap gap-x-4'>
-            <div>
-              <h2 className='text-2xl font-bold tracking-tight'>Backlogs</h2>
-              <p className='text-muted-foreground'>遇事未决，先入Backlog吧~ 🤔</p>
-            </div>
-
-            <ViewTablePrimaryButtons />
-          </div>
-
-          {/* view table*/}
-          <ViewTable data={backlogs ?? []} columns={columns} searchColumn='name' isLoading={isLoading} />
-
-          {/* customized dialogs */}
-          <BacklogDialogs />
-        </ViewTableProvider>
-      </Main>
+      <Main>{isSuccess && <BacklogTable />}</Main>
     </>
   )
 }
 
-export default Backlog
+const BacklogTable = () => {
+  const { data: backlogs, isPending } = useBacklogs()
+  const { data: views } = useViews()
+
+  const filterFields: DataTableFilterField<Backlog>[] = [
+    {
+      label: 'Title',
+      value: 'title',
+      placeholder: 'Filter titles...',
+    },
+    {
+      label: 'Priority',
+      value: 'priority',
+      options: priorities.map((priority) => ({
+        label: priority.label,
+        value: priority.value,
+        icon: React.createElement(priority.icon),
+        withCount: true,
+      })),
+    },
+  ]
+
+  const { table } = useDataTable({
+    data: backlogs ?? [],
+    columns: [],
+    pageCount: 10,
+    // optional props
+    filterFields,
+    defaultPerPage: 10,
+    defaultSort: 'modifiedTime.desc',
+  })
+
+  return (
+    <>
+      {isPending && (
+        <DataTableSkeleton columnCount={5} cellWidths={['10rem', '40rem', '12rem', '12rem', '8rem']} shrinkZero />
+      )}
+
+      <TableInstanceProvider table={table}>
+        <DataTable table={table} floatingBar={<BacklogTableFloatingBar table={table} />}>
+          {/* <DataTableAdvancedToolbar filterFields={filterFields} views={views}>
+            <BacklogToolbarActions table={table} />
+          </DataTableAdvancedToolbar> */}
+        </DataTable>
+      </TableInstanceProvider>
+    </>
+  )
+}
+
+export default BacklogPage

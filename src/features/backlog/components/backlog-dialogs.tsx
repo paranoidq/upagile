@@ -1,12 +1,12 @@
 import { toast } from '@/hooks/use-toast'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { useTableData } from '@/components/view-table/view-table-context'
-import { BacklogType } from '../types'
+import { Backlog } from '../types'
 import { BacklogImportDialog } from './backlog-import-dialog'
 import { BacklogMutateDrawer } from './backlog-mutate-drawer'
 
 export function BacklogDialogs() {
-  const { open, setOpen, currentRow, setCurrentRow } = useTableData<BacklogType>()
+  const { open, setOpen, currentRow, setCurrentRow } = useTableData<Backlog>()
 
   return (
     <>

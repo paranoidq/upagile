@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
-export const backlogSchema = z.object({
+export const BacklogSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  title: z.string(),
   description: z.string().optional(),
   backlogType: z.string().optional(),
   priority: z.string().optional(),
@@ -11,7 +11,7 @@ export const backlogSchema = z.object({
   createdTime: z.string().optional(),
   modifiedTime: z.string().optional(),
 })
-export type BacklogType = z.infer<typeof backlogSchema>
+export type Backlog = z.infer<typeof BacklogSchema>
 
 export const backlogTypes = [
   { label: '缺陷', value: 'BUG' },

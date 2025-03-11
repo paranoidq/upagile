@@ -1,10 +1,10 @@
 import { XIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { FilterCondition, GroupCondition, SortCondition, ViewType } from '../types'
+import { FilterCondition, GroupCondition, SortCondition, View } from '../types'
 
 interface ConditionTagsProps {
-  currentView?: ViewType
-  onUpdate?: (view: ViewType) => Promise<void>
+  currentView?: View
+  onUpdate?: (view: View) => Promise<void>
 }
 
 export function ConditionTags({ currentView, onUpdate }: ConditionTagsProps) {

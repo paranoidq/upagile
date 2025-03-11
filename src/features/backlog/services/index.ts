@@ -1,21 +1,17 @@
 import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useTeamStore } from '@/stores/teamStore'
+import { useAuthStore } from '@/stores/authStore'
 import { http } from '@/lib/axios'
-import { backlogSchema, BacklogType } from '../types'
+import { Backlog, BacklogSchema } from '../types'
 
 // 获取backlogs
-const listBacklogs = async (teamId: string): Promise<BacklogType[]> => {
-  if (!teamId) {
-    return []
-  }
-
-  const response = await http.post('/backlogs', { teamId })
+const listBacklogs = async (): Promise<Backlog[]> => {
+  const response = await http.post('/backlogs')
   if (!response) {
     return []
   }
 
-  return z.array(backlogSchema).parse(response)
+  return z.array(BacklogSchema).parse(response)
 }
 
 // 删除backlog
@@ -24,22 +20,20 @@ export const deleteBacklog = async (id: number): Promise<void> => {
 }
 
 // 新增backlog
-export const createBacklog = async (backlog: Omit<BacklogType, 'id'>): Promise<void> => {
+export const createBacklog = async (backlog: Omit<Backlog, 'id'>): Promise<void> => {
   await http.post('backlogs/create', backlog)
 }
 
 // 修改backlog
-export const updateBacklog = async (backlog: BacklogType): Promise<void> => {
+export const updateBacklog = async (backlog: Backlog): Promise<void> => {
   await http.post('backlogs/update', backlog)
 }
 
 export const useBacklogs = () => {
-  const currentTeam = useTeamStore().currentTeam
-
   return useQuery({
-    queryKey: ['backlogs', currentTeam?.id],
-    queryFn: () => listBacklogs(currentTeam?.id || ''),
-    enabled: !!currentTeam?.id,
+    queryKey: ['backlogs'],
+    queryFn: () => listBacklogs(),
+    enabled: useAuthStore.getState().auth.user !== null,
   })
 }
 

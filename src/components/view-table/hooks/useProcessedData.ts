@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { FilterCondition, GroupData, SortCondition, ViewType } from '../types'
+import type { FilterCondition, GroupData, SortCondition, View } from '../types'
 
 // 处理筛选条件
 const filterData = <T>(data: T[], filters: FilterCondition[] | undefined) => {
@@ -52,7 +52,7 @@ const sortData = <T>(data: T[], sorts: SortCondition[] | undefined) => {
   })
 }
 
-export const useProcessedData = <T>(rawData: T[], currentView: ViewType | undefined): GroupData<T>[] => {
+export const useProcessedData = <T>(rawData: T[], currentView: View | undefined): GroupData<T>[] => {
   return useMemo(() => {
     if (!rawData?.length || !currentView?.conditions) {
       return [{ key: 'All', data: rawData }]

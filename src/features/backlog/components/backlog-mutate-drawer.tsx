@@ -16,19 +16,19 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { backlogSchema, BacklogType, backlogTypes } from '../types'
+import { Backlog, BacklogSchema, backlogTypes } from '../types'
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  currentRow?: BacklogType
+  currentRow?: Backlog
 }
 
 export function BacklogMutateDrawer({ open, onOpenChange, currentRow }: Props) {
   const isUpdate = !!currentRow
 
-  const form = useForm<BacklogType>({
-    resolver: zodResolver(backlogSchema),
+  const form = useForm<Backlog>({
+    resolver: zodResolver(BacklogSchema),
     defaultValues: currentRow ?? {
       name: '',
       description: '',
@@ -39,7 +39,7 @@ export function BacklogMutateDrawer({ open, onOpenChange, currentRow }: Props) {
     },
   })
 
-  const onSubmit = (data: BacklogType) => {
+  const onSubmit = (data: Backlog) => {
     // do something with the form data
     onOpenChange(false)
     form.reset()

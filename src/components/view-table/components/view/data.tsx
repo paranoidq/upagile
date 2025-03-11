@@ -1,6 +1,6 @@
-import { ViewType } from '@/components/view-table/types.ts'
+import { View } from '@/components/view-table/types.ts'
 
-export const views: ViewType[] = [
+export const views: View[] = [
   {
     id: 1,
     name: '这是一个很长的文本内容，当超过最大宽度时会显示省略号',
