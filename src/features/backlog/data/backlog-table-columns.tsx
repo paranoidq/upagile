@@ -76,19 +76,19 @@ export function getColumns(): ColumnDef<Backlog>[] {
     {
       accessorKey: 'backlogType',
       header: ({ column }) => <DataTableColumnHeader column={column} title='事项类型' />,
-      cell: ({ cell }) => (
-        <div className='w-[80px]'>
-          <Badge
-            variant='outline'
-            className={cn(
-              'font-semibold',
-              backlogTypes.find((backlogType) => backlogType.value === cell.getValue())?.color,
-            )}
-          >
-            {backlogTypes.find((backlogType) => backlogType.value === cell.getValue())?.label}
-          </Badge>
-        </div>
-      ),
+      cell: ({ cell }) => {
+        const backlogType = backlogTypes.find((backlogType) => backlogType.value === cell.getValue())
+
+        if (!backlogType) return null
+
+        return (
+          <div className='w-[80px]'>
+            <Badge variant='outline' className={cn('font-semibold', backlogType.color)}>
+              {backlogType.label}
+            </Badge>
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'dueTime',
