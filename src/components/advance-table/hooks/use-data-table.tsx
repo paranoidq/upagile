@@ -306,6 +306,8 @@ export function useDataTable<TData, TValue>({
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
+    enableSorting: false,
+    enableHiding: false,
   })
 
   return { table }

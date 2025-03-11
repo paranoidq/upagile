@@ -2,8 +2,9 @@ import React from 'react'
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { type ColumnDef } from '@tanstack/react-table'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
-import { priorities } from '@/consts/enums'
-import { formatDate } from '@/lib/utils'
+import { PRIORITIES } from '@/consts/enums'
+import { cn, formatDate } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -16,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/view-table/components/data-table-column-header'
 import { BacklogDeleteDialog } from '../components/backlog-delete-dialog'
-import { Backlog } from '../types'
+import { Backlog, backlogTypes } from '../types'
 
 export function getColumns(): ColumnDef<Backlog>[] {
   return [
@@ -38,19 +39,15 @@ export function getColumns(): ColumnDef<Backlog>[] {
           className='translate-y-0.5'
         />
       ),
-      enableSorting: false,
-      enableHiding: false,
     },
     {
       accessorKey: 'id',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Backlog' />,
-      cell: ({ row }) => <div className='w-10'>{row.getValue('id')}</div>,
-      enableSorting: false,
-      enableHiding: false,
+      header: ({ column }) => <DataTableColumnHeader column={column} title='编号' />,
+      cell: ({ cell }) => <div className='w-10'>{cell.getValue() as number}</div>,
     },
     {
       accessorKey: 'title',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Title' />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title='名称' />,
       cell: ({ row }) => {
         return (
           <div className='flex space-x-2'>
@@ -61,9 +58,9 @@ export function getColumns(): ColumnDef<Backlog>[] {
     },
     {
       accessorKey: 'priority',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Priority' />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title='预估优先级' />,
       cell: ({ row }) => {
-        const priority = priorities.find((priority) => priority.value === row.original.priority)
+        const priority = PRIORITIES.find((priority) => priority.value === row.original.priority)
 
         if (!priority) return null
 
@@ -71,7 +68,7 @@ export function getColumns(): ColumnDef<Backlog>[] {
 
         return (
           <div className='flex items-center'>
-            <Icon className='mr-2 size-4 text-muted-foreground' aria-hidden='true' />
+            <Icon className={cn('mr-2 size-4 text-muted-foreground', priority.color)} aria-hidden='true' />
             <span className='capitalize'>{priority.label}</span>
           </div>
         )
@@ -81,9 +78,37 @@ export function getColumns(): ColumnDef<Backlog>[] {
       },
     },
     {
+      accessorKey: 'backlogType',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='事项类型' />,
+      cell: ({ cell }) => (
+        <div className='w-[80px]'>
+          <Badge
+            variant='outline'
+            className={cn(backlogTypes.find((backlogType) => backlogType.value === cell.getValue())?.color)}
+          >
+            {backlogTypes.find((backlogType) => backlogType.value === cell.getValue())?.label}
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'dueTime',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='截止时间' />,
+      cell: ({ cell }) => <div className='w-[100px]'>{formatDate(cell.getValue() as Date)}</div>,
+    },
+    {
+      accessorKey: 'estimatedTime',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='预估工作量/小时' />,
+      cell: ({ row }) => (
+        <div className='w-[10px]'>
+          {(row.getValue('estimatedTime') as number) < 0 ? '-' : row.getValue('estimatedTime')}
+        </div>
+      ),
+    },
+    {
       accessorKey: 'createdTime',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Created At' />,
-      cell: ({ cell }) => formatDate(cell.getValue() as Date),
+      header: ({ column }) => <DataTableColumnHeader column={column} title='创建时间' />,
+      cell: ({ cell }) => <div className='w-[100px]'>{formatDate(cell.getValue() as Date)}</div>,
     },
     {
       id: 'actions',

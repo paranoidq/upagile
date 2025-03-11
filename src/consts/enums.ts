@@ -1,83 +1,34 @@
-import {
-  IconAlertCircle,
-  IconAlertHexagon,
-  IconArrowDown,
-  IconArrowRight,
-  IconArrowUp,
-  IconCircle,
-  IconCircleCheck,
-  IconCircleX,
-  IconExclamationCircle,
-  IconStopwatch,
-} from '@tabler/icons-react'
+import { IconFlag3, IconFlag3Filled } from '@tabler/icons-react'
 
-export const labels = [
-  {
-    value: 'bug',
-    label: 'Bug',
-  },
-  {
-    value: 'feature',
-    label: 'Feature',
-  },
-  {
-    value: 'documentation',
-    label: 'Documentation',
-  },
-]
-
-export const statuses = [
-  {
-    value: 'backlog',
-    label: 'Backlog',
-    icon: IconExclamationCircle,
-  },
-  {
-    value: 'todo',
-    label: 'Todo',
-    icon: IconCircle,
-  },
-  {
-    value: 'in progress',
-    label: 'In Progress',
-    icon: IconStopwatch,
-  },
-  {
-    value: 'done',
-    label: 'Done',
-    icon: IconCircleCheck,
-  },
-  {
-    value: 'canceled',
-    label: 'Canceled',
-    icon: IconCircleX,
-  },
-]
-
-export const priorities = [
+export const PRIORITIES = [
   {
     label: 'Low',
     value: 'LOW',
-    icon: IconArrowDown,
+    icon: IconFlag3,
+    color: 'text-green-500',
   },
   {
     label: 'Medium',
     value: 'MEDIUM',
-    icon: IconArrowRight,
+    icon: IconFlag3,
+    color: 'text-yellow-500',
   },
   {
     label: 'High',
     value: 'HIGH',
-    icon: IconArrowUp,
+    icon: IconFlag3,
+    color: 'text-red-500',
   },
   {
     label: 'Critical',
     value: 'CRITICAL',
-    icon: IconAlertHexagon,
+    icon: IconFlag3Filled,
+    color: 'text-red-500',
   },
   {
     label: 'Blocker',
     value: 'BLOCKER',
-    icon: IconAlertCircle,
+    icon: IconFlag3Filled,
+    color: 'text-red-800',
   },
 ]

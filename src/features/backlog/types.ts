@@ -14,12 +14,12 @@ export const BacklogSchema = z.object({
 export type Backlog = z.infer<typeof BacklogSchema>
 
 export const backlogTypes = [
-  { label: '缺陷', value: 'BUG' },
-  { label: '梳理', value: 'ARRANGE' },
-  { label: '功能点', value: 'FEATURE' },
-  { label: '版本', value: 'RELEASE' },
-  { label: '回顾', value: 'RETRO' },
-  { label: '优化', value: 'IMPROVEMENT' },
-  { label: '调研', value: 'RESEARCH' },
-  { label: '其他', value: 'OTHERS' },
+  { label: '缺陷', value: 'BUG', color: 'bg-red-300' },
+  { label: '梳理', value: 'ARRANGE', color: 'bg-blue-300' },
+  { label: '功能点', value: 'FEATURE', color: 'bg-green-300' },
+  { label: '版本', value: 'RELEASE', color: 'bg-yellow-300' },
+  { label: '回顾', value: 'RETRO', color: 'bg-purple-300' },
+  { label: '优化', value: 'IMPROVEMENT', color: 'bg-orange-300' },
+  { label: '调研', value: 'RESEARCH', color: 'bg-pink-300' },
+  { label: '其他', value: 'OTHERS', color: 'bg-gray-300' },
 ]

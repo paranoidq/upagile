@@ -1,5 +1,5 @@
 import React, { useMemo, type FC } from 'react'
-import { priorities } from '@/consts/enums'
+import { PRIORITIES } from '@/consts/enums'
 import { DataTable } from '@/components/advance-table/components/data-table'
 import { DataTableSkeleton } from '@/components/advance-table/components/data-table-skeleton'
 import { useDataTable } from '@/components/advance-table/hooks/use-data-table'
@@ -50,7 +50,7 @@ const BacklogTable = () => {
     {
       label: 'Priority',
       value: 'priority',
-      options: priorities.map((priority) => ({
+      options: PRIORITIES.map((priority) => ({
         label: priority.label,
         value: priority.value,
         icon: React.createElement(priority.icon),

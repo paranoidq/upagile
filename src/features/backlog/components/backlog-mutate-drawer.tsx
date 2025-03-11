@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { priorities } from '@/consts/enums'
+import { PRIORITIES } from '@/consts/enums'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -118,7 +118,7 @@ export function BacklogMutateDrawer({ open, onOpenChange, currentRow }: Props) {
                       defaultValue={field.value}
                       className='flex flex-col space-y-1'
                     >
-                      {priorities.map((priority) => (
+                      {PRIORITIES.map((priority) => (
                         <FormItem className='flex items-center space-x-3 space-y-0' key={priority.value}>
                           <FormControl>
                             <RadioGroupItem value={priority.value} />

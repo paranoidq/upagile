@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ArrowUpIcon, Cross2Icon, TrashIcon } from '@radix-ui/react-icons'
 import { SelectTrigger } from '@radix-ui/react-select'
 import { type Table } from '@tanstack/react-table'
-import { priorities } from '@/consts/enums'
+import { PRIORITIES } from '@/consts/enums'
 import { LoaderIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -100,7 +100,7 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
             </Tooltip>
             <SelectContent align='center'>
               <SelectGroup>
-                {priorities.map((priority) => (
+                {PRIORITIES.map((priority) => (
                   <SelectItem key={priority.value} value={priority.value} className='capitalize'>
                     {priority.label}
                   </SelectItem>
