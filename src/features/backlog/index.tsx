@@ -1,6 +1,5 @@
-import React, { type FC } from 'react'
+import React, { useMemo, type FC } from 'react'
 import { priorities } from '@/consts/enums'
-import { toast } from 'sonner'
 import { DataTable } from '@/components/advance-table/components/data-table'
 import { DataTableSkeleton } from '@/components/advance-table/components/data-table-skeleton'
 import { useDataTable } from '@/components/advance-table/hooks/use-data-table'
@@ -12,17 +11,11 @@ import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
 import { ThemeSwitch } from '@/components/theme-switch.tsx'
 import { useViews } from '../tasks/services/view-services'
 import { BacklogTableFloatingBar } from './components/backlog-table-floating-bar'
+import { getColumns } from './data/backlog-table-columns'
 import { useBacklogs } from './services'
 import { Backlog } from './types'
 
 const BacklogPage: FC = () => {
-  const { data: views } = useViews()
-  const { data: backlogs, isPending, isSuccess, isError } = useBacklogs()
-
-  if (isError) {
-    toast.error('Failed to fetch backlogs')
-  }
-
   return (
     <>
       {/* common header */}
@@ -36,7 +29,9 @@ const BacklogPage: FC = () => {
           <ProfileDropdown />
         </div>
       </Header>
-      <Main>{isSuccess && <BacklogTable />}</Main>
+      <Main>
+        <BacklogTable />
+      </Main>
     </>
   )
 }
@@ -44,6 +39,7 @@ const BacklogPage: FC = () => {
 const BacklogTable = () => {
   const { data: backlogs, isPending } = useBacklogs()
   const { data: views } = useViews()
+  const columns = useMemo(() => getColumns(), [])
 
   const filterFields: DataTableFilterField<Backlog>[] = [
     {
@@ -65,7 +61,7 @@ const BacklogTable = () => {
 
   const { table } = useDataTable({
     data: backlogs ?? [],
-    columns: [],
+    columns: columns,
     pageCount: 10,
     // optional props
     filterFields,

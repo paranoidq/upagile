@@ -1,5 +1,6 @@
 import axios, { AxiosHeaders, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import router from '@/router'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
 
 // 定义响应数据的基础接口
@@ -47,23 +48,29 @@ http.interceptors.request.use(
 
 // 响应拦截器
 http.interceptors.response.use(
+  // Any status code that lie within the range of 2xx cause this function to trigger
   <T>(response: AxiosResponse<BaseResponse<T>>) => {
     const { code, data, message, reason } = response.data
 
     if (code === '0000000') {
       return data
     } else {
-      return Promise.reject(response.data)
+      return Promise.reject({
+        code,
+        message,
+        reason,
+      })
     }
   },
+  // Any status codes that falls outside the range of 2xx cause this function to trigger
   (error) => {
-    // 统一错误处理
     if (!error.config?.skipErrorHandler) {
       if (error.response) {
         switch (error.response.status) {
           case 401:
           case 403:
             useAuthStore.getState().auth.reset()
+            toast.error('登录已过期，请重新登录')
             router.navigate({
               to: '/sign-in',
               search: { redirect: window.location.pathname },
@@ -82,6 +89,11 @@ http.interceptors.response.use(
         }
       }
     }
-    return Promise.reject(error)
+
+    return Promise.reject({
+      code: error.response?.status,
+      message: error.response?.data.message,
+      reason: error.response?.data.reason,
+    })
   },
 )

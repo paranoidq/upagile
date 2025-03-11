@@ -15,8 +15,8 @@ const listBacklogs = async (): Promise<Backlog[]> => {
 }
 
 // 删除backlog
-export const deleteBacklog = async (id: number): Promise<void> => {
-  await http.post('/backlogs/delete', { id })
+export const deleteBacklog = async ({ ids }: { ids: number[] }): Promise<void> => {
+  await http.post('/backlogs/delete', { ids })
 }
 
 // 新增backlog
@@ -27,6 +27,17 @@ export const createBacklog = async (backlog: Omit<Backlog, 'id'>): Promise<void>
 // 修改backlog
 export const updateBacklog = async (backlog: Backlog): Promise<void> => {
   await http.post('backlogs/update', backlog)
+}
+
+// 批量修改backlog
+export const updateBacklogs = async ({
+  ids,
+  priority,
+}: {
+  ids: number[]
+  priority: Backlog['priority']
+}): Promise<void> => {
+  await http.post('backlogs/update-batch', { ids, priority })
 }
 
 export const useBacklogs = () => {

@@ -20,13 +20,16 @@ interface DataTableProps<TData> extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function DataTable<TData>({ table, floatingBar = null, children, className, ...props }: DataTableProps<TData>) {
+  // 添加调试日志
+  console.log('Table rows:', table.getRowModel().rows?.length)
+  console.log('Table columns:', table.getAllColumns().length)
+
   return (
     <div className={cn('w-full space-y-2.5 overflow-auto', className)} {...props}>
       {/* toolbar */}
       {children}
 
       {/* table */}
-      <div> table data</div>
       <div className='mx-1 rounded-md border'>
         <Table>
           <TableHeader>
@@ -61,10 +64,10 @@ export function DataTable<TData>({ table, floatingBar = null, children, classNam
           </TableBody>
         </Table>
       </div>
-      {/* <div className='flex flex-col gap-2.5'>
-        <DataTablePagination />
+      <div className='flex flex-col gap-2.5'>
+        {/* <DataTablePagination /> */}
         {table.getFilteredSelectedRowModel().rows.length > 0 && floatingBar}
-      </div> */}
+      </div>
     </div>
   )
 }

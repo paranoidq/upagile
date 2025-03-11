@@ -1,12 +1,16 @@
 import * as React from 'react'
-import { ArrowUpIcon, CheckCircledIcon, Cross2Icon, DownloadIcon, TrashIcon } from '@radix-ui/react-icons'
+import { ArrowUpIcon, Cross2Icon, TrashIcon } from '@radix-ui/react-icons'
 import { SelectTrigger } from '@radix-ui/react-select'
 import { type Table } from '@tanstack/react-table'
+import { priorities } from '@/consts/enums'
+import { LoaderIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Kbd } from '@/components/kbd'
+import { deleteBacklog, updateBacklogs } from '../services'
 import { Backlog } from '../types'
 
 interface BacklogTableFloatingBarProps {
@@ -57,173 +61,89 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
               </TooltipContent>
             </Tooltip>
           </div>
-          <Separator orientation='vertical' className='hidden h-5 sm:block' />
-          <div className='flex items-center gap-1.5'>
-            <Select
-              onValueChange={(value: Task['status']) => {
-                setMethod('update-status')
+          <Select
+            onValueChange={(value: Backlog['priority']) => {
+              setMethod('update-priority')
 
-                startTransition(async () => {
-                  const { error } = await updateTasks({
-                    ids: rows.map((row) => row.original.id),
-                    status: value,
-                  })
-
-                  if (error) {
-                    toast.error(error)
-                    return
-                  }
-
-                  toast.success('Tasks updated')
+              startTransition(async () => {
+                await updateBacklogs({
+                  ids: rows.map((row) => Number(row.original.id)),
+                  priority: value,
+                }).catch((error) => {
+                  toast.error(error.message)
+                  return
                 })
-              }}
-            >
-              <Tooltip delayDuration={250}>
-                <SelectTrigger asChild>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant='secondary'
-                      size='icon'
-                      className='size-7 border data-[state=open]:bg-accent data-[state=open]:text-accent-foreground'
-                      disabled={isPending}
-                    >
-                      {isPending && method === 'update-status' ? (
-                        <LoaderIcon className='size-3.5 animate-spin' aria-hidden='true' />
-                      ) : (
-                        <CheckCircledIcon className='size-3.5' aria-hidden='true' />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                </SelectTrigger>
-                <TooltipContent className='border bg-accent font-semibold text-foreground dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40'>
-                  <p>Update status</p>
-                </TooltipContent>
-              </Tooltip>
-              <SelectContent align='center'>
-                <SelectGroup>
-                  {tasks.status.enumValues.map((status) => (
-                    <SelectItem key={status} value={status} className='capitalize'>
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Select
-              onValueChange={(value: Task['priority']) => {
-                setMethod('update-priority')
 
-                startTransition(async () => {
-                  const { error } = await updateTasks({
-                    ids: rows.map((row) => row.original.id),
-                    priority: value,
-                  })
-
-                  if (error) {
-                    toast.error(error)
-                    return
-                  }
-
-                  toast.success('Tasks updated')
-                })
-              }}
-            >
-              <Tooltip delayDuration={250}>
-                <SelectTrigger asChild>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant='secondary'
-                      size='icon'
-                      className='size-7 border data-[state=open]:bg-accent data-[state=open]:text-accent-foreground'
-                      disabled={isPending}
-                    >
-                      {isPending && method === 'update-priority' ? (
-                        <LoaderIcon className='size-3.5 animate-spin' aria-hidden='true' />
-                      ) : (
-                        <ArrowUpIcon className='size-3.5' aria-hidden='true' />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                </SelectTrigger>
-                <TooltipContent className='border bg-accent font-semibold text-foreground dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40'>
-                  <p>Update priority</p>
-                </TooltipContent>
-              </Tooltip>
-              <SelectContent align='center'>
-                <SelectGroup>
-                  {tasks.priority.enumValues.map((priority) => (
-                    <SelectItem key={priority} value={priority} className='capitalize'>
-                      {priority}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+                toast.success('Backlogs updated')
+              })
+            }}
+          >
             <Tooltip delayDuration={250}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant='secondary'
-                  size='icon'
-                  className='size-7 border'
-                  onClick={() => {
-                    setMethod('export')
-
-                    startTransition(() => {
-                      exportTableToCSV(table, {
-                        excludeColumns: ['select', 'actions'],
-                        onlySelected: true,
-                      })
-                    })
-                  }}
-                  disabled={isPending}
-                >
-                  {isPending && method === 'export' ? (
-                    <LoaderIcon className='size-3.5 animate-spin' aria-hidden='true' />
-                  ) : (
-                    <DownloadIcon className='size-3.5' aria-hidden='true' />
-                  )}
-                </Button>
-              </TooltipTrigger>
+              <SelectTrigger asChild>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant='secondary'
+                    size='icon'
+                    className='size-7 border data-[state=open]:bg-accent data-[state=open]:text-accent-foreground'
+                    disabled={isPending}
+                  >
+                    {isPending && method === 'update-priority' ? (
+                      <LoaderIcon className='size-3.5 animate-spin' aria-hidden='true' />
+                    ) : (
+                      <ArrowUpIcon className='size-3.5' aria-hidden='true' />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+              </SelectTrigger>
               <TooltipContent className='border bg-accent font-semibold text-foreground dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40'>
-                <p>Export tasks</p>
+                <p>Update priority</p>
               </TooltipContent>
             </Tooltip>
-            <Tooltip delayDuration={250}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant='secondary'
-                  size='icon'
-                  className='size-7 border'
-                  onClick={() => {
-                    setMethod('delete')
+            <SelectContent align='center'>
+              <SelectGroup>
+                {priorities.map((priority) => (
+                  <SelectItem key={priority.value} value={priority.value} className='capitalize'>
+                    {priority.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Tooltip delayDuration={250}>
+            <TooltipTrigger asChild>
+              <Button
+                variant='secondary'
+                size='icon'
+                className='size-7 border'
+                onClick={() => {
+                  setMethod('delete')
 
-                    startTransition(async () => {
-                      const { error } = await deleteTasks({
-                        ids: rows.map((row) => row.original.id),
+                  startTransition(async () => {
+                    await deleteBacklog({
+                      ids: rows.map((row) => Number(row.original.id)),
+                    }).catch((error) => {
+                      toast.error(error.message, {
+                        description: error.reason,
                       })
-
-                      if (error) {
-                        toast.error(error)
-                        return
-                      }
-
-                      table.toggleAllRowsSelected(false)
+                      return
                     })
-                  }}
-                  disabled={isPending}
-                >
-                  {isPending && method === 'delete' ? (
-                    <LoaderIcon className='size-3.5 animate-spin' aria-hidden='true' />
-                  ) : (
-                    <TrashIcon className='size-3.5' aria-hidden='true' />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className='border bg-accent font-semibold text-foreground dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40'>
-                <p>Delete tasks</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+
+                    table.toggleAllRowsSelected(false)
+                  })
+                }}
+                disabled={isPending}
+              >
+                {isPending && method === 'delete' ? (
+                  <LoaderIcon className='size-3.5 animate-spin' aria-hidden='true' />
+                ) : (
+                  <TrashIcon className='size-3.5' aria-hidden='true' />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className='border bg-accent font-semibold text-foreground dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40'>
+              <p>Delete tasks</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>
