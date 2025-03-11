@@ -64,18 +64,17 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
           <Select
             onValueChange={(value: Backlog['priority']) => {
               setMethod('update-priority')
-
-              startTransition(async () => {
-                await updateBacklogs({
+              toast.promise(
+                updateBacklogs({
                   ids: rows.map((row) => Number(row.original.id)),
                   priority: value,
-                }).catch((error) => {
-                  toast.error(error.message)
-                  return
-                })
-
-                toast.success('Backlogs updated')
-              })
+                }),
+                {
+                  loading: 'Updating backlogs...',
+                  success: 'Backlogs updated',
+                  error: 'Failed to update backlogs',
+                },
+              )
             }}
           >
             <Tooltip delayDuration={250}>

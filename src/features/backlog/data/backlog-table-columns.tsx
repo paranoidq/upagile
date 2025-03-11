@@ -1,6 +1,7 @@
 import React from 'react'
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { type ColumnDef } from '@tanstack/react-table'
+import { IconEdit, IconTrash } from '@tabler/icons-react'
 import { priorities } from '@/consts/enums'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -113,7 +114,10 @@ export function getColumns(): ColumnDef<Backlog>[] {
                 align='end'
                 className='w-40 overflow-visible dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40'
               >
-                <DropdownMenuItem onSelect={() => setShowUpdateTaskSheet(true)}>Edit</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setShowUpdateTaskSheet(true)}>
+                  <IconEdit />
+                  Edit
+                </DropdownMenuItem>
                 {/* <DropdownMenuSub>
                   <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
@@ -150,6 +154,7 @@ export function getColumns(): ColumnDef<Backlog>[] {
                 </DropdownMenuSub> */}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => setShowDeleteTaskDialog(true)}>
+                  <IconTrash />
                   Delete
                   <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
                 </DropdownMenuItem>
