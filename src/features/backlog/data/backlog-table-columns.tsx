@@ -43,17 +43,13 @@ export function getColumns(): ColumnDef<Backlog>[] {
     {
       accessorKey: 'id',
       header: ({ column }) => <DataTableColumnHeader column={column} title='编号' />,
-      cell: ({ cell }) => <div className='w-10'>{cell.getValue() as number}</div>,
+      cell: ({ cell }) => <div className='w-15'>{cell.getValue() as number}</div>,
     },
     {
       accessorKey: 'title',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='名称' />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title='事项名称' />,
       cell: ({ row }) => {
-        return (
-          <div className='flex space-x-2'>
-            <span className='max-w-[31.25rem] truncate font-medium'>{row.getValue('title')}</span>
-          </div>
-        )
+        return <span className='max-w-[31.25rem] truncate'>{row.getValue('title')}</span>
       },
     },
     {
@@ -84,7 +80,10 @@ export function getColumns(): ColumnDef<Backlog>[] {
         <div className='w-[80px]'>
           <Badge
             variant='outline'
-            className={cn(backlogTypes.find((backlogType) => backlogType.value === cell.getValue())?.color)}
+            className={cn(
+              'font-semibold',
+              backlogTypes.find((backlogType) => backlogType.value === cell.getValue())?.color,
+            )}
           >
             {backlogTypes.find((backlogType) => backlogType.value === cell.getValue())?.label}
           </Badge>
