@@ -11,19 +11,19 @@ export const PRIORITIES = [
     label: 'Medium',
     value: 'MEDIUM',
     icon: IconFlag3,
-    color: 'text-yellow-500',
+    color: 'text-blue-500',
   },
   {
     label: 'High',
     value: 'HIGH',
     icon: IconFlag3,
-    color: 'text-red-500',
+    color: 'text-orange-500',
   },
   {
     label: 'Critical',
     value: 'CRITICAL',
     icon: IconFlag3Filled,
-    color: 'text-red-500',
+    color: 'text-red-300',
   },
   {
     label: 'Blocker',
