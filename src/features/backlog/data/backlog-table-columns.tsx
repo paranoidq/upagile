@@ -42,8 +42,8 @@ export function getColumns(): ColumnDef<Backlog>[] {
     },
     {
       accessorKey: 'id',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='编号' />,
-      cell: ({ cell }) => <div className='w-15'>{cell.getValue() as number}</div>,
+      header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
+      cell: ({ cell }) => <div className='w-[10px]'>{cell.getValue() as number}</div>,
     },
     {
       accessorKey: 'title',
@@ -83,7 +83,7 @@ export function getColumns(): ColumnDef<Backlog>[] {
 
         return (
           <div className='w-[80px]'>
-            <Badge variant='outline' className={cn('font-semibold', backlogType.color)}>
+            <Badge variant='outline' className={cn('font-normal', backlogType.color)}>
               {backlogType.label}
             </Badge>
           </div>
@@ -97,10 +97,10 @@ export function getColumns(): ColumnDef<Backlog>[] {
     },
     {
       accessorKey: 'estimatedTime',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='预估工作量/小时' />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title='工作量' />,
       cell: ({ row }) => (
-        <div className='w-[10px]'>
-          {(row.getValue('estimatedTime') as number) < 0 ? '-' : row.getValue('estimatedTime')}
+        <div className='w-[50px]'>
+          {(row.getValue('estimatedTime') as number) < 0 ? '-' : row.getValue('estimatedTime') + 'h'}
         </div>
       ),
     },
