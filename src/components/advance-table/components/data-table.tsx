@@ -20,10 +20,6 @@ interface DataTableProps<TData> extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function DataTable<TData>({ table, floatingBar = null, children, className, ...props }: DataTableProps<TData>) {
-  // 添加调试日志
-  console.log('Table rows:', table.getRowModel().rows?.length)
-  console.log('Table columns:', table.getAllColumns().length)
-
   return (
     <div className={cn('w-full space-y-2.5 overflow-auto', className)} {...props}>
       {/* toolbar */}

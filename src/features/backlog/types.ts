@@ -23,3 +23,13 @@ export const backlogTypes = [
   { label: '调研', value: 'RESEARCH', color: 'bg-pink-300' },
   { label: '其他', value: 'OTHERS', color: 'bg-gray-300' },
 ]
+
+export const createBacklogSchema = z.object({
+  title: z.string().min(1, { message: '标题不能为空' }),
+  description: z.string().optional(),
+  backlogType: z.string().optional(),
+  priority: z.string().optional(),
+  dueTime: z.string().optional(),
+})
+
+export type CreateBacklogSchema = z.infer<typeof createBacklogSchema>

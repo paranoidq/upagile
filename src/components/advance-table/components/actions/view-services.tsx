@@ -1,23 +1,18 @@
-import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '@/lib/axios'
 import { QueryKeys } from '@/utils/query-keys'
-import { View, ViewSchema } from '@/components/view-table/types.ts'
+import { views } from '../../data/data'
+import { View } from '../views/types'
 
 const fetchViews = async (): Promise<View[]> => {
   // const response = await http.post('/views')
   // if (!response) {
-  return [
-    {
-      id: 1,
-      name: '默认视图',
-      type: 'task',
-      conditions: { filters: [], sorts: [], groups: [] },
-    },
-  ]
+  //   return views
   // }
 
-  return z.array(ViewSchema).parse(response)
+  // return z.array(viewSchema).parse(response)
+
+  return views
 }
 export const useViews = () => {
   return useQuery({

@@ -4,12 +4,12 @@ import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
-import { URLSearchParamsSchema } from '@/components/advance-table/types'
+import { SearchParamsSchema } from '@/components/advance-table/types'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
 
 export const Route = createFileRoute('/_authenticated')({
-  validateSearch: URLSearchParamsSchema,
+  validateSearch: SearchParamsSchema,
   beforeLoad: ({ location }) => {
     const { auth } = useAuthStore.getState()
     if (!auth.accessToken) {

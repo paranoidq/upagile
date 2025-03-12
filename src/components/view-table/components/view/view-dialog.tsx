@@ -93,7 +93,7 @@ export const ViewDialog = ({ open, id, name, type, onOpenChange }: Props) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} placeholder='请输入视图名称' />
+                    <Input {...field} placeholder='Name' />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

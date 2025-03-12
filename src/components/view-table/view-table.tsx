@@ -29,12 +29,12 @@ import {
 import { Button } from '@/components/ui/button.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import { useProcessedData } from '@/components/view-table/hooks/useProcessedData.ts'
+import { useDeleteView, useViews } from '../advance-table/components/actions/view-services.tsx'
 import { Badge } from '../ui/badge.tsx'
 import { Card, CardContent, CardHeader } from '../ui/card.tsx'
 import { DataTable } from './components/data-table.tsx'
 import { DataTableToolbar } from './components/view-table-toolbar.tsx'
 import { ViewDialog } from './components/view/view-dialog.tsx'
-import { useDeleteView, useViews } from './components/view/view-services.tsx'
 import { BaseData, GroupData, ViewTableProps } from './types'
 
 export function ViewTable<TData extends BaseData>({

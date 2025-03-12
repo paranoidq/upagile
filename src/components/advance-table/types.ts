@@ -1,8 +1,17 @@
 import { z } from 'zod'
 
-export interface SearchParams {
-  [key: string]: string | string[] | undefined
-}
+export const SearchParamsSchema = z.object({
+  page: z.coerce.number().default(1),
+  per_page: z.coerce.number().default(10),
+  sort: z.string().optional(),
+  title: z.string().optional(),
+  status: z.string().optional(),
+  priority: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  operator: z.enum(['and', 'or']).optional(),
+  viewId: z.number().optional(),
+})
 
 export interface Option {
   label: string
@@ -28,9 +37,4 @@ export interface DataTableFilterOption<TData> {
   isMulti?: boolean
 }
 
-export const URLSearchParamsSchema = z.object({
-  page: z.coerce.number().default(1),
-  per_page: z.coerce.number().optional(),
-})
-
-export type URLSearchParams = z.infer<typeof URLSearchParamsSchema>
+export type SearchParams = z.infer<typeof SearchParamsSchema>

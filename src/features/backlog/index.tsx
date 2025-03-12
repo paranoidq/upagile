@@ -1,6 +1,8 @@
 import React, { useMemo, type FC } from 'react'
 import { PRIORITIES } from '@/consts/enums'
+import { useViews } from '@/components/advance-table/components/actions/view-services'
 import { DataTable } from '@/components/advance-table/components/data-table'
+import { DataTableAdvancedToolbar } from '@/components/advance-table/components/data-table-advanced-toolbar'
 import { DataTableSkeleton } from '@/components/advance-table/components/data-table-skeleton'
 import { useDataTable } from '@/components/advance-table/hooks/use-data-table'
 import { TableInstanceProvider } from '@/components/advance-table/table-instance-provider'
@@ -9,11 +11,11 @@ import { Header } from '@/components/layout/header.tsx'
 import { Main } from '@/components/layout/main.tsx'
 import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
 import { ThemeSwitch } from '@/components/theme-switch.tsx'
-import { useViews } from '../tasks/services/view-services'
 import { BacklogTableFloatingBar } from './components/backlog-table-floating-bar'
+import { BacklogToolbarActions } from './components/backlog-toolbar-actions'
 import { getColumns } from './data/backlog-table-columns'
 import { useBacklogs } from './services'
-import { Backlog } from './types'
+import { Backlog, backlogTypes } from './types'
 
 const BacklogPage: FC = () => {
   return (
@@ -57,6 +59,30 @@ const BacklogTable = () => {
         withCount: true,
       })),
     },
+    {
+      label: 'Type',
+      value: 'backlogType',
+      options: backlogTypes.map((type) => ({
+        label: type.label,
+        value: type.value,
+        withCount: true,
+      })),
+    },
+    {
+      label: 'Deadline',
+      value: 'dueTime',
+      placeholder: 'Filter deadlines...',
+    },
+    {
+      label: 'Created Time',
+      value: 'createdTime',
+      placeholder: 'Filter created times...',
+    },
+    {
+      label: 'Estimated Time',
+      value: 'estimatedTime',
+      placeholder: 'Filter estimated times...',
+    },
   ]
 
   const { table } = useDataTable({
@@ -77,9 +103,9 @@ const BacklogTable = () => {
 
       <TableInstanceProvider table={table}>
         <DataTable table={table} floatingBar={<BacklogTableFloatingBar table={table} />}>
-          {/* <DataTableAdvancedToolbar filterFields={filterFields} views={views}>
+          <DataTableAdvancedToolbar filterFields={filterFields} views={views}>
             <BacklogToolbarActions table={table} />
-          </DataTableAdvancedToolbar> */}
+          </DataTableAdvancedToolbar>
         </DataTable>
       </TableInstanceProvider>
     </>
