@@ -17,6 +17,27 @@ interface DataTableSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   rowCount?: number
 
   /**
+   * The number of searchable columns in the table.
+   * @default 0
+   * @type number | undefined
+   */
+  searchableColumnCount?: number
+
+  /**
+   * The number of filterable columns in the table.
+   * @default 0
+   * @type number | undefined
+   */
+  filterableColumnCount?: number
+
+  /**
+   * Flag to show the table view options.
+   * @default undefined
+   * @type boolean | undefined
+   */
+  showViewOptions?: boolean
+
+  /**
    * The width of each cell in the table.
    * The length of the array should be equal to the columnCount.
    * Any valid CSS width value is accepted.
@@ -44,6 +65,9 @@ export function DataTableSkeleton(props: DataTableSkeletonProps) {
   const {
     columnCount,
     rowCount = 10,
+    searchableColumnCount = 0,
+    filterableColumnCount = 0,
+    showViewOptions = true,
     cellWidths = ['auto'],
     withPagination = true,
     shrinkZero = false,
@@ -53,12 +77,20 @@ export function DataTableSkeleton(props: DataTableSkeletonProps) {
 
   return (
     <div className={cn('w-full space-y-2.5 overflow-auto', className)} {...skeletonProps}>
-      <Skeleton className='ml-auto h-7 w-56 sm:w-60' />
-      <div className='flex w-full items-center justify-end space-x-2 overflow-auto p-1'>
-        <Skeleton className='h-7 w-[6.5rem]' />
-        <Skeleton className='h-7 w-[5.5rem]' />
-        <Skeleton className='h-7 w-20' />
-        <Skeleton className='hidden h-7 w-[6.25rem] lg:flex' />
+      <div className='flex w-full items-center justify-between space-x-2 overflow-auto p-1'>
+        <div className='flex flex-1 items-center space-x-2'>
+          {searchableColumnCount > 0
+            ? Array.from({ length: searchableColumnCount }).map((_, i) => (
+                <Skeleton key={i} className='h-7 w-40 lg:w-60' />
+              ))
+            : null}
+          {filterableColumnCount > 0
+            ? Array.from({ length: filterableColumnCount }).map((_, i) => (
+                <Skeleton key={i} className='h-7 w-[4.5rem] border-dashed' />
+              ))
+            : null}
+        </div>
+        {showViewOptions ? <Skeleton className='ml-auto hidden h-7 w-[4.5rem] lg:flex' /> : null}
       </div>
       <div className='rounded-md border'>
         <Table>
@@ -106,7 +138,7 @@ export function DataTableSkeleton(props: DataTableSkeletonProps) {
               <Skeleton className='h-7 w-24' />
               <Skeleton className='h-7 w-[4.5rem]' />
             </div>
-            <div className='flex items-center justify-center text-sm font-medium'>
+            <div className='flex items-center justify-center font-medium text-sm'>
               <Skeleton className='h-7 w-20' />
             </div>
             <div className='flex items-center space-x-2'>

@@ -1,15 +1,17 @@
+import { z } from 'zod'
 import Cookies from 'js-cookie'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
-import { SearchParamsSchema } from '@/components/advance-table/types'
-import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
 
+// search参数可以支持任何类型
+const searchParams = z.object
+
 export const Route = createFileRoute('/_authenticated')({
-  validateSearch: SearchParamsSchema,
+  validateSearch: searchParams,
   beforeLoad: ({ location }) => {
     const { auth } = useAuthStore.getState()
     if (!auth.accessToken) {

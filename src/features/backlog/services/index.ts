@@ -5,7 +5,7 @@ import { http } from '@/lib/axios'
 import { Backlog, BacklogSchema } from '../types'
 
 // 获取backlogs
-const listBacklogs = async (): Promise<Backlog[]> => {
+export const listBacklogs = async (): Promise<Backlog[]> => {
   const response = await http.post('/backlogs')
   if (!response) {
     return []

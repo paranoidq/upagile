@@ -1,25 +1,22 @@
 import React from 'react'
-import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { type ColumnDef } from '@tanstack/react-table'
-import { IconEdit, IconTrash } from '@tabler/icons-react'
+import { IconFlag3 } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
+import { Ellipsis } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DataTableRowAction } from '@/components/data-table/types'
 import { DataTableColumnHeader } from '@/components/view-table/components/data-table-column-header'
-import { BacklogDeleteDialog } from '../components/backlog-delete-dialog'
 import { Backlog, backlogTypes } from '../types'
 
-export function getColumns(): ColumnDef<Backlog>[] {
+interface GetColumnsProps {
+  setRowAction: React.Dispatch<React.SetStateAction<DataTableRowAction<Backlog> | null>>
+}
+
+export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Backlog>[] {
   return [
     {
       id: 'select',
@@ -39,6 +36,8 @@ export function getColumns(): ColumnDef<Backlog>[] {
           className='translate-y-0.5'
         />
       ),
+      enableSorting: false,
+      enableHiding: false,
     },
     {
       accessorKey: 'id',
@@ -61,11 +60,9 @@ export function getColumns(): ColumnDef<Backlog>[] {
 
         if (!priority) return null
 
-        const Icon = priority.icon
-
         return (
           <div className='flex items-center'>
-            <Icon className={cn('mr-2 size-4 text-muted-foreground', priority.color)} aria-hidden='true' />
+            <IconFlag3 className={cn('mr-2 size-4 text-muted-foreground', priority.color)} aria-hidden='true' />
             <span className='capitalize'>{priority.label}</span>
           </div>
         )
@@ -113,81 +110,23 @@ export function getColumns(): ColumnDef<Backlog>[] {
     {
       id: 'actions',
       cell: function Cell({ row }) {
-        const [showUpdateTaskSheet, setShowUpdateTaskSheet] = React.useState(false)
-        const [showDeleteTaskDialog, setShowDeleteTaskDialog] = React.useState(false)
+        const [isUpdatePending, startUpdateTransition] = React.useTransition()
 
         return (
-          <>
-            {/* <UpdateTaskSheet open={showUpdateTaskSheet} onOpenChange={setShowUpdateTaskSheet} task={row.original} /> */}
-            <BacklogDeleteDialog
-              open={showDeleteTaskDialog}
-              onOpenChange={setShowDeleteTaskDialog}
-              backlogs={[row.original]}
-              showTrigger={false}
-              onSuccess={() => row.toggleSelected(false)}
-            />
-
-            {/* menu actions */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button aria-label='Open menu' variant='ghost' className='flex size-8 p-0 data-[state=open]:bg-muted'>
-                  <DotsHorizontalIcon className='size-4' aria-hidden='true' />
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent
-                align='end'
-                className='w-40 overflow-visible dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40'
-              >
-                <DropdownMenuItem onSelect={() => setShowUpdateTaskSheet(true)}>
-                  <IconEdit />
-                  Edit
-                </DropdownMenuItem>
-                {/* <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuRadioGroup
-                      value={row.original.label}
-                      onValueChange={(value) => {
-                        startUpdateTransition(() => {
-                          toast.promise(
-                            updateTask({
-                              id: row.original.id,
-                              label: value as Task['label'],
-                            }),
-                            {
-                              loading: 'Updating...',
-                              success: 'Label updated',
-                              error: (err) => getErrorMessage(err),
-                            },
-                          )
-                        })
-                      }}
-                    >
-                      {tasks.label.enumValues.map((label) => (
-                        <DropdownMenuRadioItem
-                          key={label}
-                          value={label}
-                          className='capitalize'
-                          disabled={isUpdatePending}
-                        >
-                          {label}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub> */}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setShowDeleteTaskDialog(true)}>
-                  <IconTrash />
-                  Delete
-                  <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button aria-label='Open menu' variant='ghost' className='flex size-8 p-0 data-[state=open]:bg-muted'>
+                <Ellipsis className='size-4' aria-hidden='true' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end' className='w-40'>
+              <DropdownMenuItem onSelect={() => setRowAction({ row, type: 'update' })}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setRowAction({ row, type: 'delete' })}>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )
       },
+      size: 40,
     },
   ]
 }

@@ -13,3 +13,13 @@ export function formatDate(date: Date | string | number, opts: Intl.DateTimeForm
     ...opts,
   }).format(new Date(date))
 }
+
+export function toSentenceCase(str: string) {
+  return str
+    .replace(/_/g, ' ')
+    .replace(/([A-Z])/g, ' $1')
+    .toLowerCase()
+    .replace(/^\w/, (c) => c.toUpperCase())
+    .replace(/\s+/g, ' ')
+    .trim()
+}
