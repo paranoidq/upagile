@@ -2,11 +2,17 @@ import React, { type FC } from 'react'
 import { IconFlag3 } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
 import { DataTableSkeleton } from '@/components/data-table/component/data-table-skeleton'
+import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/component/feature-flags-provider'
+import { DataTable } from '@/components/data-table/data-table'
+import { useDataTable } from '@/components/data-table/hooks/use-data-table'
 import { DataTableAdvancedFilterField, DataTableFilterField, DataTableRowAction } from '@/components/data-table/types'
 import { Header } from '@/components/layout/header.tsx'
 import { Main } from '@/components/layout/main.tsx'
 import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
 import { ThemeSwitch } from '@/components/theme-switch.tsx'
+import { BacklogTableFloatingBar } from './components/backlog-table-floating-bar'
+import { DeleteBacklogsDialog } from './components/delete-backlog-dialog'
+import { UpdateBacklogSheet } from './components/update-backlog-sheet'
 import { getColumns } from './data/backlog-table-columns'
 import { listBacklogs } from './services'
 import { Backlog } from './types'
@@ -28,9 +34,11 @@ const BacklogPage: FC = () => {
         </div>
       </Header>
       <Main>
-        <React.Suspense fallback={<DataTableSkeleton columnCount={10} rowCount={10} />}>
-          <BacklogTable promises={promise} />
-        </React.Suspense>
+        <FeatureFlagsProvider>
+          <React.Suspense fallback={<DataTableSkeleton columnCount={10} rowCount={10} />}>
+            <BacklogTable promises={promise} />
+          </React.Suspense>
+        </FeatureFlagsProvider>
       </Main>
     </>
   )
@@ -43,7 +51,10 @@ type BacklogTableProps = {
 }
 
 function BacklogTable({ promises }: BacklogTableProps) {
-  const [backlogs] = React.use(promises)
+  const { featureFlags } = useFeatureFlags()
+
+  const backlogs = React.use(promises)
+  const pageCount = backlogs?.length % 10 === 0 ? backlogs?.length / 10 : Math.floor(backlogs?.length / 10) + 1
 
   const [rowAction, setRowAction] = React.useState<DataTableRowAction<Backlog> | null>(null)
 
@@ -114,5 +125,51 @@ function BacklogTable({ promises }: BacklogTableProps) {
     },
   ]
 
-  return <div>backlog</div>
+  const enableAdvancedTable = featureFlags.includes('advancedTable')
+  const enableFloatingBar = featureFlags.includes('floatingBar')
+
+  const { table } = useDataTable({
+    data: backlogs,
+    columns,
+    pageCount,
+    filterFields,
+    enableAdvancedFilter: enableAdvancedTable,
+    initialState: {
+      sorting: [{ id: 'createdTime', desc: true }],
+      columnPinning: { right: ['actions'] },
+    },
+    getRowId: (originalRow) => originalRow.id,
+    shallow: false,
+    clearOnDefault: true,
+  })
+
+  return (
+    <>
+      <DataTable table={table} floatingBar={enableFloatingBar ? <BacklogTableFloatingBar table={table} /> : null}>
+        {/* {enableAdvancedTable ? (
+          <DataTableAdvancedToolbar table={table} filterFields={advancedFilterFields} shallow={false}>
+            <TasksTableToolbarActions table={table} />
+          </DataTableAdvancedToolbar>
+        ) : (
+          <DataTableToolbar table={table} filterFields={filterFields}>
+            <TasksTableToolbarActions table={table} />
+          </DataTableToolbar>
+        )} */}
+      </DataTable>
+
+      <UpdateBacklogSheet
+        open={rowAction?.type === 'update'}
+        onOpenChange={() => setRowAction(null)}
+        backlog={rowAction?.row.original ?? null}
+      />
+
+      <DeleteBacklogsDialog
+        open={rowAction?.type === 'delete'}
+        onOpenChange={() => setRowAction(null)}
+        backlogs={rowAction?.row.original ? [rowAction?.row.original] : []}
+        showTrigger={false}
+        onSuccess={() => rowAction?.row.toggleSelected(false)}
+      />
+    </>
+  )
 }

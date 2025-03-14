@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie'
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v7'
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
@@ -84,7 +85,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 function RootLayout() {
   return (
     <>
-      <Outlet />
+      <NuqsAdapter>
+        <Outlet />
+      </NuqsAdapter>
       <Toaster position='top-right' richColors closeButton />
       {import.meta.env.MODE === 'development' && <>{/* 可以添加 React Query DevTools */}</>}
     </>

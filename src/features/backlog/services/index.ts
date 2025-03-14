@@ -15,7 +15,7 @@ export const listBacklogs = async (): Promise<Backlog[]> => {
 }
 
 // 删除backlog
-export const deleteBacklog = async ({ ids }: { ids: number[] }): Promise<void> => {
+export const deleteBacklogs = async ({ ids }: { ids: number[] }): Promise<void> => {
   await http.post('/backlogs/delete', { ids })
 }
 
@@ -38,6 +38,16 @@ export const updateBacklogs = async ({
   priority: Backlog['priority']
 }): Promise<void> => {
   await http.post('backlogs/update-batch', { ids, priority })
+}
+
+export const useUpdateBacklogs = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: updateBacklogs,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['backlogs'] })
+    },
+  })
 }
 
 export const useBacklogs = () => {
@@ -68,12 +78,14 @@ export const useUpdateBacklog = () => {
   })
 }
 
-export const useDeleteBacklog = () => {
+export const useDeleteBacklogs = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: deleteBacklog,
+    mutationFn: deleteBacklogs,
     onSuccess: () => {
+      console.log('Invalidating backlogs queries')
       queryClient.invalidateQueries({ queryKey: ['backlogs'] })
+      console.log('Invalidating backlogs queries done')
     },
   })
 }

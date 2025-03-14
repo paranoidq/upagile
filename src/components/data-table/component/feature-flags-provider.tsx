@@ -1,13 +1,11 @@
-'use client'
-
 import * as React from 'react'
-import { useQueryState } from 'node_modules/nuqs/dist/_tsup-dts-rollup'
+import { useQueryState } from 'nuqs'
 import { cn } from '@/lib/utils'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { type DataTableConfig, dataTableConfig } from '@/components/data-table/config/data-table'
 
-export type FeatureFlagValue = DataTableConfig['featureFlags'][number]['value']
+type FeatureFlagValue = DataTableConfig['featureFlags'][number]['value']
 
 interface FeatureFlagsContextProps {
   featureFlags: FeatureFlagValue[]

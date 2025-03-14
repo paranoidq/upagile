@@ -1,4 +1,6 @@
+import { z } from 'zod'
 import { ColumnSort, Row } from '@tanstack/react-table'
+import { filterSchema } from './_lib/parsers'
 import { DataTableConfig } from './config/data-table'
 
 export type Prettify<T> = {
@@ -36,6 +38,12 @@ export interface DataTableFilterField<TData> {
 export interface DataTableAdvancedFilterField<TData> extends DataTableFilterField<TData> {
   type: ColumnType
 }
+
+export type Filter<TData> = Prettify<
+  Omit<z.infer<typeof filterSchema>, 'id'> & {
+    id: StringKeyOf<TData>
+  }
+>
 
 export interface DataTableRowAction<TData> {
   row: Row<TData>

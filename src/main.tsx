@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client'
 import { AxiosError } from 'axios'
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@ant-design/v5-patch-for-react-19'
-import { NuqsAdapter } from 'nuqs/adapters/react'
 import { RouterProvider } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { handleServerError } from '@/utils/handle-server-error'
@@ -76,13 +75,11 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <NuqsAdapter>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
-            <RouterProvider router={router} />
-          </ThemeProvider>
-        </QueryClientProvider>
-      </NuqsAdapter>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </QueryClientProvider>
     </StrictMode>,
   )
 }

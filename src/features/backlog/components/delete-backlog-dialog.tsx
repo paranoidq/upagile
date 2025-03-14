@@ -1,9 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { TrashIcon } from '@radix-ui/react-icons'
-import { type Row } from '@tanstack/react-table'
-import { LoaderIcon } from 'lucide-react'
+import type { Row } from '@tanstack/react-table'
+import { Loader, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,24 +15,44 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { useDeleteBacklog } from '../services'
+import { useDeleteBacklogs } from '../services'
 import { Backlog } from '../types'
 
-interface DeleteTasksDialogProps extends React.ComponentPropsWithoutRef<typeof Dialog> {
+interface DeleteBacklogsDialogProps extends React.ComponentPropsWithoutRef<typeof Dialog> {
   backlogs: Row<Backlog>['original'][]
   showTrigger?: boolean
   onSuccess?: () => void
 }
 
-export function BacklogDeleteDialog({ backlogs, showTrigger = true, onSuccess, ...props }: DeleteTasksDialogProps) {
-  const { mutateAsync: deleteBacklog, isPending: isDeletePending } = useDeleteBacklog()
+export function DeleteBacklogsDialog({ backlogs, showTrigger = true, onSuccess, ...props }: DeleteBacklogsDialogProps) {
+  const { mutateAsync: deleteBacklogs, isPending: isDeletePending } = useDeleteBacklogs()
+
+  function onDelete() {
+    toast.promise(
+      deleteBacklogs({
+        ids: backlogs.map((backlog) => Number(backlog.id)),
+      }),
+      {
+        loading: 'Deleting backlogs...',
+        success: () => {
+          props.onOpenChange?.(false)
+          toast.success('Backlogs deleted')
+          onSuccess?.()
+          return 'Backlogs deleted'
+        },
+        error: () => {
+          return 'Failed to delete backlogs'
+        },
+      },
+    )
+  }
 
   return (
     <Dialog {...props}>
       {showTrigger ? (
         <DialogTrigger asChild>
           <Button variant='outline' size='sm'>
-            <TrashIcon className='mr-2 size-4' aria-hidden='true' />
+            <Trash className='mr-2 size-4' aria-hidden='true' />
             Delete ({backlogs.length})
           </Button>
         </DialogTrigger>
@@ -51,25 +70,8 @@ export function BacklogDeleteDialog({ backlogs, showTrigger = true, onSuccess, .
           <DialogClose asChild>
             <Button variant='outline'>Cancel</Button>
           </DialogClose>
-          <Button
-            aria-label='Delete selected rows'
-            variant='destructive'
-            onClick={() => {
-              deleteBacklog({
-                ids: backlogs.map((backlog) => Number(backlog.id)),
-              }).catch((error) => {
-                toast.error(error.message, {
-                  description: 'Please try again later',
-                })
-              })
-
-              props.onOpenChange?.(false)
-              toast.success(`${backlogs.length > 1 ? 'Tasks' : 'Task'} deleted`)
-              onSuccess?.()
-            }}
-            disabled={isDeletePending}
-          >
-            {isDeletePending && <LoaderIcon className='mr-1.5 size-4 animate-spin' aria-hidden='true' />}
+          <Button aria-label='Delete selected rows' variant='destructive' onClick={onDelete} disabled={isDeletePending}>
+            {isDeletePending && <Loader className='mr-2 size-4 animate-spin' aria-hidden='true' />}
             Delete
           </Button>
         </DialogFooter>
