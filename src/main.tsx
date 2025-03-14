@@ -2,15 +2,15 @@ import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { AxiosError } from 'axios'
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
 import '@ant-design/v5-patch-for-react-19'
 import { NuqsAdapter } from 'nuqs/adapters/react'
+import { RouterProvider } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { handleServerError } from '@/utils/handle-server-error'
 import { toast } from '@/hooks/use-toast'
 import { ThemeProvider } from './context/theme-context'
 import './index.css'
-import { routeTree } from './routeTree.gen'
+import router from './router.tsx'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,44 +52,23 @@ const queryClient = new QueryClient({
             title: 'Session expired!',
           })
           useAuthStore.getState().auth.reset()
-          const redirect = `${router.history.location.href}`
-          router.navigate({ to: '/sign-in', search: { redirect } })
+          const redirect = window.location.pathname
+          window.location.href = `/sign-in?redirect=${redirect}`
         }
         if (error.response?.status === 500) {
           toast({
             variant: 'destructive',
             title: 'Internal Server Error!',
           })
-          router.navigate({ to: '/500' })
+          window.location.href = '/500'
         }
         if (error.response?.status === 403) {
-          // router.navigate("/forbidden", { replace: true });
+          // window.location.href = '/403'
         }
       }
     },
   }),
 })
-
-// Create a new router instance
-const router = createRouter({
-  routeTree,
-  context: { queryClient },
-  defaultPreload: 'intent',
-  defaultPreloadStaleTime: 0,
-})
-
-// Register the router instance for type safety
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router
-  }
-}
-// register global error for tanstack query
-declare module '@tanstack/react-query' {
-  interface Register {
-    defaultError: AxiosError
-  }
-}
 
 // Render the app
 const rootElement = document.getElementById('root')!

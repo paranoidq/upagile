@@ -1,5 +1,4 @@
 import axios, { AxiosHeaders, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import router from '@/router'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -71,20 +70,13 @@ http.interceptors.response.use(
           case 403:
             useAuthStore.getState().auth.reset()
             toast.error('登录已过期，请重新登录')
-            router.navigate({
-              to: '/sign-in',
-              search: { redirect: window.location.pathname },
-            })
+            window.location.href = `/sign-in?redirect=${window.location.pathname}`
             break
           case 404:
-            router.navigate({
-              to: '/404',
-            })
+            window.location.href = '/404'
             break
           case 500:
-            router.navigate({
-              to: '/500',
-            })
+            window.location.href = '/500'
             break
         }
       }

@@ -1,5 +1,3 @@
-import { LinkProps } from '@tanstack/react-router'
-
 interface User {
   name: string
   email: string
@@ -18,21 +16,23 @@ interface BaseNavItem {
   icon?: React.ElementType
 }
 
-type NavLink = BaseNavItem & {
-  url: LinkProps['to']
-  items?: never
+export interface NavItem {
+  title: string
+  url: string
+  icon?: React.ElementType
+  badge?: string | number
+  items?: NavItem[]
 }
 
-type NavCollapsible = BaseNavItem & {
-  items: (BaseNavItem & { url: LinkProps['to'] })[]
-  url?: never
-}
+export interface NavLink extends NavItem {}
 
-type NavItem = NavCollapsible | NavLink
+export interface NavCollapsible extends NavItem {
+  items: NavItem[]
+}
 
 interface NavGroup {
   title: string
-  items: NavItem[]
+  items: (NavLink | NavCollapsible)[]
 }
 
 interface SidebarData {
@@ -41,4 +41,4 @@ interface SidebarData {
   navGroups: NavGroup[]
 }
 
-export type { SidebarData, NavGroup, NavItem, NavCollapsible, NavLink }
+export type { NavCollapsible, NavGroup, NavItem, NavLink, SidebarData }

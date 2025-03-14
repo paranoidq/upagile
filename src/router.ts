@@ -1,43 +1,5 @@
-import { createRouter } from '@tanstack/react-router'
-import BacklogTable from '@/features/backlog'
-import Issue from '@/features/issue'
-import Project from '@/features/project'
-import Requirement from '@/features/requirement'
-import Sprint from '@/features/sprint'
-import Workspace from '@/features/workspace'
-import Dashboard from './features/dashboard'
-
-const router = createRouter({
-  routes: [
-    {
-      path: '/backlog',
-      component: BacklogTable,
-    },
-    {
-      path: '/dashboard',
-      component: Dashboard,
-    },
-    {
-      path: '/issue',
-      component: Issue,
-    },
-    {
-      path: '/project',
-      component: Project,
-    },
-    {
-      path: '/requirement',
-      component: Requirement,
-    },
-    {
-      path: '/sprint',
-      component: Sprint,
-    },
-    {
-      path: '/workspace',
-      component: Workspace,
-    },
-  ],
-})
+// 这个文件可以删除，因为我们已经创建了新的 router.tsx 文件
+// 如果需要保留，可以将其重命名为 router.old.ts 或完全删除
+import router from './router.tsx'
 
 export default router

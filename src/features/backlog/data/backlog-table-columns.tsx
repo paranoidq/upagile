@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DataTableColumnHeader } from '@/components/data-table/components/data-table-column-header'
 import { DataTableRowAction } from '@/components/data-table/types'
-import { DataTableColumnHeader } from '@/components/view-table/components/data-table-column-header'
 import { Backlog, backlogTypes } from '../types'
 
 interface GetColumnsProps {

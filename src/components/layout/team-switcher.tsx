@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconCrown, IconNavigationBolt } from '@tabler/icons-react'
 import { ChevronsUpDown, Plus } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useDebouncedCallback } from 'use-debounce'
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
@@ -35,6 +36,7 @@ export function TeamSwitcher() {
   const { user } = useAuthStore().auth
   const [dialogOpen, setDialogOpen] = useState(false)
   const { mutate: createTeam } = useCreateTeam()
+  const navigate = useNavigate()
 
   /* ------------------ form ------------------ */
   const form = useForm<z.infer<typeof formSchema>>({

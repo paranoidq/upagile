@@ -2,7 +2,7 @@ import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { http } from '@/lib/axios.ts'
 import { cn } from '@/lib/utils'
@@ -42,10 +42,10 @@ interface LoginResponse {
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { auth } = useAuthStore()
 
   // 获取 URL 中的 redirect 参数
-  const searchParams = new URLSearchParams(window.location.search)
   const redirectTo = searchParams.get('redirect') || '/'
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -58,7 +58,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
-      setIsLoading(true) // 移到请求开始前
+      setIsLoading(true)
 
       const response = await http.post<LoginResponse>('/auth/login', data, {
         skipAuth: true,
@@ -72,8 +72,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         email: response.account.email,
       })
 
-      // 使用获取到的 redirectTo
-      await navigate({ to: redirectTo as any })
+      // 使用 React Router 的导航
+      navigate(redirectTo)
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -81,7 +81,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         description: '请检查用户名和密码',
       })
     } finally {
-      setIsLoading(false) // 确保加载状态被重置
+      setIsLoading(false)
     }
   }
 
