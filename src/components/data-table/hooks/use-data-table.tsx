@@ -298,7 +298,7 @@ export function useDataTable<TData>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: enableAdvancedFilter ? undefined : getFacetedRowModel(),
     getFacetedUniqueValues: enableAdvancedFilter ? undefined : getFacetedUniqueValues(),
-    manualPagination: true,
+    manualPagination: false,
     manualSorting: true,
     manualFiltering: true,
   })

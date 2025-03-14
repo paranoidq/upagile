@@ -1,6 +1,6 @@
 import React from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
-import { IconFlag3 } from '@tabler/icons-react'
+import { IconFlag3Filled } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
 import { Ellipsis } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
@@ -62,7 +62,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Backlog
 
         return (
           <div className='flex items-center'>
-            <IconFlag3 className={cn('mr-2 size-4 text-muted-foreground', priority.color)} aria-hidden='true' />
+            <IconFlag3Filled className={cn('mr-2 size-4 text-muted-foreground', priority.color)} aria-hidden='true' />
             <span className='capitalize'>{priority.label}</span>
           </div>
         )
