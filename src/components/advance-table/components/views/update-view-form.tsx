@@ -1,19 +1,32 @@
-import { useEffect } from 'react'
-import { useFormState, useFormStatus } from 'react-dom'
-import { toast } from 'sonner'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { LoaderIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { View } from '@/components/view-table/types'
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import { useTableInstanceContext } from '../../table-instance-provider'
+import { useUpdateView } from '../actions/view-services'
+import { FilterParams, View } from './types'
 
 interface UpdateViewFormProps {
   isUpdated: boolean
   currentView: View | undefined
   filterParams: FilterParams
+  onSuccess?: () => void
 }
 
-export default function UpdateViewForm({ isUpdated, currentView, filterParams }: UpdateViewFormProps) {
-  const [state, formAction] = useFormState(editView, { message: '' })
+// 定义表单验证模式
+const formSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, '视图名称不能为空'),
+  columns: z.array(z.string()),
+  filterParams: z.any(),
+})
 
+type FormValues = z.infer<typeof formSchema>
+
+export default function UpdateViewForm({ isUpdated, currentView, filterParams }: UpdateViewFormProps) {
   const { tableInstance } = useTableInstanceContext()
 
   const visibleColumns = tableInstance
@@ -21,33 +34,94 @@ export default function UpdateViewForm({ isUpdated, currentView, filterParams }:
     .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide())
     .map((column) => column.id)
 
-  useEffect(() => {
-    if (state.status === 'success') {
-      toast.success(state.message)
-    } else if (state.status === 'error') {
-      toast.error(state.message)
-    }
-  }, [state])
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      id: currentView?.id || 0,
+      name: currentView?.name || '',
+      columns: visibleColumns,
+      filterParams: filterParams,
+    },
+  })
 
-  if (!isUpdated || !currentView) return
+  const { mutate: updateView, isPending: isUpdating } = useUpdateView()
+
+  const onSubmit = async (values: FormValues) => {
+    updateView(values)
+  }
+
+  if (!isUpdated || !currentView) return null
 
   return (
-    <form action={formAction}>
-      <input type='hidden' name='id' value={currentView.id} />
-      <input type='hidden' name='name' value={currentView.name} />
-      <input type='hidden' name='columns' value={JSON.stringify(visibleColumns)} />
-      <input type='hidden' name='filterParams' value={JSON.stringify(filterParams)} />
-      <SubmitButton />
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <FormField
+          control={form.control}
+          name='id'
+          render={({ field }) => (
+            <FormItem className='hidden'>
+              <FormControl>
+                <Input {...field} type='hidden' />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='name'
+          render={({ field }) => (
+            <FormItem className='hidden'>
+              <FormControl>
+                <Input {...field} type='hidden' />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='columns'
+          render={({ field }) => (
+            <FormItem className='hidden'>
+              <FormControl>
+                <Input
+                  {...field}
+                  type='hidden'
+                  value={Array.isArray(field.value) ? JSON.stringify(field.value) : field.value}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='filterParams'
+          render={({ field }) => (
+            <FormItem className='hidden'>
+              <FormControl>
+                <Input
+                  {...field}
+                  type='hidden'
+                  value={typeof field.value === 'object' ? JSON.stringify(field.value) : field.value}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <SubmitButton isSubmitting={isUpdating} />
+      </form>
+    </Form>
   )
 }
 
-function SubmitButton() {
-  const { pending } = useFormStatus()
+function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
   return (
-    <Button disabled={pending} type='submit' size='sm' className='gap-1.5'>
-      {pending && <LoaderIcon aria-hidden='true' className='size-3.5 animate-spin' />}
-      Update view
+    <Button disabled={isSubmitting} type='submit' size='sm' className='gap-1.5'>
+      {isSubmitting && <LoaderIcon aria-hidden='true' className='size-3.5 animate-spin' />}
+      更新视图
     </Button>
   )
 }

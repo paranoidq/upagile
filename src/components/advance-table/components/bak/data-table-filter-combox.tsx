@@ -1,13 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { CaretSortIcon, ChevronDownIcon, PlusIcon, TextIcon } from '@radix-ui/react-icons'
-import { Button } from '@/components/ui/button'
+import { ChevronDownIcon, PlusIcon, TextIcon } from '@radix-ui/react-icons'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Kbd } from '@/components/kbd'
 import type { DataTableFilterOption } from '../types'
 
 interface DataTableFilterComboboxProps<TData> {
@@ -35,33 +32,7 @@ export function DataTableFilterCombobox<TData>({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      {children ? (
-        <PopoverTrigger asChild>{children}</PopoverTrigger>
-      ) : (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <PopoverTrigger asChild>
-                <Button ref={buttonRef} variant='outline' size='sm' role='combobox' className='capitalize'>
-                  <CaretSortIcon className='mr-2 size-4 shrink-0' aria-hidden='true' />
-                  Filter
-                </Button>
-              </PopoverTrigger>
-            </TooltipTrigger>
-            <TooltipContent className='flex items-center gap-2 border bg-accent font-semibold text-foreground dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40'>
-              Open filter
-              <div>
-                <Kbd variant='outline' className='font-sans'>
-                  ⇧
-                </Kbd>{' '}
-                <Kbd variant='outline' className='font-sans'>
-                  F
-                </Kbd>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
 
       <PopoverContent
         className='w-[12.5rem] p-0 dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40'
@@ -97,6 +68,7 @@ export function DataTableFilterCombobox<TData>({
               ))}
             </CommandGroup>
             <Separator />
+
             <CommandGroup>
               <CommandItem
                 onSelect={() => {

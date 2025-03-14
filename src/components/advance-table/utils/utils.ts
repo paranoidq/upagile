@@ -42,7 +42,11 @@ export function calcFilterParams<T = unknown>(selectedOptions: DataTableFilterOp
 }
 
 export function calcViewSearchParams(view: View) {
-  const searchParamsObj: Partial<Record<keyof SearchParams, string | number | null | undefined>> = {}
+  const searchParamsObj: SearchParams = {
+    page: 1,
+    per_page: 10,
+    viewId: view.id,
+  }
   const filterParams = view.filterParams
   if (!filterParams) return
 
@@ -63,4 +67,21 @@ export function calcViewSearchParams(view: View) {
   searchParamsObj.viewId = view.id
 
   return searchParamsObj
+}
+
+export function createQueryString(
+  params: Partial<Record<keyof SearchParams, string | number | null | undefined>>,
+  searchParams: SearchParams,
+) {
+  const newSearchParams = new URLSearchParams(searchParams?.toString())
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value === null || value === undefined) {
+      newSearchParams.delete(key)
+    } else {
+      newSearchParams.set(key, String(value))
+    }
+  }
+
+  return newSearchParams.toString()
 }

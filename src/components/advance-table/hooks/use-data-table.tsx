@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { z } from 'zod'
-import { useRouter, useSearch } from '@tanstack/react-router'
+import { useSearch } from '@tanstack/react-router'
 import {
   getCoreRowModel,
   getFacetedRowModel,
@@ -101,16 +101,8 @@ export function useDataTable<TData, TValue>({
   defaultSort,
   filterFields = [],
 }: UseDataTableProps<TData, TValue>) {
-  const router = useRouter()
-  const pathname = router.state.location.pathname
-
   // 获取搜索参数
-  const search = useSearch({
-    from: '/_authenticated/backlog/',
-    select: (s) => s,
-  })
-
-  console.log(search)
+  const search = useSearch({ strict: false })
 
   // 使用 zod 解析和验证搜索参数
   const parsedSearch = schema.parse(search)
@@ -307,7 +299,7 @@ export function useDataTable<TData, TValue>({
     manualSorting: true,
     manualFiltering: true,
     enableSorting: false,
-    enableHiding: false,
+    enableHiding: true,
   })
 
   return { table }

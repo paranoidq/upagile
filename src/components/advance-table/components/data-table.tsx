@@ -19,12 +19,9 @@ interface DataTableProps<TData> extends React.HTMLAttributes<HTMLDivElement> {
   floatingBar?: React.ReactNode | null
 }
 
-export function DataTable<TData>({ table, floatingBar = null, children, className, ...props }: DataTableProps<TData>) {
+export function DataTable<TData>({ table, floatingBar = null, className, ...props }: DataTableProps<TData>) {
   return (
     <div className={cn('w-full space-y-2.5 overflow-auto', className)} {...props}>
-      {/* toolbar */}
-      {children}
-
       {/* table */}
       <div className='mx-1 rounded-md border'>
         <Table>

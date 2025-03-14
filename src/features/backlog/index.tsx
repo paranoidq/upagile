@@ -2,11 +2,12 @@ import React, { useMemo, type FC } from 'react'
 import { PRIORITIES } from '@/consts/enums'
 import { useViews } from '@/components/advance-table/components/actions/view-services'
 import { DataTable } from '@/components/advance-table/components/data-table'
-import { DataTableAdvancedToolbar } from '@/components/advance-table/components/data-table-advanced-toolbar'
 import { DataTableSkeleton } from '@/components/advance-table/components/data-table-skeleton'
+import { DataTableToolbar } from '@/components/advance-table/components/data-table-toolbar'
+import { DataTableViewList } from '@/components/advance-table/components/data-table-view-list'
 import { useDataTable } from '@/components/advance-table/hooks/use-data-table'
 import { TableInstanceProvider } from '@/components/advance-table/table-instance-provider'
-import { DataTableFilterField } from '@/components/advance-table/types'
+import { DataTableFilterField, DataTableGroupField, DataTableSortField } from '@/components/advance-table/types'
 import { Header } from '@/components/layout/header.tsx'
 import { Main } from '@/components/layout/main.tsx'
 import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
@@ -85,6 +86,28 @@ const BacklogTable = () => {
     },
   ]
 
+  const sortFields: DataTableSortField<Backlog>[] = [
+    {
+      label: 'Priority',
+      value: 'priority',
+    },
+    {
+      label: 'Deadline',
+      value: 'dueTime',
+    },
+    {
+      label: 'Estimated Time',
+      value: 'estimatedTime',
+    },
+  ]
+
+  const groupFields: DataTableGroupField<Backlog>[] = [
+    {
+      label: 'Priority',
+      value: 'priority',
+    },
+  ]
+
   const { table } = useDataTable({
     data: backlogs ?? [],
     columns: columns,
@@ -102,11 +125,21 @@ const BacklogTable = () => {
       )}
 
       <TableInstanceProvider table={table}>
-        <DataTable table={table} floatingBar={<BacklogTableFloatingBar table={table} />}>
-          <DataTableAdvancedToolbar filterFields={filterFields} views={views}>
-            <BacklogToolbarActions table={table} />
-          </DataTableAdvancedToolbar>
-        </DataTable>
+        {/* view list and toolbar actions */}
+        <DataTableViewList views={views ?? []}>
+          <BacklogToolbarActions table={table} />
+        </DataTableViewList>
+
+        {/* toolbar */}
+        <DataTableToolbar
+          sortFields={sortFields}
+          filterFields={filterFields}
+          groupFields={groupFields}
+          currentView={currentView}
+        ></DataTableToolbar>
+
+        {/* table */}
+        <DataTable table={table} floatingBar={<BacklogTableFloatingBar table={table} />}></DataTable>
       </TableInstanceProvider>
     </>
   )

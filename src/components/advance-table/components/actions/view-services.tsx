@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '@/lib/axios'
-import { QueryKeys } from '@/utils/query-keys'
 import { views } from '../../data/data'
 import { View } from '../views/types'
+
+const QueryKeys = {
+  views: ['views'] as const,
+} as const
 
 const fetchViews = async (): Promise<View[]> => {
   // const response = await http.post('/views')
@@ -16,49 +19,37 @@ const fetchViews = async (): Promise<View[]> => {
 }
 export const useViews = () => {
   return useQuery({
-    queryKey: QueryKeys.view,
+    queryKey: QueryKeys.views,
     queryFn: fetchViews,
   })
 }
 
-const createView = async (view: Omit<View, 'id'>): Promise<void> => {
+export const createView = async (view: Omit<View, 'id'>): Promise<void> => {
   await http.post('views/create', view)
 }
+
 export const useCreateView = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationKey: QueryKeys.view,
+    mutationKey: ['createView'],
     mutationFn: createView,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.view })
+      queryClient.invalidateQueries({ queryKey: QueryKeys.views })
     },
   })
 }
 
-const updateViewName = async (view: Partial<View>): Promise<void> => {
+const updateView = async (view: View): Promise<void> => {
+  console.log(view)
   await http.post('views/update', view)
 }
-export const useRenameView = () => {
+export const useUpdateView = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationKey: QueryKeys.view,
-    mutationFn: updateViewName,
+    mutationKey: ['updateView'],
+    mutationFn: updateView,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.view })
-    },
-  })
-}
-
-const updateViewCondition = async (view: View): Promise<void> => {
-  await http.post('views/condition/update', view)
-}
-export const useUpdateViewCondition = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationKey: QueryKeys.view,
-    mutationFn: updateViewCondition,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.view })
+      queryClient.invalidateQueries({ queryKey: QueryKeys.views })
     },
   })
 }
@@ -69,10 +60,10 @@ const deleteView = async (id: number): Promise<void> => {
 export const useDeleteView = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationKey: QueryKeys.view,
+    mutationKey: ['deleteView'],
     mutationFn: deleteView,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.view })
+      queryClient.invalidateQueries({ queryKey: QueryKeys.views })
     },
   })
 }

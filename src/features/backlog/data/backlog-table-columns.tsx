@@ -44,6 +44,7 @@ export function getColumns(): ColumnDef<Backlog>[] {
       accessorKey: 'id',
       header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
       cell: ({ cell }) => <div className='w-[10px]'>{cell.getValue() as number}</div>,
+      enableHiding: false,
     },
     {
       accessorKey: 'title',

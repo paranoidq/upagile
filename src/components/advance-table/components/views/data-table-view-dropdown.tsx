@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
-import { View } from '@/components/view-table/types'
-import { ViewCreateForm } from './view-create-form'
+import { calcViewSearchParams } from '../../utils/utils'
+import { CreateViewForm } from './create-view-form'
+import { FilterParams, View } from './types'
 import { ViewEditForm } from './view-edit-form'
 
 interface DataTableViewsDropdownProps {
@@ -26,7 +27,7 @@ export function DataTableViewsDropdown({ views, filterParams }: DataTableViewsDr
   const currentView = views.find((view) => view.id === search.viewId)
 
   function selectView(view: View) {
-    router.navigate({ to: '.', search: { viewId: view.id }, resetScroll: false })
+    router.navigate({ to: '.', search: calcViewSearchParams(view), resetScroll: false })
   }
 
   return (
@@ -50,7 +51,7 @@ export function DataTableViewsDropdown({ views, filterParams }: DataTableViewsDr
         align='start'
       >
         {isCreateViewFormOpen && (
-          <ViewCreateForm
+          <CreateViewForm
             backButton
             onBack={() => setIsCreateViewFormOpen(false)}
             filterParams={filterParams}
