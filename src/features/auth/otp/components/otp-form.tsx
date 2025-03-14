@@ -2,17 +2,11 @@ import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { PinInput, PinInputField } from '@/components/pin-input'
@@ -68,8 +62,7 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
                       onIncomplete={() => setDisabledBtn(true)}
                     >
                       {Array.from({ length: 7 }, (_, i) => {
-                        if (i === 3)
-                          return <Separator key={i} orientation='vertical' />
+                        if (i === 3) return <Separator key={i} orientation='vertical' />
                         return (
                           <PinInputField
                             key={i}

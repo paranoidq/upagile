@@ -1,27 +1,13 @@
 import { z } from 'zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
+import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 
 const profileFormSchema = z.object({
@@ -43,7 +29,7 @@ const profileFormSchema = z.object({
     .array(
       z.object({
         value: z.string().url({ message: 'Please enter a valid URL.' }),
-      })
+      }),
     )
     .optional(),
 })
@@ -53,10 +39,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>
 // This can come from your database or API.
 const defaultValues: Partial<ProfileFormValues> = {
   bio: 'I own a computer.',
-  urls: [
-    { value: 'https://shadcn.com' },
-    { value: 'http://twitter.com/shadcn' },
-  ],
+  urls: [{ value: 'https://shadcn.com' }, { value: 'http://twitter.com/shadcn' }],
 }
 
 export default function ProfileForm() {
@@ -95,8 +78,8 @@ export default function ProfileForm() {
                 <Input placeholder='shadcn' {...field} />
               </FormControl>
               <FormDescription>
-                This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
+                This is your public display name. It can be your real name or a pseudonym. You can only change this once
+                every 30 days.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -121,8 +104,7 @@ export default function ProfileForm() {
                 </SelectContent>
               </Select>
               <FormDescription>
-                You can manage verified email addresses in your{' '}
-                <Link to='/'>email settings</Link>.
+                You can manage verified email addresses in your <Link to='/'>email settings</Link>.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -135,15 +117,10 @@ export default function ProfileForm() {
             <FormItem>
               <FormLabel>Bio</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder='Tell us a little bit about yourself'
-                  className='resize-none'
-                  {...field}
-                />
+                <Textarea placeholder='Tell us a little bit about yourself' className='resize-none' {...field} />
               </FormControl>
               <FormDescription>
-                You can <span>@mention</span> other users and organizations to
-                link to them.
+                You can <span>@mention</span> other users and organizations to link to them.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -157,9 +134,7 @@ export default function ProfileForm() {
               name={`urls.${index}.value`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={cn(index !== 0 && 'sr-only')}>
-                    URLs
-                  </FormLabel>
+                  <FormLabel className={cn(index !== 0 && 'sr-only')}>URLs</FormLabel>
                   <FormDescription className={cn(index !== 0 && 'sr-only')}>
                     Add links to your website, blog, or social media profiles.
                   </FormDescription>
@@ -171,13 +146,7 @@ export default function ProfileForm() {
               )}
             />
           ))}
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            className='mt-2'
-            onClick={() => append({ value: '' })}
-          >
+          <Button type='button' variant='outline' size='sm' className='mt-2' onClick={() => append({ value: '' })}>
             Add URL
           </Button>
         </div>
