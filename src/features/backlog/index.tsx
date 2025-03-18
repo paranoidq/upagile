@@ -1,8 +1,8 @@
 import React, { type FC } from 'react'
 import { IconFlag3 } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
-import { DataTableSkeleton } from '@/components/data-table/component/data-table-skeleton'
-import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/component/feature-flags-provider'
+import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
+import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/components/feature-flags-provider'
 import { DataTable } from '@/components/data-table/data-table'
 import { useDataTable } from '@/components/data-table/hooks/use-data-table'
 import { DataTableAdvancedFilterField, DataTableFilterField, DataTableRowAction } from '@/components/data-table/types'
@@ -14,11 +14,11 @@ import { BacklogTableFloatingBar } from './components/backlog-table-floating-bar
 import { DeleteBacklogsDialog } from './components/delete-backlog-dialog'
 import { UpdateBacklogSheet } from './components/update-backlog-sheet'
 import { getColumns } from './data/backlog-table-columns'
-import { listBacklogs } from './services'
+import { useBacklogs } from './services'
 import { Backlog } from './types'
 
 const BacklogPage: FC = () => {
-  const promise = listBacklogs()
+  const { data: backlogs, isLoading } = useBacklogs()
 
   return (
     <>
@@ -35,9 +35,7 @@ const BacklogPage: FC = () => {
       </Header>
       <Main>
         <FeatureFlagsProvider>
-          <React.Suspense fallback={<DataTableSkeleton columnCount={10} rowCount={10} />}>
-            <BacklogTable promises={promise} />
-          </React.Suspense>
+          {isLoading ? <DataTableSkeleton columnCount={10} rowCount={10} /> : <BacklogTable data={backlogs} />}
         </FeatureFlagsProvider>
       </Main>
     </>
@@ -47,13 +45,12 @@ const BacklogPage: FC = () => {
 export default BacklogPage
 
 type BacklogTableProps = {
-  promises: Promise<Backlog[]>
+  data: Backlog[]
 }
 
-function BacklogTable({ promises }: BacklogTableProps) {
+function BacklogTable({ data: backlogs }: BacklogTableProps) {
   const { featureFlags } = useFeatureFlags()
 
-  const backlogs = React.use(promises)
   const pageCount = backlogs?.length % 10 === 0 ? backlogs?.length / 10 : Math.floor(backlogs?.length / 10) + 1
 
   const [rowAction, setRowAction] = React.useState<DataTableRowAction<Backlog> | null>(null)

@@ -28,6 +28,7 @@ export function DeleteBacklogsDialog({ backlogs, showTrigger = true, onSuccess, 
   const { mutateAsync: deleteBacklogs, isPending: isDeletePending } = useDeleteBacklogs()
 
   function onDelete() {
+    // TODO: 这里有问题，isDeletePending 会一直为 true
     toast.promise(
       deleteBacklogs({
         ids: backlogs.map((backlog) => Number(backlog.id)),
@@ -36,17 +37,16 @@ export function DeleteBacklogsDialog({ backlogs, showTrigger = true, onSuccess, 
         loading: 'Deleting backlogs...',
         success: () => {
           props.onOpenChange?.(false)
-          toast.success('Backlogs deleted')
           onSuccess?.()
           return 'Backlogs deleted'
         },
         error: () => {
+          props.onOpenChange?.(false)
           return 'Failed to delete backlogs'
         },
       },
     )
   }
-
   return (
     <Dialog {...props}>
       {showTrigger ? (

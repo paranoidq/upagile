@@ -37,7 +37,7 @@ export const updateBacklogs = async ({
   ids: number[]
   priority: Backlog['priority']
 }): Promise<void> => {
-  await http.post('backlogs/update-batch', { ids, priority })
+  await http.post('backlogs/update/batch', { ids, priority })
 }
 
 export const useUpdateBacklogs = () => {
@@ -83,9 +83,7 @@ export const useDeleteBacklogs = () => {
   return useMutation({
     mutationFn: deleteBacklogs,
     onSuccess: () => {
-      console.log('Invalidating backlogs queries')
       queryClient.invalidateQueries({ queryKey: ['backlogs'] })
-      console.log('Invalidating backlogs queries done')
     },
   })
 }

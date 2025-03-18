@@ -89,16 +89,16 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Backlog
       },
     },
     {
-      accessorKey: 'dueTime',
+      accessorKey: 'deadline',
       header: ({ column }) => <DataTableColumnHeader column={column} title='截止时间' />,
       cell: ({ cell }) => <div className='w-[100px]'>{formatDate(cell.getValue() as Date)}</div>,
     },
     {
-      accessorKey: 'estimatedTime',
+      accessorKey: 'estimateWorkload',
       header: ({ column }) => <DataTableColumnHeader column={column} title='工作量' />,
       cell: ({ row }) => (
         <div className='w-[50px]'>
-          {(row.getValue('estimatedTime') as number) < 0 ? '-' : row.getValue('estimatedTime') + 'h'}
+          {(row.getValue('estimateWorkload') as number) < 0 ? '-' : row.getValue('estimateWorkload') + 'h'}
         </div>
       ),
     },
@@ -110,8 +110,6 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Backlog
     {
       id: 'actions',
       cell: function Cell({ row }) {
-        const [isUpdatePending, startUpdateTransition] = React.useTransition()
-
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

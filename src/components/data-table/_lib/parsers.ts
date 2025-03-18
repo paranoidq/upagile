@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { Row } from '@tanstack/react-table'
-import { createParser } from 'nuqs/server'
+import { createParser } from 'nuqs'
 import { dataTableConfig } from '@/components/data-table/config/data-table'
 import type { ExtendedSortingState, Filter } from '@/components/data-table/types'
 
