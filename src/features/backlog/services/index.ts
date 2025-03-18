@@ -34,7 +34,7 @@ export const updateBacklogs = async ({
   ids,
   priority,
 }: {
-  ids: number[]
+  ids: string[]
   priority: Backlog['priority']
 }): Promise<void> => {
   await http.post('backlogs/update/batch', { ids, priority })

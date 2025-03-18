@@ -15,26 +15,32 @@ export const backlogTypes = [
 const backlogTypeEnums = backlogTypes.map((type) => type.value)
 
 export const createBacklogSchema = z.object({
-  title: z.string(),
+  title: z.string().min(1, '标题不能为空'),
   description: z.string().optional(),
   backlogType: z.enum(backlogTypeEnums as [string, ...string[]]),
   priority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]),
   deadline: z.string().optional(),
-  estimateWorkload: z.number().optional(),
+  estimateWorkload: z
+    .union([z.string(), z.number()])
+    .transform((val) => (val === '' ? undefined : typeof val === 'string' ? Number(val) : val))
+    .optional(),
 })
 
 export const updateBacklogSchema = z.object({
-  title: z.string().optional(),
+  id: z.string(),
+  title: z.string().min(1, '标题不能为空').optional(),
   description: z.string().optional(),
-  backlogType: z.enum().optional(),
-  priority: z.string().optional(),
+  backlogType: z.enum(backlogTypeEnums as [string, ...string[]]).optional(),
+  priority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
   deadline: z.string().optional(),
-  estimateWorkload: z.number().optional(),
+  estimateWorkload: z
+    .union([z.string(), z.number()])
+    .transform((val) => (val === '' ? undefined : typeof val === 'string' ? Number(val) : val))
+    .optional(),
 })
 
-export type GetTasksSchema = z.infer<typeof getBacklogsSchema>
-export type CreateTaskSchema = z.infer<typeof createBacklogSchema>
-export type UpdateTaskSchema = z.infer<typeof updateBacklogSchema>
+export type CreateBacklogSchema = z.infer<typeof createBacklogSchema>
+export type UpdateBacklogSchema = z.infer<typeof updateBacklogSchema>
 
 export const BacklogSchema = z.object({
   id: z.string(),

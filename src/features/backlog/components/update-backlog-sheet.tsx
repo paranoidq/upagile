@@ -3,13 +3,14 @@
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconFlag3 } from '@tabler/icons-react'
+import { IconFlag3Filled } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
 import { Loader } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Sheet,
@@ -21,40 +22,52 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { Backlog, updateBacklogSchema, UpdateTaskSchema } from '../types'
+import { useUpdateBacklog } from '../services'
+import { Backlog, updateBacklogSchema, UpdateBacklogSchema } from '../types'
 
 interface UpdateBacklogSheetProps extends React.ComponentPropsWithRef<typeof Sheet> {
   backlog: Backlog | null
 }
 
 export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProps) {
-  const [isUpdatePending, startUpdateTransition] = React.useTransition()
+  const { mutateAsync: updateBacklog, isPending: isUpdatePending } = useUpdateBacklog()
 
-  const form = useForm<UpdateTaskSchema>({
+  const form = useForm<UpdateBacklogSchema>({
     resolver: zodResolver(updateBacklogSchema),
-    defaultValues: {
-      title: backlog?.title ?? '',
-      priority: backlog?.priority,
-    },
   })
 
-  function onSubmit(input: UpdateTaskSchema) {
-    startUpdateTransition(async () => {
-      if (!backlog) return
+  // 关键修复：当 backlog 变化时重置表单
+  React.useEffect(() => {
+    if (backlog) {
+      form.reset({
+        id: backlog.id,
+        title: backlog.title ?? '',
+        description: backlog?.description ?? '',
+        backlogType: backlog?.backlogType,
+        priority: backlog?.priority,
+        deadline: backlog?.deadline,
+        estimateWorkload: backlog?.estimateWorkload,
+      })
+    }
+  }, [backlog])
 
-      // const { error } = await updateBacklog({
-      //   id: backlog.id,
-      //   ...input,
-      // })
+  function onSubmit(input: UpdateBacklogSchema) {
+    // 确保 title 有值
+    const data = {
+      ...input,
+      title: input.title || backlog?.title || '',
+    }
 
-      // if (error) {
-      //   toast.error(error)
-      //   return
-      // }
-
-      form.reset()
-      props.onOpenChange?.(false)
-      toast.success('Task updated')
+    toast.promise(updateBacklog(data), {
+      loading: 'Updating backlog...',
+      success: () => {
+        form.reset()
+        props.onOpenChange?.(false)
+        return 'Backlog updated'
+      },
+      error: (error) => {
+        return 'Failed to update backlog' + error.message
+      },
     })
   }
 
@@ -62,11 +75,26 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
     <Sheet {...props}>
       <SheetContent className='flex flex-col gap-6 sm:max-w-md'>
         <SheetHeader className='text-left'>
-          <SheetTitle>Update task</SheetTitle>
-          <SheetDescription>Update the task details and save the changes</SheetDescription>
+          <SheetTitle>Update backlog</SheetTitle>
+          <SheetDescription>Update the backlog details and save the changes</SheetDescription>
         </SheetHeader>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+            <FormField
+              control={form.control}
+              name='id'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ID</FormLabel>
+                  <FormControl>
+                    <Input placeholder='' {...field} disabled />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name='title'
@@ -74,12 +102,27 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Textarea placeholder='Do a kickflip' className='resize-none' {...field} />
+                    <Textarea className='resize-none' placeholder='' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name='description'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder='' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name='priority'
@@ -97,8 +140,8 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
                         {PRIORITIES.map((item) => (
                           <SelectItem key={item.value} value={item.value} className='capitalize'>
                             <div className='flex items-center gap-2'>
-                              <IconFlag3 className={cn(item.color)} />
-                              <span className={cn(item.color)}>{item.label}</span>
+                              <IconFlag3Filled className={cn(item.color)} />
+                              <span>{item.label}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -109,6 +152,35 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name='deadline'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Deadline</FormLabel>
+                  <FormControl>
+                    <Input type='date' placeholder='' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='estimateWorkload'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estimate Workload (hours)</FormLabel>
+                  <FormControl>
+                    <Input type='number' max={100} min={0} placeholder='' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <SheetFooter className='gap-2 pt-2 sm:space-x-0'>
               <SheetClose asChild>
                 <Button type='button' variant='outline'>

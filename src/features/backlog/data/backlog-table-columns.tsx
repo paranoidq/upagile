@@ -49,7 +49,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Backlog
       accessorKey: 'title',
       header: ({ column }) => <DataTableColumnHeader column={column} title='事项名称' />,
       cell: ({ row }) => {
-        return <span className='max-w-[31.25rem] truncate'>{row.getValue('title')}</span>
+        return <span className='max-w-[200px] truncate text-ellipsis'>{row.getValue('title')}</span>
       },
     },
     {
@@ -98,7 +98,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Backlog
       header: ({ column }) => <DataTableColumnHeader column={column} title='工作量' />,
       cell: ({ row }) => (
         <div className='w-[50px]'>
-          {(row.getValue('estimateWorkload') as number) < 0 ? '-' : row.getValue('estimateWorkload') + 'h'}
+          {(row.getValue('estimateWorkload') as number) < 0 ? '-' : row.getValue('estimateWorkload') + ' h'}
         </div>
       ),
     },
