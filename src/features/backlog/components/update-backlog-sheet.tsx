@@ -36,7 +36,7 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
     resolver: zodResolver(updateBacklogSchema),
   })
 
-  // 关键修复：当 backlog 变化时重置表单
+  // 当 backlog 变化时重置表单
   React.useEffect(() => {
     if (backlog) {
       form.reset({
