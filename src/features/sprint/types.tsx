@@ -8,10 +8,10 @@ export const sprintStatus: {
   color: string
   icon?: React.ReactNode
 }[] = [
-  { label: '未开始', value: 'planing', color: 'bg-gray-600', icon: <IconCircle /> },
-  { label: '进行中', value: 'active', color: 'bg-blue-600', icon: <IconRotateClockwise2 /> },
-  { label: '已完成', value: 'complete', color: 'bg-green-600', icon: <IconCheck /> },
-  { label: '已关闭', value: 'cancel', color: 'bg-red-600', icon: <IconX /> },
+  { label: '未开始', value: 'init', color: 'bg-gray-600', icon: <IconCircle /> },
+  { label: '进行中', value: 'progressing', color: 'bg-blue-600', icon: <IconRotateClockwise2 /> },
+  { label: '已完成', value: 'completed', color: 'bg-green-600', icon: <IconCheck /> },
+  { label: '已关闭', value: 'canceled', color: 'bg-red-600', icon: <IconX /> },
 ]
 
 export const createSprintSchema = z.object({

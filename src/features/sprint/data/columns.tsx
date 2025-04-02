@@ -1,5 +1,6 @@
 import React from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
+import { IconCalendar } from '@tabler/icons-react'
 import { Ellipsis } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -39,7 +40,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Sprint>
     {
       accessorKey: 'id',
       header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
-      cell: ({ cell }) => <div>{cell.getValue() as number}</div>,
+      cell: ({ cell }) => <div className='flex items-center gap-2'>{cell.getValue() as number}</div>,
       enableHiding: false,
       size: 100,
     },
@@ -47,21 +48,33 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Sprint>
       accessorKey: 'title',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Sprint名称' />,
       cell: ({ row }) => {
-        return <span className='max-w-[400px] truncate text-ellipsis'>{row.getValue('title')}</span>
+        return (
+          <div className='flex items-center gap-2'>
+            <span className='max-w-[400px] truncate text-ellipsis'>{row.getValue('title')}</span>
+            {/* <IconEdit className='size-4 bg-gray-200 rounded-full p-0.5' /> */}
+          </div>
+        )
       },
-      size: Number.MAX_SAFE_INTEGER,
     },
     {
       accessorKey: 'startTime',
       header: ({ column }) => <DataTableColumnHeader column={column} title='开始时间' />,
-      cell: ({ cell }) => <div>{formatDate(cell.getValue() as string)}</div>,
-      minSize: 100,
+      cell: ({ cell }) => (
+        <div className='flex items-center gap-2'>
+          <IconCalendar className='size-4' />
+          {formatDate(cell.getValue() as string)}
+        </div>
+      ),
     },
     {
       accessorKey: 'endTime',
       header: ({ column }) => <DataTableColumnHeader column={column} title='结束时间' />,
-      cell: ({ cell }) => <div className='w-[100px]'>{formatDate(cell.getValue() as string)}</div>,
-      minSize: 100,
+      cell: ({ cell }) => (
+        <div className='flex items-center gap-2'>
+          <IconCalendar className='size-4' />
+          {formatDate(cell.getValue() as string)}
+        </div>
+      ),
     },
     {
       accessorKey: 'status',
