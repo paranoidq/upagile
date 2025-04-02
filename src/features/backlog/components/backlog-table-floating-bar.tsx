@@ -73,7 +73,7 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
 
                 toast.promise(
                   updateBacklogs({
-                    ids: rows.map((row) => Number(row.original.id)),
+                    ids: rows.map((row) => String(row.original.id)),
                     priority: value,
                   }),
                   {
