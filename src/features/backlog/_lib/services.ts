@@ -30,7 +30,7 @@ export const updateBacklog = async (backlog: Backlog): Promise<void> => {
 }
 
 // 批量修改backlog
-export const updateBacklogs = async ({
+export const bacthUpdateBacklog = async ({
   ids,
   priority,
 }: {
@@ -40,10 +40,10 @@ export const updateBacklogs = async ({
   await http.post('backlogs/update/batch', { ids, priority })
 }
 
-export const useUpdateBacklogs = () => {
+export const useBatchUpdateBacklog = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: updateBacklogs,
+    mutationFn: bacthUpdateBacklog,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backlogs'] })
     },

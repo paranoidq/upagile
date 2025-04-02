@@ -10,11 +10,11 @@ import { Header } from '@/components/layout/header.tsx'
 import { Main } from '@/components/layout/main.tsx'
 import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
 import { ThemeSwitch } from '@/components/theme-switch.tsx'
+import { useBacklogs } from './_lib/services'
 import { BacklogTableFloatingBar } from './components/backlog-table-floating-bar'
 import { DeleteBacklogsDialog } from './components/delete-backlog-dialog'
 import { UpdateBacklogSheet } from './components/update-backlog-sheet'
-import { getColumns } from './data/backlog-table-columns'
-import { useBacklogs } from './services'
+import { getColumns } from './data/columns'
 import { Backlog } from './types'
 
 const BacklogPage: FC = () => {

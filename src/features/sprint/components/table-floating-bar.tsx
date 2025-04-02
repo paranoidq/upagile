@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { SelectTrigger } from '@radix-ui/react-select'
 import type { Table } from '@tanstack/react-table'
-import { PRIORITIES } from '@/consts/enums'
 import { ArrowUp, Loader, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -10,14 +9,14 @@ import { Select, SelectContent, SelectGroup, SelectItem } from '@/components/ui/
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Kbd } from '@/components/kbd'
-import { useBatchUpdateBacklog, useDeleteBacklogs } from '../_lib/services'
-import { Backlog } from '../types'
+import { useDeleteSprints, useUpdateSprints } from '../_lib/services'
+import { Sprint, sprintStatus } from '../types'
 
-interface BacklogTableFloatingBarProps {
-  table: Table<Backlog>
+interface SprintTableFloatingBarProps {
+  table: Table<Sprint>
 }
 
-export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps) {
+export function SprintTableFloatingBar({ table }: SprintTableFloatingBarProps) {
   const rows = table.getFilteredSelectedRowModel().rows
 
   const [action, setAction] = React.useState<'update-status' | 'update-priority' | 'export' | 'delete'>()
@@ -34,9 +33,9 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [table])
 
-  const { mutateAsync: updateBacklogs, isPending: isUpdatingBacklogs } = useBatchUpdateBacklog()
+  const { mutateAsync: updateSprints, isPending: isUpdatingSprints } = useUpdateSprints()
 
-  const { mutateAsync: deleteBacklogs, isPending: isDeletingBacklogs } = useDeleteBacklogs()
+  const { mutateAsync: deleteSprints, isPending: isDeletingSprints } = useDeleteSprints()
 
   return (
     <Portal>
@@ -68,18 +67,18 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
             <Separator orientation='vertical' className='hidden h-5 sm:block' />
 
             <Select
-              onValueChange={(value: Backlog['priority']) => {
-                setAction('update-priority')
+              onValueChange={(value: Sprint['status']) => {
+                setAction('update-status')
 
                 toast.promise(
-                  updateBacklogs({
-                    ids: rows.map((row) => String(row.original.id)),
-                    priority: value,
+                  updateSprints({
+                    ids: rows.map((row) => Number(row.original.id)),
+                    status: value,
                   }),
                   {
-                    loading: 'Updating backlogs...',
-                    success: 'Backlogs updated',
-                    error: 'Failed to update backlogs',
+                    loading: 'Updating sprints...',
+                    success: 'Sprints updated',
+                    error: 'Failed to update sprints',
                   },
                 )
               }}
@@ -91,9 +90,9 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
                       variant='secondary'
                       size='icon'
                       className='size-7 border data-[state=open]:bg-accent data-[state=open]:text-accent-foreground'
-                      disabled={isUpdatingBacklogs}
+                      disabled={isUpdatingSprints}
                     >
-                      {isUpdatingBacklogs && action === 'update-priority' ? (
+                      {isUpdatingSprints && action === 'update-status' ? (
                         <Loader className='size-3.5 animate-spin' aria-hidden='true' />
                       ) : (
                         <ArrowUp className='size-3.5' aria-hidden='true' />
@@ -102,14 +101,21 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
                   </TooltipTrigger>
                 </SelectTrigger>
                 <TooltipContent className='border bg-accent font-semibold text-foreground dark:bg-zinc-900'>
-                  <p>Update priority</p>
+                  <p>Update status</p>
                 </TooltipContent>
               </Tooltip>
               <SelectContent align='center'>
                 <SelectGroup>
-                  {PRIORITIES.map((priority) => (
-                    <SelectItem key={priority.value} value={priority.value} className='capitalize'>
-                      {priority.label}
+                  {sprintStatus.map((item) => (
+                    <SelectItem key={item.value} value={item.value} className='capitalize'>
+                      <div className='flex items-center gap-2'>
+                        <div
+                          className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${item?.color || ''} text-white`}
+                        >
+                          {item?.icon}
+                        </div>
+                        <span className='inline-flex items-center'>{item?.label}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -126,22 +132,27 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
                     setAction('delete')
 
                     toast.promise(
-                      deleteBacklogs({
+                      deleteSprints({
                         ids: rows.map((row) => Number(row.original.id)),
                       }),
                       {
-                        loading: 'Deleting backlogs...',
+                        loading: 'Deleting sprints...',
                         success: () => {
                           table.toggleAllRowsSelected(false)
-                          return 'Backlogs deleted'
+                          return 'Sprints deleted'
                         },
-                        error: 'Failed to delete backlogs',
+                        error: (e) => {
+                          return {
+                            message: e.msg,
+                            description: e.reason,
+                          }
+                        },
                       },
                     )
                   }}
-                  disabled={isDeletingBacklogs}
+                  disabled={isDeletingSprints}
                 >
-                  {isDeletingBacklogs && action === 'delete' ? (
+                  {isDeletingSprints && action === 'delete' ? (
                     <Loader className='size-3.5 animate-spin' aria-hidden='true' />
                   ) : (
                     <Trash2 className='size-3.5' aria-hidden='true' />
@@ -149,7 +160,7 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
                 </Button>
               </TooltipTrigger>
               <TooltipContent className='border bg-accent font-semibold text-foreground dark:bg-zinc-900'>
-                <p>Delete backlogs</p>
+                <p>Delete sprints</p>
               </TooltipContent>
             </Tooltip>
           </div>

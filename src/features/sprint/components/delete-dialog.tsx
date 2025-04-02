@@ -15,34 +15,36 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { useDeleteBacklogs } from '../_lib/services'
-import { Backlog } from '../types'
+import { useDeleteSprints } from '../_lib/services'
+import { Sprint } from '../types'
 
-interface DeleteBacklogsDialogProps extends React.ComponentPropsWithoutRef<typeof Dialog> {
-  backlogs: Row<Backlog>['original'][]
+interface DeleteSprintsDialogProps extends React.ComponentPropsWithoutRef<typeof Dialog> {
+  sprints: Row<Sprint>['original'][]
   showTrigger?: boolean
   onSuccess?: () => void
 }
 
-export function DeleteBacklogsDialog({ backlogs, showTrigger = true, onSuccess, ...props }: DeleteBacklogsDialogProps) {
-  const { mutateAsync: deleteBacklogs, isPending: isDeletePending } = useDeleteBacklogs()
+export function DeleteSprintsDialog({ sprints, showTrigger = true, onSuccess, ...props }: DeleteSprintsDialogProps) {
+  const { mutateAsync: deleteSprints, isPending: isDeletePending } = useDeleteSprints()
 
   function onDelete() {
-    // TODO: 这里有问题，isDeletePending 会一直为 true
     toast.promise(
-      deleteBacklogs({
-        ids: backlogs.map((backlog) => Number(backlog.id)),
+      deleteSprints({
+        ids: sprints.map((sprint) => Number(sprint.id)),
       }),
       {
-        loading: 'Deleting backlogs...',
+        loading: 'Deleting sprints...',
         success: () => {
           props.onOpenChange?.(false)
           onSuccess?.()
-          return 'Backlogs deleted'
+          return 'Sprints deleted'
         },
-        error: () => {
+        error: (e) => {
           props.onOpenChange?.(false)
-          return 'Failed to delete backlogs'
+          return {
+            message: e.msg,
+            description: e.reason,
+          }
         },
       },
     )
@@ -53,7 +55,7 @@ export function DeleteBacklogsDialog({ backlogs, showTrigger = true, onSuccess, 
         <DialogTrigger asChild>
           <Button variant='outline' size='sm'>
             <Trash className='mr-2 size-4' aria-hidden='true' />
-            Delete ({backlogs.length})
+            Delete ({sprints.length})
           </Button>
         </DialogTrigger>
       ) : null}
@@ -62,8 +64,8 @@ export function DeleteBacklogsDialog({ backlogs, showTrigger = true, onSuccess, 
           <DialogTitle>Are you absolutely sure?</DialogTitle>
           <DialogDescription>
             This action cannot be undone. This will permanently delete your{' '}
-            <span className='font-medium'>{backlogs.length}</span>
-            {backlogs.length === 1 ? ' backlog' : ' backlogs'} from our servers.
+            <span className='font-medium'>{sprints.length}</span>
+            {sprints.length === 1 ? ' sprint' : ' sprints'} from our servers.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className='gap-2 sm:space-x-0'>

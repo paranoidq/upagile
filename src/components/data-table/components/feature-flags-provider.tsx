@@ -13,7 +13,7 @@ interface FeatureFlagsContextProps {
 }
 
 const FeatureFlagsContext = React.createContext<FeatureFlagsContextProps>({
-  featureFlags: [],
+  featureFlags: ['advancedTable', 'floatingBar'],
   setFeatureFlags: () => {},
 })
 
@@ -31,7 +31,7 @@ interface FeatureFlagsProviderProps {
 
 export function FeatureFlagsProvider({ children }: FeatureFlagsProviderProps) {
   const [featureFlags, setFeatureFlags] = useQueryState<FeatureFlagValue[]>('flags', {
-    defaultValue: [],
+    defaultValue: ['advancedTable', 'floatingBar'],
     parse: (value) => value.split(',') as FeatureFlagValue[],
     serialize: (value) => value.join(','),
     eq: (a, b) => a.length === b.length && a.every((value, index) => value === b[index]),

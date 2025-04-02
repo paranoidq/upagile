@@ -3,11 +3,8 @@
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconFlag3Filled } from '@tabler/icons-react'
-import { PRIORITIES } from '@/consts/enums'
 import { Loader } from 'lucide-react'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -22,51 +19,51 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { useUpdateBacklog } from '../_lib/services'
-import { Backlog, updateBacklogSchema, UpdateBacklogSchema } from '../types'
+import { useUpdateSprint } from '../_lib/services'
+import { Sprint, sprintStatus, updateSprintSchema, UpdateSprintSchema } from '../types'
 
-interface UpdateBacklogSheetProps extends React.ComponentPropsWithRef<typeof Sheet> {
-  backlog: Backlog | null
+interface UpdateSprintSheetProps extends React.ComponentPropsWithRef<typeof Sheet> {
+  sprint: Sprint | null
 }
 
-export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProps) {
-  const { mutateAsync: updateBacklog, isPending: isUpdatePending } = useUpdateBacklog()
+export function UpdateSprintSheet({ sprint, ...props }: UpdateSprintSheetProps) {
+  const { mutateAsync: updateSprint, isPending: isUpdatePending } = useUpdateSprint()
 
-  const form = useForm<UpdateBacklogSchema>({
-    resolver: zodResolver(updateBacklogSchema),
+  const form = useForm<UpdateSprintSchema>({
+    resolver: zodResolver(updateSprintSchema),
   })
 
   // 当 backlog 变化时重置表单
   React.useEffect(() => {
-    if (backlog) {
+    if (sprint) {
       form.reset({
-        id: backlog.id,
-        title: backlog.title ?? '',
-        description: backlog?.description ?? '',
-        backlogType: backlog?.backlogType,
-        priority: backlog?.priority,
-        deadline: backlog?.deadline,
-        estimateWorkload: backlog?.estimateWorkload,
+        id: sprint.id,
+        title: sprint.title ?? '',
+        description: sprint?.description ?? '',
+        startTime: sprint?.startTime,
+        endTime: sprint?.endTime,
+        status: sprint?.status,
+        teamId: sprint?.teamId,
       })
     }
-  }, [backlog])
+  }, [sprint])
 
-  function onSubmit(input: UpdateBacklogSchema) {
+  function onSubmit(input: UpdateSprintSchema) {
     // 确保 title 有值
     const data = {
       ...input,
-      title: input.title || backlog?.title || '',
+      title: input.title || sprint?.title || '',
     }
 
-    toast.promise(updateBacklog(data), {
-      loading: 'Updating backlog...',
+    toast.promise(updateSprint(data), {
+      loading: 'Updating sprint...',
       success: () => {
         form.reset()
         props.onOpenChange?.(false)
-        return 'Backlog updated'
+        return 'Sprint updated'
       },
       error: (error) => {
-        return 'Failed to update backlog' + error.message
+        return 'Failed to update sprint' + error.message
       },
     })
   }
@@ -75,8 +72,8 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
     <Sheet {...props}>
       <SheetContent className='flex flex-col gap-6 sm:max-w-md'>
         <SheetHeader className='text-left'>
-          <SheetTitle>Update backlog</SheetTitle>
-          <SheetDescription>Update the backlog details and save the changes</SheetDescription>
+          <SheetTitle>Update sprint</SheetTitle>
+          <SheetDescription>Update the sprint details and save the changes</SheetDescription>
         </SheetHeader>
 
         <Form {...form}>
@@ -125,10 +122,10 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
 
             <FormField
               control={form.control}
-              name='priority'
+              name='status'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Priority</FormLabel>
+                  <FormLabel>Status</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger className='capitalize'>
@@ -137,11 +134,15 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
                     </FormControl>
                     <SelectContent>
                       <SelectGroup>
-                        {PRIORITIES.map((item) => (
+                        {sprintStatus.map((item) => (
                           <SelectItem key={item.value} value={item.value} className='capitalize'>
                             <div className='flex items-center gap-2'>
-                              <IconFlag3Filled className={cn(item.color)} />
-                              <span>{item.label}</span>
+                              <div
+                                className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${item?.color || ''} text-white`}
+                              >
+                                {item?.icon}
+                              </div>
+                              <span className='inline-flex items-center'>{item?.label}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -155,10 +156,10 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
 
             <FormField
               control={form.control}
-              name='deadline'
+              name='startTime'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Deadline</FormLabel>
+                  <FormLabel>Start Time</FormLabel>
                   <FormControl>
                     <Input type='date' placeholder='' {...field} />
                   </FormControl>
@@ -169,10 +170,24 @@ export function UpdateBacklogSheet({ backlog, ...props }: UpdateBacklogSheetProp
 
             <FormField
               control={form.control}
-              name='estimateWorkload'
+              name='endTime'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Estimate Workload (hours)</FormLabel>
+                  <FormLabel>End Time</FormLabel>
+                  <FormControl>
+                    <Input type='date' placeholder='' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='teamId'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Team</FormLabel>
                   <FormControl>
                     <Input type='number' max={100} min={0} placeholder='' {...field} />
                   </FormControl>
