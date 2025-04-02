@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTeamStore } from '@/stores/teamStore'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -28,6 +29,7 @@ interface UpdateSprintSheetProps extends React.ComponentPropsWithRef<typeof Shee
 
 export function UpdateSprintSheet({ sprint, ...props }: UpdateSprintSheetProps) {
   const { mutateAsync: updateSprint, isPending: isUpdatePending } = useUpdateSprint()
+  const { teams } = useTeamStore()
 
   const form = useForm<UpdateSprintSchema>({
     resolver: zodResolver(updateSprintSchema),
@@ -43,7 +45,7 @@ export function UpdateSprintSheet({ sprint, ...props }: UpdateSprintSheetProps) 
         startTime: sprint?.startTime,
         endTime: sprint?.endTime,
         status: sprint?.status,
-        teamId: sprint?.teamId,
+        teamId: sprint?.team?.id,
       })
     }
   }, [sprint])
@@ -189,7 +191,20 @@ export function UpdateSprintSheet({ sprint, ...props }: UpdateSprintSheetProps) 
                 <FormItem>
                   <FormLabel>Team</FormLabel>
                   <FormControl>
-                    <Input type='number' max={100} min={0} placeholder='' {...field} />
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select a team' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {teams.map((team) => (
+                          <SelectItem key={team.id} value={team.id}>
+                            {team.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
