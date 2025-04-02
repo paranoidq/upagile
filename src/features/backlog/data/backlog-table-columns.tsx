@@ -91,7 +91,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Backlog
     {
       accessorKey: 'deadline',
       header: ({ column }) => <DataTableColumnHeader column={column} title='截止时间' />,
-      cell: ({ cell }) => <div className='w-[100px]'>{formatDate(cell.getValue() as Date)}</div>,
+      cell: ({ cell }) => <div className='w-[100px]'>{formatDate(cell.getValue() as string)}</div>,
     },
     {
       accessorKey: 'estimateWorkload',
