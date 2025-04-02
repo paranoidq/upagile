@@ -16,9 +16,9 @@ import {
   IconNotification,
   IconPackages,
   IconPalette,
-  IconRocket,
   IconServerOff,
   IconSettings,
+  IconTargetArrow,
   IconTool,
   IconUserCog,
   IconUserOff,
@@ -56,7 +56,7 @@ export const getSidebarData = (): SidebarData => {
           {
             title: 'Release',
             url: '/release',
-            icon: IconRocket,
+            icon: IconTargetArrow,
           },
           // {
           //   title: 'Workspace',
