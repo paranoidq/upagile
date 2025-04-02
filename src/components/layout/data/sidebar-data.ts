@@ -3,11 +3,11 @@ import {
   IconBrowserCheck,
   IconBug,
   IconChecklist,
+  IconCube,
   IconError404,
   IconFlag,
-  IconFolderPlus,
   IconHelp,
-  IconHome,
+  IconHomeShield,
   IconLayoutDashboard,
   IconListCheck,
   IconLock,
@@ -34,29 +34,14 @@ export const getSidebarData = (): SidebarData => {
         title: 'General',
         items: [
           {
-            title: 'Backlog',
-            url: '/backlog',
-            icon: IconListCheck,
-          },
-          {
             title: 'Dashboard',
             url: '/dashboard',
             icon: IconLayoutDashboard,
           },
           {
-            title: 'Workspace',
-            url: '/workspace',
-            icon: IconHome,
-          },
-          {
-            title: 'Project',
-            url: '/project',
-            icon: IconPackages,
-          },
-          {
-            title: 'Requirement',
-            url: '/requirement',
-            icon: IconFolderPlus,
+            title: 'Backlog',
+            url: '/backlog',
+            icon: IconListCheck,
           },
           {
             title: 'Issue',
@@ -73,10 +58,45 @@ export const getSidebarData = (): SidebarData => {
             url: '/release',
             icon: IconRocket,
           },
+          // {
+          //   title: 'Workspace',
+          //   url: '/workspace',
+          //   icon: IconHome,
+          // },
+          // {
+          //   title: 'Project',
+          //   url: '/project',
+          //   icon: IconPackages,
+          // },
+          // {
+          //   title: 'Requirement',
+          //   url: '/requirement',
+          //   icon: IconFolderPlus,
+          // },
         ],
       },
       {
-        title: 'Pages',
+        title: 'Workspaces',
+        items: [
+          {
+            title: 'My Workspace(private)',
+            url: '/my-workspace',
+            icon: IconHomeShield,
+          },
+          {
+            title: '生活缴费',
+            url: '/workspace/1',
+            icon: IconCube,
+          },
+          {
+            title: '内容转接',
+            url: '/workspace/2',
+            icon: IconCube,
+          },
+        ],
+      },
+      {
+        title: 'AAA',
         items: [
           {
             title: 'Dashboard',
