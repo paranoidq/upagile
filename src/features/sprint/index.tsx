@@ -19,8 +19,6 @@ import { Sprint, sprintStatus } from './types'
 const SprintPage: FC = () => {
   const { data: sprints, isLoading } = useSprints()
 
-  console.log(sprints)
-
   return (
     <>
       {/* common header */}
