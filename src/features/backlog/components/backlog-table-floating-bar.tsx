@@ -1,9 +1,11 @@
 import * as React from 'react'
 import { SelectTrigger } from '@radix-ui/react-select'
 import type { Table } from '@tanstack/react-table'
+import { IconFlag3Filled } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
 import { ArrowUp, Loader, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Portal } from '@/components/ui/portal'
 import { Select, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select'
@@ -107,9 +109,15 @@ export function BacklogTableFloatingBar({ table }: BacklogTableFloatingBarProps)
               </Tooltip>
               <SelectContent align='center'>
                 <SelectGroup>
-                  {PRIORITIES.map((priority) => (
-                    <SelectItem key={priority.value} value={priority.value} className='capitalize'>
-                      {priority.label}
+                  {PRIORITIES.map((item) => (
+                    <SelectItem key={item.value} value={item.value} className='capitalize'>
+                      <div className='flex items-center'>
+                        <IconFlag3Filled
+                          className={cn('mr-2 size-4 text-muted-foreground', item.color)}
+                          aria-hidden='true'
+                        />
+                        <span className='capitalize'>{item.label}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectGroup>

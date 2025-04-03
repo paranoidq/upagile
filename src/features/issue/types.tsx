@@ -34,7 +34,7 @@ export const issueType: {
 export const createIssueSchema = z.object({
   title: z.string().min(1, '标题不能为空'),
   description: z.string().optional(),
-  priorities: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
+  priority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
   sprintPriority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
   status: z.enum(issueStatus.map((status) => status.value) as [string, ...string[]]).optional(),
   type: z.enum(issueType.map((type) => type.value) as [string, ...string[]]).optional(),
@@ -59,9 +59,10 @@ export type CreateIssueSchema = z.infer<typeof createIssueSchema>
 export type UpdateIssueSchema = z.infer<typeof updateIssueSchema>
 
 export const BaseIssueSchema = z.object({
+  id: z.string(),
   title: z.string().min(1, '标题不能为空'),
   description: z.string().optional(),
-  priorities: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
+  priority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
   sprintPriority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
   status: z.enum(issueStatus.map((status) => status.value) as [string, ...string[]]).optional(),
   type: z.enum(issueType.map((type) => type.value) as [string, ...string[]]).optional(),
@@ -112,8 +113,8 @@ export const BaseIssueSchema = z.object({
 })
 
 export type Issue = z.infer<typeof BaseIssueSchema> & {
-  parent: Issue | null
-  children: Issue[]
+  parent: Issue | undefined
+  children: Issue[] | undefined
 }
 
 export const IssueSchema = BaseIssueSchema.extend({
