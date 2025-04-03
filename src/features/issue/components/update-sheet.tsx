@@ -6,6 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTeamStore } from '@/stores/teamStore'
+import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -146,7 +148,9 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
                         {issueType.map((item) => (
                           <SelectItem key={item.value} value={item.value} className='capitalize'>
                             <div className='flex items-center gap-2'>
-                              <span className='inline-flex items-center'>{item?.label}</span>
+                              <Badge variant='outline' className={cn('text-white font-semibold', item?.color)}>
+                                {item?.label}
+                              </Badge>
                             </div>
                           </SelectItem>
                         ))}

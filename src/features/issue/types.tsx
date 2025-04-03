@@ -17,18 +17,19 @@ export const issueStatus: {
 export const issueType: {
   label: string
   value: string
+  color: string
 }[] = [
-  { label: '待定', value: 'unset' },
-  { label: '需求', value: 'req' },
-  { label: '功能', value: 'feature' },
-  { label: '事务', value: 'task' },
-  { label: '缺陷', value: 'bug' },
-  { label: '评审', value: 'review' },
-  { label: '回顾', value: 'retro' },
-  { label: '调研', value: 'research' },
-  { label: '整理', value: 'doc' },
-  { label: '项目', value: 'project' },
-  { label: '其他', value: 'other' },
+  { label: '待定', value: 'unset', color: 'bg-gray-600' },
+  { label: '需求', value: 'req', color: 'bg-blue-600' },
+  { label: '功能', value: 'feature', color: 'bg-green-600' },
+  { label: '事务', value: 'task', color: 'bg-red-600' },
+  { label: '缺陷', value: 'bug', color: 'bg-yellow-600' },
+  { label: '评审', value: 'review', color: 'bg-purple-600' },
+  { label: '回顾', value: 'retro', color: 'bg-pink-600' },
+  { label: '调研', value: 'research', color: 'bg-gray-600' },
+  { label: '整理', value: 'doc', color: 'bg-gray-600' },
+  { label: '项目', value: 'project', color: 'bg-gray-600' },
+  { label: '其他', value: 'other', color: 'bg-gray-600' },
 ]
 
 export const createIssueSchema = z.object({

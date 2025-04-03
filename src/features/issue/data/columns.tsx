@@ -1,10 +1,11 @@
 import React from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
-import { IconCalendar, IconFlag3Filled } from '@tabler/icons-react'
+import { IconCalendar, IconCube, IconFlag3Filled } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
 import { Ellipsis } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -66,7 +67,13 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
       cell: ({ cell }) => {
         const typeValue = cell.getValue() as string
         const type = issueType.find((t) => t.value === typeValue)
-        return <div className=''>{type?.label || typeValue}</div>
+        return (
+          <div className='flex items-center gap-2'>
+            <Badge variant='outline' className={cn('text-white font-semibold', type?.color)}>
+              {type?.label || typeValue}
+            </Badge>
+          </div>
+        )
       },
     },
     {
@@ -78,8 +85,11 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
         if (!priority) return null
 
         return (
-          <div className='flex items-center'>
-            <IconFlag3Filled className={cn('mr-2 size-4 text-muted-foreground', priority.color)} aria-hidden='true' />
+          <div className='flex items-center gap-2'>
+            <IconFlag3Filled
+              className={cn('size-4 text-muted-foreground cursor-pointer', priority.color)}
+              aria-hidden='true'
+            />
             <span className='capitalize'>{priority.label}</span>
           </div>
         )
@@ -96,9 +106,9 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
         const status = issueStatus.find((s) => s.value === statusValue)
 
         return (
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-2 w-[100px]'>
             <div
-              className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${status?.color || ''} text-white`}
+              className={`flex size-4 px-0.5 font-extrabold items-center justify-center cursor-pointer rounded-full ${status?.color || ''} text-white`}
             >
               {status?.icon}
             </div>
@@ -106,13 +116,12 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
           </div>
         )
       },
-      size: 100,
     },
     {
       accessorKey: 'assignee.id',
       header: ({ column }) => <DataTableColumnHeader column={column} title='负责人' />,
       cell: ({ row }) => (
-        <div className='w-[200px] flex items-center gap-2'>
+        <div className='w-[150px] flex items-center gap-2'>
           {row.original.assignees?.map((assignee) => (
             <TooltipProvider key={assignee.id} delayDuration={100}>
               <Tooltip>
@@ -138,7 +147,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
       header: ({ column }) => <DataTableColumnHeader column={column} title='开始时间' />,
       cell: ({ cell }) => (
         <div className='flex items-center gap-2'>
-          <IconCalendar className='size-4' />
+          <IconCalendar className='size-4 cursor-pointer' />
           {formatDate(cell.getValue() as string) || '-'}
         </div>
       ),
@@ -148,7 +157,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
       header: ({ column }) => <DataTableColumnHeader column={column} title='截止时间' />,
       cell: ({ cell }) => (
         <div className='flex items-center gap-2'>
-          <IconCalendar className='size-4' />
+          <IconCalendar className='size-4 cursor-pointer' />
           {formatDate(cell.getValue() as string) || '-'}
         </div>
       ),
@@ -156,7 +165,12 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
     {
       accessorKey: 'team.id',
       header: ({ column }) => <DataTableColumnHeader column={column} title='归属团队' />,
-      cell: ({ row }) => <div className='w-[100px]'>{row.original.team?.name}</div>,
+      cell: ({ row }) => (
+        <div className='w-[100px] truncate flex items-center gap-2'>
+          <IconCube className='size-4 cursor-pointer' />
+          <p>{row.original.team?.name}</p>
+        </div>
+      ),
     },
     {
       id: 'actions',
