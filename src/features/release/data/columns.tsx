@@ -3,9 +3,11 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { IconCalendar } from '@tabler/icons-react'
 import { Ellipsis } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DataTableColumnHeader } from '@/components/data-table/components/data-table-column-header'
 import { DataTableRowAction } from '@/components/data-table/types'
 import { Release, releaseStatus } from '../types'
@@ -116,7 +118,27 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Release
     {
       accessorKey: 'principal.name',
       header: ({ column }) => <DataTableColumnHeader column={column} title='负责人' />,
-      cell: ({ row }) => <div>{row?.original?.principal?.name || ''}</div>,
+      cell: ({ row }) => (
+        <div className='w-[50px] flex items-center gap-2'>
+          {row.original.principal?.name && (
+            <TooltipProvider key={row.original.principal.id} delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Avatar className='h-6 w-6 cursor-pointer'>
+                    <AvatarImage src={row.original.principal.avatar} />
+                    <AvatarFallback className='bg-gray-200 text-gray-400 text-[10px] font-bold'>
+                      {row.original.principal.name.slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{row.original.principal.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      ),
     },
     {
       id: 'actions',

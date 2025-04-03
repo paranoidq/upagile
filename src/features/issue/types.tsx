@@ -82,6 +82,7 @@ export const BaseIssueSchema = z.object({
       z.object({
         id: z.string(),
         name: z.string(),
+        avatar: z.string().optional(),
       }),
     )
     .optional(),

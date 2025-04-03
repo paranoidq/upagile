@@ -4,9 +4,11 @@ import { IconCalendar, IconFlag3Filled } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
 import { Ellipsis } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DataTableColumnHeader } from '@/components/data-table/components/data-table-column-header'
 import { DataTableRowAction } from '@/components/data-table/types'
 import { Issue, issueStatus, issueType } from '../types'
@@ -56,6 +58,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
           </div>
         )
       },
+      size: Number.MAX_SAFE_INTEGER,
     },
     {
       accessorKey: 'type',
@@ -63,7 +66,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
       cell: ({ cell }) => {
         const typeValue = cell.getValue() as string
         const type = issueType.find((t) => t.value === typeValue)
-        return <div className='w-[100px]'>{type?.label || typeValue}</div>
+        return <div className=''>{type?.label || typeValue}</div>
       },
     },
     {
@@ -86,26 +89,6 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
       },
     },
     {
-      accessorKey: 'startTime',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='开始时间' />,
-      cell: ({ cell }) => (
-        <div className='flex items-center gap-2'>
-          <IconCalendar className='size-4' />
-          {formatDate(cell.getValue() as string)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'deadline',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='截止时间' />,
-      cell: ({ cell }) => (
-        <div className='flex items-center gap-2'>
-          <IconCalendar className='size-4' />
-          {formatDate(cell.getValue() as string)}
-        </div>
-      ),
-    },
-    {
       accessorKey: 'status',
       header: ({ column }) => <DataTableColumnHeader column={column} title='状态' />,
       cell: ({ cell }) => {
@@ -124,6 +107,56 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
         )
       },
       size: 100,
+    },
+    {
+      accessorKey: 'assignee.id',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='负责人' />,
+      cell: ({ row }) => (
+        <div className='w-[200px] flex items-center gap-2'>
+          {row.original.assignees?.map((assignee) => (
+            <TooltipProvider key={assignee.id} delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Avatar className='h-6 w-6 cursor-pointer'>
+                    <AvatarImage src={assignee.avatar} />
+                    <AvatarFallback className='bg-gray-200 text-gray-400 text-[10px] font-bold'>
+                      {assignee.name.slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{assignee.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ))}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'startTime',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='开始时间' />,
+      cell: ({ cell }) => (
+        <div className='flex items-center gap-2'>
+          <IconCalendar className='size-4' />
+          {formatDate(cell.getValue() as string) || '-'}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'deadline',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='截止时间' />,
+      cell: ({ cell }) => (
+        <div className='flex items-center gap-2'>
+          <IconCalendar className='size-4' />
+          {formatDate(cell.getValue() as string) || '-'}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'team.id',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='归属团队' />,
+      cell: ({ row }) => <div className='w-[100px]'>{row.original.team?.name}</div>,
     },
     {
       id: 'actions',
