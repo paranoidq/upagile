@@ -1,0 +1,122 @@
+import React from 'react'
+import { z } from 'zod'
+import { IconCheck, IconCircle, IconRotateClockwise2, IconX } from '@tabler/icons-react'
+import { PRIORITIES } from '@/consts/enums'
+
+export const issueStatus: {
+  label: string
+  value: string
+  color: string
+  icon?: React.ReactNode
+}[] = [
+  { label: '未开始', value: 'init', color: 'bg-gray-600', icon: <IconCircle /> },
+  { label: '进行中', value: 'progressing', color: 'bg-blue-600', icon: <IconRotateClockwise2 /> },
+  { label: '已完成', value: 'completed', color: 'bg-green-600', icon: <IconCheck /> },
+  { label: '已取消', value: 'canceled', color: 'bg-red-600', icon: <IconX /> },
+]
+export const issueType: {
+  label: string
+  value: string
+}[] = [
+  { label: '待定', value: 'unset' },
+  { label: '需求', value: 'req' },
+  { label: '功能', value: 'feature' },
+  { label: '事务', value: 'task' },
+  { label: '缺陷', value: 'bug' },
+  { label: '评审', value: 'review' },
+  { label: '回顾', value: 'retro' },
+  { label: '调研', value: 'research' },
+  { label: '整理', value: 'doc' },
+  { label: '项目', value: 'project' },
+  { label: '其他', value: 'other' },
+]
+
+export const createIssueSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  description: z.string().optional(),
+  priorities: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
+  sprintPriority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
+  status: z.enum(issueStatus.map((status) => status.value) as [string, ...string[]]).optional(),
+  type: z.enum(issueType.map((type) => type.value) as [string, ...string[]]).optional(),
+  progress: z.number().min(0).max(100).optional(),
+  deadline: z.string().optional(),
+  startTime: z.string().optional(),
+  duration: z.number().optional(),
+  parentId: z.string().optional(),
+  inParentOrder: z.number().optional(),
+  teamId: z.string().optional(),
+  assigneeIds: z.array(z.string()).optional(),
+  labelsIds: z.array(z.string()).optional(),
+  sprintIds: z.array(z.string()).optional(),
+  releaseId: z.string().optional(),
+})
+
+export const updateIssueSchema = createIssueSchema.extend({
+  id: z.string(),
+})
+
+export type CreateIssueSchema = z.infer<typeof createIssueSchema>
+export type UpdateIssueSchema = z.infer<typeof updateIssueSchema>
+
+export const BaseIssueSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  description: z.string().optional(),
+  priorities: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
+  sprintPriority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
+  status: z.enum(issueStatus.map((status) => status.value) as [string, ...string[]]).optional(),
+  type: z.enum(issueType.map((type) => type.value) as [string, ...string[]]).optional(),
+  progress: z.number().min(0).max(100).optional(),
+  deadline: z.string().optional(),
+  startTime: z.string().optional(),
+  duration: z.number().optional(),
+  inParentOrder: z.number().optional(),
+  team: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+    })
+    .optional(),
+  assignees: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+      }),
+    )
+    .optional(),
+  labels: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        color: z.string().optional(),
+      }),
+    )
+    .optional(),
+  sprints: z
+    .array(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+      }),
+    )
+    .optional(),
+  release: z
+    .object({
+      id: z.string(),
+      title: z.string(),
+    })
+    .optional(),
+  createdTime: z.string().optional(),
+  modifiedTime: z.string().optional(),
+})
+
+export type Issue = z.infer<typeof BaseIssueSchema> & {
+  parent: Issue | null
+  children: Issue[]
+}
+
+export const IssueSchema = BaseIssueSchema.extend({
+  parent: BaseIssueSchema.optional(),
+  children: z.array(BaseIssueSchema).optional(),
+})
