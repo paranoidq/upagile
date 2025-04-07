@@ -154,7 +154,7 @@ const router = createBrowserRouter([
             element: <Release />,
           },
           {
-            path: 'workspace/:teamId/settings',
+            path: 'workspace/settings',
             element: <WorkspaceSettings />,
           },
         ],

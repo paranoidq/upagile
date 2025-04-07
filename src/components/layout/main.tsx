@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useTeamStore } from '@/stores/teamStore'
 import { cn } from '@/lib/utils'
-import { useListMyTeams } from '@/features/teams/_lib/services'
+import { useListMyTeams } from '@/features/workspace/_lib/services'
 
 interface MainProps extends React.HTMLAttributes<HTMLElement> {
   fixed?: boolean

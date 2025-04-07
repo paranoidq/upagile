@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { TeamType } from '@/features/teams/types'
+import { TeamType } from '@/features/workspace/types'
 
 interface TeamState {
   teams: TeamType[]

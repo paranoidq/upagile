@@ -23,7 +23,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { Textarea } from '@/components/ui/textarea'
-import { checkTeamNameExisted, useCreateTeam } from '@/features/teams/_lib/services'
+import { checkTeamNameExisted, useCreateTeam } from '@/features/workspace/_lib/services'
 
 const formSchema = z.object({
   name: z.string().min(1, '请输入团队名称'),

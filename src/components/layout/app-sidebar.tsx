@@ -4,7 +4,7 @@ import { useTeamStore } from '@/stores/teamStore'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar'
 import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
-import { useListMyTeams } from '@/features/teams/_lib/services'
+import { useListMyTeams } from '@/features/workspace/_lib/services'
 import { getSidebarData } from './data/sidebar-data'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

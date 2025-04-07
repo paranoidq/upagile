@@ -24,7 +24,7 @@ import {
   IconUserOff,
   IconUsers,
 } from '@tabler/icons-react'
-import { TeamType } from '@/features/teams/types'
+import { TeamType } from '@/features/workspace/types'
 import { type SidebarData } from '../types'
 
 // 创建一个函数来生成侧边栏数据

@@ -1,5 +1,4 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { IconSettings2 } from '@tabler/icons-react'
 import { ChevronRight, Plus } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -14,7 +13,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { CreateTeamDialog } from '@/features/teams/components/create-team-dialog'
+import { CreateTeamDialog } from '@/features/workspace/components/create-team-dialog'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import {
@@ -250,24 +249,6 @@ const SidebarMenuCollapsedDropdown = ({
     }
   }
 
-  // 处理设置按钮点击事件
-  const handleSettingsClick = (e: React.MouseEvent) => {
-    e.stopPropagation() // 阻止事件冒泡
-
-    // 从 URL 中提取 teamId
-    const teamId = item.url?.split('/').pop()
-    if (teamId) {
-      navigate(`/workspace/${teamId}/settings`)
-    }
-  }
-
-  // 检查是否为工作区项目
-  const isWorkspace =
-    item.url?.includes('/workspace/') &&
-    !item.url?.includes('/issues') &&
-    !item.url?.includes('/sprints') &&
-    !item.url?.includes('/releases')
-
   return (
     <SidebarMenuItem>
       <DropdownMenu>
@@ -280,15 +261,6 @@ const SidebarMenuCollapsedDropdown = ({
                 {item.badge && <NavBadge>{item.badge}</NavBadge>}
               </SidebarMenuButton>
             </div>
-            {isWorkspace && (
-              <div
-                className='p-1 rounded-full hover:bg-sidebar-accent cursor-pointer'
-                onClick={handleSettingsClick}
-                title={`${item.title} 设置`}
-              >
-                <IconSettings2 className='size-4 text-sidebar-foreground' />
-              </div>
-            )}
             <div className='ml-auto p-1'>
               <ChevronRight className='h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
             </div>
