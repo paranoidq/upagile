@@ -1,5 +1,7 @@
 import React, { type FC } from 'react'
 import { IconFlag3 } from '@tabler/icons-react'
+import { useParams } from 'react-router-dom'
+import { useTeamStore } from '@/stores/teamStore'
 import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
 import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/components/feature-flags-provider'
 import { DataTable } from '@/components/data-table/data-table'
@@ -17,14 +19,27 @@ import { getColumns } from './data/columns'
 import { Sprint, sprintStatus } from './types'
 
 const SprintPage: FC = () => {
+  const { teamId } = useParams()
+  const { teams } = useTeamStore()
   const { data: sprints, isLoading } = useSprints()
+
+  // 获取当前工作区名称
+  const workspaceName = teamId ? teams.find((t) => t.id === teamId)?.name || '工作区' : undefined
+
+  // 根据团队 ID 过滤数据
+  const filteredSprints = React.useMemo(() => {
+    if (!sprints) return []
+    if (!teamId) return sprints
+
+    return sprints.filter((sprint) => sprint.team?.id === teamId)
+  }, [sprints, teamId])
 
   return (
     <>
       {/* common header */}
       <Header fixed>
         <div className='flex items-center space-x-4'>
-          <span className='text-lg font-bold'>Sprints</span>
+          <span className='text-lg font-bold'>{workspaceName ? `${workspaceName} - Sprints` : 'Sprints'}</span>
         </div>
 
         <div className='ml-auto flex items-center space-x-4'>
@@ -34,7 +49,11 @@ const SprintPage: FC = () => {
       </Header>
       <Main>
         <FeatureFlagsProvider>
-          {isLoading ? <DataTableSkeleton columnCount={10} rowCount={10} /> : <SprintTable data={sprints ?? []} />}
+          {isLoading ? (
+            <DataTableSkeleton columnCount={10} rowCount={10} />
+          ) : (
+            <SprintTable data={filteredSprints ?? []} />
+          )}
         </FeatureFlagsProvider>
       </Main>
     </>

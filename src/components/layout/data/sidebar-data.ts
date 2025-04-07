@@ -24,10 +24,11 @@ import {
   IconUserOff,
   IconUsers,
 } from '@tabler/icons-react'
+import { TeamType } from '@/features/teams/types'
 import { type SidebarData } from '../types'
 
 // 创建一个函数来生成侧边栏数据
-export const getSidebarData = (): SidebarData => {
+export const getSidebarData = (teams: TeamType[] = []): SidebarData => {
   return {
     navGroups: [
       {
@@ -83,16 +84,28 @@ export const getSidebarData = (): SidebarData => {
             url: '/my-workspace',
             icon: IconHomeShield,
           },
-          {
-            title: '生活缴费',
-            url: '/workspace/1',
+          // 动态生成团队列表
+          ...teams.map((team) => ({
+            title: team.name,
             icon: IconCube,
-          },
-          {
-            title: '内容转接',
-            url: '/workspace/2',
-            icon: IconCube,
-          },
+            items: [
+              {
+                title: 'Issues',
+                url: `/workspace/${team.id}/issues`,
+                icon: IconChecklist,
+              },
+              {
+                title: 'Sprints',
+                url: `/workspace/${team.id}/sprints`,
+                icon: IconFlag,
+              },
+              {
+                title: 'Releases',
+                url: `/workspace/${team.id}/releases`,
+                icon: IconTargetArrow,
+              },
+            ],
+          })),
         ],
       },
       {

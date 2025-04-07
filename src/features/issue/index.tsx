@@ -1,5 +1,7 @@
 import React, { type FC } from 'react'
 import { IconFlag3 } from '@tabler/icons-react'
+import { useParams } from 'react-router-dom'
+import { useTeamStore } from '@/stores/teamStore'
 import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
 import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/components/feature-flags-provider'
 import { DataTable } from '@/components/data-table/data-table'
@@ -17,14 +19,27 @@ import { getColumns } from './data/columns'
 import { Issue, issueStatus } from './types'
 
 const IssuePage: FC = () => {
+  const { teamId } = useParams()
+  const { teams } = useTeamStore()
   const { data: issues, isLoading } = useIssues()
+
+  // 获取当前工作区名称
+  const workspaceName = teamId ? teams.find((t) => t.id === teamId)?.name || '工作区' : undefined
+
+  // 根据团队 ID 过滤数据
+  const filteredIssues = React.useMemo(() => {
+    if (!issues) return []
+    if (!teamId) return issues
+
+    return issues.filter((issue) => issue.team?.id === teamId)
+  }, [issues, teamId])
 
   return (
     <>
       {/* common header */}
       <Header fixed>
         <div className='flex items-center space-x-4'>
-          <span className='text-lg font-bold'>Issues</span>
+          <span className='text-lg font-bold'>{workspaceName ? `${workspaceName} - Issues` : 'Issues'}</span>
         </div>
 
         <div className='ml-auto flex items-center space-x-4'>
@@ -34,7 +49,11 @@ const IssuePage: FC = () => {
       </Header>
       <Main>
         <FeatureFlagsProvider>
-          {isLoading ? <DataTableSkeleton columnCount={10} rowCount={10} /> : <IssueTable data={issues ?? []} />}
+          {isLoading ? (
+            <DataTableSkeleton columnCount={10} rowCount={10} />
+          ) : (
+            <IssueTable data={filteredIssues ?? []} />
+          )}
         </FeatureFlagsProvider>
       </Main>
     </>

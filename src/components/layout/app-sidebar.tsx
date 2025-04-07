@@ -1,12 +1,24 @@
+import { useEffect } from 'react'
 import { useAuthStore } from '@/stores/authStore'
+import { useTeamStore } from '@/stores/teamStore'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar'
 import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
 import { TeamSwitcher } from '@/components/layout/team-switcher'
+import { useListMyTeams } from '@/features/teams/services'
 import { getSidebarData } from './data/sidebar-data'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuthStore().auth
+  const { data: teams, isLoading } = useListMyTeams()
+  const { setTeams, teams: storeTeams } = useTeamStore()
+
+  // 当获取到团队数据时，更新 store
+  useEffect(() => {
+    if (teams) {
+      setTeams(teams)
+    }
+  }, [teams, setTeams])
 
   // 如果 user 为空，尝试从 localStorage 获取
   let userData = user
@@ -21,13 +33,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }
 
+  // 使用 storeTeams 或 teams 来生成侧边栏数据
+  const teamsToUse = storeTeams.length > 0 ? storeTeams : teams || []
+
   const sidebarData = {
     user: {
       name: user?.name || 'Guest',
       email: user?.email || '',
       avatar: '/avatars/shadcn.jpg',
     },
-    navGroups: [...getSidebarData().navGroups],
+    navGroups: [...getSidebarData(teamsToUse).navGroups],
   }
 
   return (
@@ -36,8 +51,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        {sidebarData.navGroups.map((props) => (
-          <NavGroup key={props.title} {...props} />
+        {sidebarData.navGroups.map((props, index) => (
+          <NavGroup key={props.title || index} {...props} />
         ))}
       </SidebarContent>
       <SidebarFooter>

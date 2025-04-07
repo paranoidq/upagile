@@ -1,5 +1,7 @@
 import React, { type FC } from 'react'
 import { IconFlag3 } from '@tabler/icons-react'
+import { useParams } from 'react-router-dom'
+import { useTeamStore } from '@/stores/teamStore'
 import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
 import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/components/feature-flags-provider'
 import { DataTable } from '@/components/data-table/data-table'
@@ -17,14 +19,33 @@ import { getColumns } from './data/columns'
 import { Release, releaseStatus } from './types'
 
 const ReleasePage: FC = () => {
+  const { teamId } = useParams()
+  const { teams } = useTeamStore()
   const { data: releases, isLoading } = useReleases()
+
+  // 获取当前工作区名称
+  const workspaceName = teamId ? teams.find((t) => t.id === teamId)?.name || '工作区' : undefined
+
+  // 根据团队 ID 过滤数据
+  const filteredReleases = React.useMemo(() => {
+    if (!releases) return []
+    if (!teamId) return releases
+
+    // 假设 release 对象中有 application 字段，且 application 对象中有 teamId 字段
+    // 如果数据结构不同，请根据实际情况调整过滤条件
+    return releases.filter((release) => {
+      // 根据实际数据结构调整过滤条件
+      // 这里假设 release 通过 application.teamId 关联到团队
+      return release.application?.teamId === teamId
+    })
+  }, [releases, teamId])
 
   return (
     <>
       {/* common header */}
       <Header fixed>
         <div className='flex items-center space-x-4'>
-          <span className='text-lg font-bold'>Releases</span>
+          <span className='text-lg font-bold'>{workspaceName ? `${workspaceName} - Releases` : 'Releases'}</span>
         </div>
 
         <div className='ml-auto flex items-center space-x-4'>
@@ -34,7 +55,11 @@ const ReleasePage: FC = () => {
       </Header>
       <Main>
         <FeatureFlagsProvider>
-          {isLoading ? <DataTableSkeleton columnCount={10} rowCount={10} /> : <ReleaseTable data={releases ?? []} />}
+          {isLoading ? (
+            <DataTableSkeleton columnCount={10} rowCount={10} />
+          ) : (
+            <ReleaseTable data={filteredReleases ?? []} />
+          )}
         </FeatureFlagsProvider>
       </Main>
     </>

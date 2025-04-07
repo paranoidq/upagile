@@ -135,6 +135,23 @@ const router = createBrowserRouter([
               { path: 'notifications', element: <SettingsNotifications /> },
             ],
           },
+          { path: 'my-workspace', element: <Workspace /> },
+          {
+            path: 'workspace/:teamId',
+            element: <Workspace />,
+          },
+          {
+            path: 'workspace/:teamId/issues',
+            element: <Issue />,
+          },
+          {
+            path: 'workspace/:teamId/sprints',
+            element: <Sprint />,
+          },
+          {
+            path: 'workspace/:teamId/releases',
+            element: <Release />,
+          },
         ],
       },
       // 认证相关路由
