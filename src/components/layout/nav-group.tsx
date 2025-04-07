@@ -249,6 +249,14 @@ const SidebarMenuCollapsedDropdown = ({
     }
   }
 
+  // 处理箭头点击事件
+  const handleArrowClick = (e: React.MouseEvent) => {
+    // 阻止事件冒泡，避免触发工作区导航
+    e.stopPropagation()
+    // 展开当前项并折叠其他项
+    onExpand()
+  }
+
   return (
     <SidebarMenuItem>
       <DropdownMenu>
@@ -261,7 +269,7 @@ const SidebarMenuCollapsedDropdown = ({
                 {item.badge && <NavBadge>{item.badge}</NavBadge>}
               </SidebarMenuButton>
             </div>
-            <div className='ml-auto p-1'>
+            <div className='ml-auto p-1 cursor-pointer' onClick={handleArrowClick}>
               <ChevronRight className='h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
             </div>
           </div>

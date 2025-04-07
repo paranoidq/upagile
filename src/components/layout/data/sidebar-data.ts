@@ -83,6 +83,23 @@ export const getSidebarData = (teams: TeamType[] = []): SidebarData => {
             title: 'My Workspace(private)',
             url: '/my-workspace',
             icon: IconHomeShield,
+            items: [
+              {
+                title: 'Issues',
+                url: '/my-workspace/issues',
+                icon: IconChecklist,
+              },
+              {
+                title: 'Sprints',
+                url: '/my-workspace/sprints',
+                icon: IconFlag,
+              },
+              {
+                title: 'Releases',
+                url: '/my-workspace/releases',
+                icon: IconTargetArrow,
+              },
+            ],
           },
           // 动态生成团队列表
           ...teams.map((team) => ({

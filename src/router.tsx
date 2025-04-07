@@ -137,6 +137,9 @@ const router = createBrowserRouter([
             ],
           },
           { path: 'my-workspace', element: <Workspace /> },
+          { path: 'my-workspace/issues', element: <Issue /> },
+          { path: 'my-workspace/sprints', element: <Sprint /> },
+          { path: 'my-workspace/releases', element: <Release /> },
           {
             path: 'workspace/:teamId',
             element: <Workspace />,
