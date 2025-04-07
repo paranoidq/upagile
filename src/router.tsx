@@ -40,6 +40,7 @@ import Sprint from '@/features/sprint'
 import Tasks from '@/features/tasks'
 import Users from '@/features/users'
 import Workspace from '@/features/workspace'
+import WorkspaceSettings from '@/features/workspace/settings'
 
 // 认证布局组件
 function AuthenticatedLayout() {
@@ -151,6 +152,10 @@ const router = createBrowserRouter([
           {
             path: 'workspace/:teamId/releases',
             element: <Release />,
+          },
+          {
+            path: 'workspace/:teamId/settings',
+            element: <WorkspaceSettings />,
           },
         ],
       },
