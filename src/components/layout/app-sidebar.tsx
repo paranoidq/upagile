@@ -4,8 +4,7 @@ import { useTeamStore } from '@/stores/teamStore'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar'
 import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
-import { TeamSwitcher } from '@/components/layout/team-switcher'
-import { useListMyTeams } from '@/features/teams/services'
+import { useListMyTeams } from '@/features/teams/_lib/services'
 import { getSidebarData } from './data/sidebar-data'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -34,30 +33,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   // 使用 storeTeams 或 teams 来生成侧边栏数据
-  const teamsToUse = storeTeams.length > 0 ? storeTeams : teams || []
+  const myTeams = storeTeams.length > 0 ? storeTeams : teams || []
 
   const sidebarData = {
     user: {
       name: user?.name || 'Guest',
       email: user?.email || '',
-      avatar: '/avatars/shadcn.jpg',
+      avatar: user?.avatar || '',
     },
-    navGroups: [...getSidebarData(teamsToUse).navGroups],
+    navGroups: [...getSidebarData(myTeams).navGroups],
   }
 
   return (
-    <Sidebar collapsible='icon' variant='floating' {...props}>
+    <Sidebar {...props}>
       <SidebarHeader>
-        <TeamSwitcher />
+        <NavUser user={sidebarData.user} />
       </SidebarHeader>
       <SidebarContent>
-        {sidebarData.navGroups.map((props, index) => (
-          <NavGroup key={props.title || index} {...props} />
+        {sidebarData.navGroups.map((group) => (
+          <NavGroup key={group.title} {...group} />
         ))}
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={sidebarData.user} />
-      </SidebarFooter>
+      <SidebarFooter>{/* 可以在这里添加其他底部组件 */}</SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )

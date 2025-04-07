@@ -87,6 +87,7 @@ export const getSidebarData = (teams: TeamType[] = []): SidebarData => {
           // 动态生成团队列表
           ...teams.map((team) => ({
             title: team.name,
+            url: `/workspace/${team.id}`,
             icon: IconCube,
             items: [
               {

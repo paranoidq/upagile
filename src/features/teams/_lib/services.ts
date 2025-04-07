@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '@/lib/axios'
 import { toast } from '@/hooks/use-toast'
-import { teamSchema, TeamType } from '../types'
+import { CreateTeamType, teamSchema, TeamType } from '../types'
 
 export type Team = {
   id: string
@@ -18,7 +18,7 @@ const listMyTeams = async (): Promise<TeamType[]> => {
   return z.array(teamSchema).parse(response)
 }
 
-const createTeam = async (team: Omit<TeamType, 'id'>) => {
+const createTeam = async (team: CreateTeamType) => {
   const response = await http.post('/teams/save', team)
   if (!response) {
     return null

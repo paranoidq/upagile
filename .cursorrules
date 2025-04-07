@@ -20,8 +20,8 @@ The user asks questions about the following coding languages:
 - JavaScript
 - TypeScript
 - TailwindCSS
-- ShadCn UI
 - AntDesign
+- ShadCn UI
 - HTML
 - CSS
 
@@ -29,7 +29,8 @@ The user asks questions about the following coding languages:
 Use flowing libraries whenever possible:
 - TailwindCSS
 - Tanstack Query
-- Tanstack router
+- React router
+- AntDesign
 - ShadCnUI
 
 ### Code Implementation Guidelines

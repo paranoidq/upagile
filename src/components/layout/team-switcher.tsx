@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconCrown, IconNavigationBolt } from '@tabler/icons-react'
+import { IconNavigationBolt, IconStar } from '@tabler/icons-react'
 import { ChevronsUpDown, Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useDebouncedCallback } from 'use-debounce'
@@ -23,7 +23,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { Textarea } from '@/components/ui/textarea'
-import { checkTeamNameExisted, useCreateTeam } from '@/features/teams/services'
+import { checkTeamNameExisted, useCreateTeam } from '@/features/teams/_lib/services'
 
 const formSchema = z.object({
   name: z.string().min(1, '请输入团队名称'),
@@ -131,7 +131,7 @@ export function TeamSwitcher() {
                 {currentTeam && <IconNavigationBolt className='size-4' />}
               </div>
               <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-semibold'>{currentTeam?.name}</span>
+                <span className='truncate font-semibold'>XAgile</span>
               </div>
               <ChevronsUpDown className='ml-auto' />
             </SidebarMenuButton>
@@ -142,7 +142,7 @@ export function TeamSwitcher() {
             side={isMobile ? 'bottom' : 'right'}
             sideOffset={4}
           >
-            <DropdownMenuLabel className='text-xs text-muted-foreground'>Teams</DropdownMenuLabel>
+            <DropdownMenuLabel className='text-xs text-muted-foreground'>Workspaces</DropdownMenuLabel>
             {teams &&
               teams.map((team) => (
                 <DropdownMenuItem key={team.id} onClick={() => handleTeamChange(team.id)} className='gap-2 p-2'>
@@ -150,9 +150,9 @@ export function TeamSwitcher() {
                     <IconNavigationBolt className='size-4 shrink-0' />
                   </div>
                   {team.name}
-                  {team.owner.username === user?.username && (
-                    <IconCrown className='ml-auto size-4 shrink-0' fill='#FFD700' stroke='#FFD700' strokeWidth={1.5} />
-                  )}
+
+                  {/* 如果是当前用户创建的团队，则显示特殊图标 */}
+                  {team.owner.username === user?.username && <IconStar className='ml-auto size-4 shrink-0' />}
                 </DropdownMenuItem>
               ))}
             <DropdownMenuSeparator />
@@ -166,7 +166,7 @@ export function TeamSwitcher() {
               <div className='flex size-6 items-center justify-center rounded-md border bg-background'>
                 <Plus className='size-4' />
               </div>
-              <div className='font-medium text-muted-foreground'>添加团队</div>
+              <div className='font-medium text-muted-foreground'>添加Workspace</div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -176,7 +176,7 @@ export function TeamSwitcher() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>创建新团队</DialogTitle>
+            <DialogTitle>创建Workspace</DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleAddTeam)} className='space-y-4'>
@@ -185,7 +185,7 @@ export function TeamSwitcher() {
                 name='name'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>团队名称</FormLabel>
+                    <FormLabel>Workspace名称</FormLabel>
                     <FormControl>
                       <div className='relative'>
                         <Input placeholder='输入团队名称' {...field} />
@@ -196,7 +196,9 @@ export function TeamSwitcher() {
                         )}
                       </div>
                     </FormControl>
-                    {nameExists && <p className='text-sm font-medium text-destructive'>团队名称已存在，请换个名称吧</p>}
+                    {nameExists && (
+                      <p className='text-sm font-medium text-destructive'>Workspace名称已存在，请换个名称吧</p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -206,9 +208,9 @@ export function TeamSwitcher() {
                 name='description'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>团队描述</FormLabel>
+                    <FormLabel>Workspace描述</FormLabel>
                     <FormControl>
-                      <Textarea placeholder='输入团队描述（可选）' className='resize-none' {...field} />
+                      <Textarea placeholder='输入Workspace描述（可选）' className='resize-none' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

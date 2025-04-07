@@ -13,3 +13,10 @@ export const teamSchema = z.object({
 })
 
 export type TeamType = z.infer<typeof teamSchema>
+
+export const createTeamSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+})
+
+export type CreateTeamType = z.infer<typeof createTeamSchema>
