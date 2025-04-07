@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore'
 interface BaseResponse<T = unknown> {
   code: string
   data: T
-  message: string
+  msg: string
   reason: string
 }
 
@@ -49,14 +49,14 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   // Any status code that lie within the range of 2xx cause this function to trigger
   <T>(response: AxiosResponse<BaseResponse<T>>) => {
-    const { code, data, message, reason } = response.data
+    const { code, data, msg, reason } = response.data
 
     if (code === '0000000') {
       return data
     } else {
       return Promise.reject({
         code,
-        message,
+        msg,
         reason,
       })
     }

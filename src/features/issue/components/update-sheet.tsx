@@ -1,61 +1,54 @@
 'use client'
 
 import * as React from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader } from 'lucide-react'
+import { useEffect } from 'react'
+import { IconCube, IconFlagFilled } from '@tabler/icons-react'
+import { PRIORITIES } from '@/consts/enums'
+import { Button, DatePicker, Drawer, Form, Input, Select, Tag } from 'antd'
+import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { useTeamStore } from '@/stores/teamStore'
 import { cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
-import { Textarea } from '@/components/ui/textarea'
+import { Sheet } from '@/components/ui/sheet'
 import { useUpdateIssue } from '../_lib/services'
-import { Issue, issueStatus, issueType, updateIssueSchema, UpdateIssueSchema } from '../types'
+import { Issue, issueStatus, issueType, UpdateIssueSchema } from '../types'
 
 interface UpdateIssueSheetProps extends React.ComponentPropsWithRef<typeof Sheet> {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   issue: Issue | null
 }
 
+const formItemLayout = {
+  labelCol: {
+    span: 24,
+  },
+  wrapperCol: {
+    span: 24,
+  },
+}
 export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
   const { mutateAsync: updateIssue, isPending: isUpdatePending } = useUpdateIssue()
   const { teams } = useTeamStore()
 
-  const form = useForm<UpdateIssueSchema>({
-    resolver: zodResolver(updateIssueSchema),
-  })
+  const [form] = Form.useForm()
 
-  // 当 backlog 变化时重置表单
-  React.useEffect(() => {
+  const initialValues = {
+    id: issue?.id,
+    title: issue?.title,
+    description: issue?.description,
+    type: issue?.type,
+    status: issue?.status,
+    priority: issue?.priority,
+    // 确保日期值是 dayjs 对象或 null
+    startTime: issue?.startTime ? dayjs(issue.startTime) : null,
+    deadline: issue?.deadline ? dayjs(issue.deadline) : null,
+    teamId: issue?.team?.id,
+  }
+
+  useEffect(() => {
     if (issue) {
-      form.reset({
-        id: issue.id,
-        title: issue.title ?? '',
-        description: issue?.description ?? '',
-        status: issue?.status,
-        type: issue?.type,
-        priority: issue?.priority,
-        teamId: issue?.team?.id,
-        releaseId: issue?.release?.id,
-        deadline: issue?.deadline,
-        duration: issue?.duration,
-        inParentOrder: issue?.inParentOrder,
-        assigneeIds: issue?.assignees?.map((assignee) => assignee.id),
-        parentId: issue?.parent?.id,
-        sprintIds: issue?.sprints?.map((sprint) => sprint.id),
-      })
+      form.resetFields()
     }
   }, [issue])
 
@@ -64,207 +57,130 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
     const data = {
       ...input,
       title: input.title || issue?.title || '',
+      startTime: input.startTime ? dayjs(input.startTime).format('YYYY-MM-DD') : undefined,
+      deadline: input.deadline ? dayjs(input.deadline).format('YYYY-MM-DD') : undefined,
     }
 
     toast.promise(updateIssue(data), {
       loading: 'Updating issue...',
       success: () => {
-        form.reset()
         props.onOpenChange?.(false)
         return 'Issue updated'
       },
       error: (error) => {
-        return 'Failed to update issue' + error.message
+        return {
+          message: error.msg,
+          description: error.reason,
+        }
       },
     })
   }
 
   return (
-    <Sheet {...props}>
-      <SheetContent className='flex flex-col gap-6 sm:max-w-md'>
-        <SheetHeader className='text-left'>
-          <SheetTitle>Update issue</SheetTitle>
-          <SheetDescription>Update the issue details and save the changes</SheetDescription>
-        </SheetHeader>
+    <Drawer title='Update Issue' open={props.open} onClose={() => props.onOpenChange?.(false)} keyboard={true}>
+      <Form
+        form={form}
+        {...formItemLayout}
+        layout='vertical'
+        initialValues={initialValues}
+        onFinish={onSubmit}
+        autoComplete='off'
+      >
+        <Form.Item name='id' label='ID' hidden>
+          <Input />
+        </Form.Item>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
-            <FormField
-              control={form.control}
-              name='id'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ID</FormLabel>
-                  <FormControl>
-                    <Input placeholder='' {...field} disabled />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Form.Item name='title' label='Title'>
+          <Input />
+        </Form.Item>
 
-            <FormField
-              control={form.control}
-              name='title'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Textarea className='resize-none' placeholder='' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Form.Item name='description' label='Description'>
+          <Input.TextArea />
+        </Form.Item>
 
-            <FormField
-              control={form.control}
-              name='description'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder='' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Form.Item name='type' label='Type'>
+          <Select>
+            {issueType.map((type) => (
+              <Select.Option key={type.value} value={type.value}>
+                <Tag className={cn('text-white font-semibold', type.color)}>{type.label}</Tag>
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
 
-            <FormField
-              control={form.control}
-              name='type'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='capitalize'>
-                        <SelectValue placeholder='Select a type' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectGroup>
-                        {issueType.map((item) => (
-                          <SelectItem key={item.value} value={item.value} className='capitalize'>
-                            <div className='flex items-center gap-2'>
-                              <Badge variant='outline' className={cn('text-white font-semibold', item?.color)}>
-                                {item?.label}
-                              </Badge>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Form.Item name='status' label='Status'>
+          <Select>
+            {issueStatus.map((status) => (
+              <Select.Option key={status.value} value={status.value}>
+                <Tag className={cn('text-white font-semibold', status.color)}>{status.label}</Tag>
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
 
-            <FormField
-              control={form.control}
-              name='status'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='capitalize'>
-                        <SelectValue placeholder='Select a priority' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectGroup>
-                        {issueStatus.map((item) => (
-                          <SelectItem key={item.value} value={item.value} className='capitalize'>
-                            <div className='flex items-center gap-2'>
-                              <div
-                                className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${item?.color || ''} text-white`}
-                              >
-                                {item?.icon}
-                              </div>
-                              <span className='inline-flex items-center'>{item?.label}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Form.Item name='priority' label='Priority'>
+          <Select>
+            {PRIORITIES.map((type) => (
+              <Select.Option key={type.value} value={type.value}>
+                <div className='flex items-center gap-2'>
+                  <IconFlagFilled className={cn('size-4', type.color)} />
+                  {type.label}
+                </div>
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
 
-            <FormField
-              control={form.control}
-              name='startTime'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Start Time</FormLabel>
-                  <FormControl>
-                    <Input type='date' placeholder='' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Form.Item name='startTime' label='Start Time'>
+          <DatePicker
+            className='w-full'
+            format='YYYY-MM-DD'
+            // 确保值是 dayjs 对象或 null
+            onChange={(date) => {
+              form.setFieldsValue({
+                startTime: date ? date : null,
+              })
+            }}
+          />
+        </Form.Item>
 
-            <FormField
-              control={form.control}
-              name='deadline'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Deadline</FormLabel>
-                  <FormControl>
-                    <Input type='date' placeholder='' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Form.Item name='deadline' label='Deadline'>
+          <DatePicker
+            className='w-full'
+            format='YYYY-MM-DD'
+            // 确保值是 dayjs 对象或 null
+            onChange={(date) => {
+              form.setFieldsValue({
+                deadline: date ? date : null,
+              })
+            }}
+          />
+        </Form.Item>
 
-            <FormField
-              control={form.control}
-              name='teamId'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Team</FormLabel>
-                  <FormControl>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select a team' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {teams.map((team) => (
-                          <SelectItem key={team.id} value={team.id}>
-                            {team.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Form.Item name='teamId' label='Team'>
+          <Select>
+            {teams.map((team) => (
+              <Select.Option key={team.id} value={team.id}>
+                <div className='flex items-center gap-2'>
+                  <IconCube className='size-4' />
+                  {team.name}
+                </div>
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
 
-            <SheetFooter className='gap-2 pt-2 sm:space-x-0'>
-              <SheetClose asChild>
-                <Button type='button' variant='outline'>
-                  Cancel
-                </Button>
-              </SheetClose>
-              <Button disabled={isUpdatePending}>
-                {isUpdatePending && <Loader className='mr-2 size-4 animate-spin' aria-hidden='true' />}
-                Save
-              </Button>
-            </SheetFooter>
-          </form>
-        </Form>
-      </SheetContent>
-    </Sheet>
+        <Form.Item>
+          <div className='flex justify-end gap-2'>
+            <Button type='default' onClick={() => props.onOpenChange?.(false)}>
+              Cancel
+            </Button>
+            <Button type='primary' htmlType='submit' loading={isUpdatePending}>
+              OK
+            </Button>
+          </div>
+        </Form.Item>
+      </Form>
+    </Drawer>
   )
 }

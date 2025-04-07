@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { http } from '@/lib/axios'
-import { Issue, IssueSchema } from '../types'
+import { Issue, IssueSchema, updateIssueSchema } from '../types'
 
 // 获取issues
 export const listIssues = async (): Promise<Issue[]> => {
@@ -53,7 +53,7 @@ export const useCreateIssue = () => {
 }
 
 // 修改issue
-export const updateIssue = async (issue: Issue): Promise<void> => {
+export const updateIssue = async (issue: z.infer<typeof updateIssueSchema>): Promise<void> => {
   await http.post('issues/update', issue)
 }
 

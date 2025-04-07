@@ -138,7 +138,7 @@ function IssueTable({ data: issues }: IssueTableProps) {
 
       <UpdateIssueSheet
         open={rowAction?.type === 'update'}
-        onOpenChange={() => setRowAction(null)}
+        onOpenChange={(_) => setRowAction(null)}
         issue={rowAction?.row.original ?? null}
       />
 
