@@ -36,7 +36,7 @@ const WorkspaceSettings: FC = () => {
     <>
       <Header fixed>
         <div className='flex items-center space-x-4'>
-          <span className='text-lg font-bold'>工作区设置</span>
+          <span className='text-lg font-bold'>Setting workspace</span>
         </div>
 
         <div className='ml-auto flex items-center space-x-4'>
@@ -47,7 +47,7 @@ const WorkspaceSettings: FC = () => {
       <Main>
         <div className='flex flex-col space-y-6'>
           <div className='flex items-center justify-between'>
-            <h1 className='text-2xl font-bold'>工作区设置</h1>
+            <h1 className='text-2xl font-bold'>{selectedWorkspace?.name}</h1>
 
             {/* 工作区选择器 */}
             <div className='w-64'>

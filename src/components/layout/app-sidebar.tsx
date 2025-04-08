@@ -6,6 +6,7 @@ import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
 import { useListMyTeams } from '@/features/workspace/_lib/services'
 import { getSidebarData } from './data/sidebar-data'
+import { TeamSwitcher } from '@/components/layout/team-switcher.tsx'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuthStore().auth
@@ -45,16 +46,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   return (
-    <Sidebar {...props}>
+    <Sidebar collapsible='icon' variant='floating' {...props}>
       <SidebarHeader>
-        <NavUser user={sidebarData.user} />
+        <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        {sidebarData.navGroups.map((group) => (
-          <NavGroup key={group.title} {...group} />
+        {sidebarData.navGroups.map((props, index) => (
+          <NavGroup key={props.title || index} {...props} />
         ))}
       </SidebarContent>
-      <SidebarFooter>{/* 可以在这里添加其他底部组件 */}</SidebarFooter>
+      <SidebarFooter>
+        <NavUser user={sidebarData.user} />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
