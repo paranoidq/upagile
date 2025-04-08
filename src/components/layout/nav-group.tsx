@@ -1,6 +1,6 @@
-import { ReactNode, useEffect, useState } from 'react'
-import { ChevronRight, Plus } from 'lucide-react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { ReactNode } from 'react'
+import { ChevronRight } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   SidebarGroup,
@@ -13,9 +13,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { CreateTeamDialog } from '@/features/workspace/components/create-team-dialog'
 import { Badge } from '../ui/badge'
-import { Button } from '../ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,113 +22,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { NavCollapsible, NavItem, NavLink, type NavGroup } from './types'
 
 export function NavGroup({ title, items }: NavGroup) {
   const { state } = useSidebar()
   const location = useLocation()
   const href = location.pathname
-  const navigate = useNavigate()
-
-  // 添加状态来跟踪展开的项
-  const [expandedItems, setExpandedItems] = useState<string[]>([])
-
-  // 添加状态控制对话框
-  const [createTeamDialogOpen, setCreateTeamDialogOpen] = useState(false)
-
-  // 初始化时根据当前路径设置展开状态
-  useEffect(() => {
-    const activeItem = items.find(
-      (item) => item.items && (checkIsActive(href, item) || item.items.some((subItem) => checkIsActive(href, subItem))),
-    )
-
-    if (activeItem && activeItem.url) {
-      setExpandedItems([activeItem.url])
-    }
-  }, [href, items])
-
-  // 处理展开/折叠逻辑
-  const handleExpand = (itemUrl: string) => {
-    setExpandedItems([itemUrl]) // 只保留当前点击的项
-  }
-
-  // 修改处理添加团队的函数
-  const handleAddTeam = () => {
-    setCreateTeamDialogOpen(true)
-  }
-
   return (
     <SidebarGroup>
-      {/* 为 Workspaces 标题添加添加团队按钮 */}
-      <div className='flex items-center justify-between'>
-        <SidebarGroupLabel>{title}</SidebarGroupLabel>
-        {title === 'Workspaces' && (
-          <>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-6 w-6 mr-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                    onClick={handleAddTeam}
-                  >
-                    <Plus className='h-4 w-4' />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side='right'>
-                  <p>添加团队</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            {/* 添加创建团队对话框 */}
-            <CreateTeamDialog
-              open={createTeamDialogOpen}
-              onOpenChange={setCreateTeamDialogOpen}
-              onSuccess={() => {
-                // 可以在这里刷新团队列表
-              }}
-            />
-          </>
-        )}
-      </div>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const key = `${item.title}-${item.url}`
-          const isExpanded = item.url ? expandedItems.includes(item.url) : false
 
-          if (!item.items) return <SidebarMenuLink key={key} item={item} href={href} />
+          if (!item.items) {
+            return <SidebarMenuLink key={key} item={item} href={href} />
+          }
 
-          if (state === 'collapsed')
-            return (
-              <SidebarMenuCollapsedDropdown
-                key={key}
-                item={item}
-                href={href}
-                onExpand={() => item.url && handleExpand(item.url)}
-              />
-            )
+          if (state === 'collapsed') {
+            return <SidebarMenuCollapsedDropdown key={key} item={item} href={href} />
+          }
 
-          return (
-            <SidebarMenuCollapsible
-              key={key}
-              item={item}
-              href={href}
-              isExpanded={isExpanded}
-              onExpand={() => item.url && handleExpand(item.url)}
-            />
-          )
+          return <SidebarMenuCollapsible key={key} item={item} href={href} />
         })}
       </SidebarMenu>
     </SidebarGroup>
   )
 }
 
-const NavBadge = ({ children }: { children: ReactNode }) => {
-  return <Badge variant='outline'>{children}</Badge>
-}
+const NavBadge = ({ children }: { children: ReactNode }) => (
+  <Badge className='text-xs rounded-full px-1 py-0'>{children}</Badge>
+)
 
 const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
   const { setOpenMobile } = useSidebar()
@@ -147,64 +69,19 @@ const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
   )
 }
 
-const SidebarMenuCollapsible = ({
-  item,
-  href,
-  isExpanded,
-  onExpand,
-}: {
-  item: NavCollapsible
-  href: string
-  isExpanded: boolean
-  onExpand: () => void
-}) => {
+const SidebarMenuCollapsible = ({ item, href }: { item: NavCollapsible; href: string }) => {
   const { setOpenMobile } = useSidebar()
-  const navigate = useNavigate()
-
-  // 处理 Workspace 点击事件
-  const handleWorkspaceClick = (e: React.MouseEvent) => {
-    // 如果点击的是箭头图标区域，则不导航
-    if ((e.target as HTMLElement).closest('.chevron-container')) {
-      return
-    }
-
-    // 导航到 workspace 页面
-    if (item.url) {
-      navigate(item.url)
-      setOpenMobile(false)
-      // 展开当前项并折叠其他项
-      onExpand()
-    }
-  }
-
   return (
-    <Collapsible
-      asChild
-      open={isExpanded}
-      onOpenChange={(open) => {
-        if (open) onExpand()
-      }}
-      className='group/collapsible'
-    >
+    <Collapsible asChild defaultOpen={checkIsActive(href, item, true)} className='group/collapsible'>
       <SidebarMenuItem>
-        <div className='flex w-full items-center'>
-          {/* 可点击的主要内容 */}
-          <div className='flex-1 cursor-pointer' onClick={handleWorkspaceClick}>
-            <SidebarMenuButton tooltip={item.title}>
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
-              {item.badge && <NavBadge>{item.badge}</NavBadge>}
-            </SidebarMenuButton>
-          </div>
-
-          {/* 折叠/展开按钮 */}
-          <CollapsibleTrigger asChild>
-            <div className='chevron-container p-2 hover:bg-sidebar-accent rounded-md'>
-              <ChevronRight className='h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
-            </div>
-          </CollapsibleTrigger>
-        </div>
-
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton tooltip={item.title}>
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+            {item.badge && <NavBadge>{item.badge}</NavBadge>}
+            <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
         <CollapsibleContent className='CollapsibleContent'>
           <SidebarMenuSub>
             {item.items.map((subItem) => (
@@ -225,54 +102,17 @@ const SidebarMenuCollapsible = ({
   )
 }
 
-const SidebarMenuCollapsedDropdown = ({
-  item,
-  href,
-  onExpand,
-}: {
-  item: NavCollapsible
-  href: string
-  onExpand: () => void
-}) => {
-  const navigate = useNavigate()
-
-  // 处理 Workspace 点击事件
-  const handleWorkspaceClick = (e: React.MouseEvent) => {
-    // 阻止事件冒泡，避免触发下拉菜单
-    e.stopPropagation()
-
-    // 导航到 workspace 页面
-    if (item.url) {
-      navigate(item.url)
-      // 展开当前项并折叠其他项
-      onExpand()
-    }
-  }
-
-  // 处理箭头点击事件
-  const handleArrowClick = (e: React.MouseEvent) => {
-    // 阻止事件冒泡，避免触发工作区导航
-    e.stopPropagation()
-    // 展开当前项并折叠其他项
-    onExpand()
-  }
-
+const SidebarMenuCollapsedDropdown = ({ item, href }: { item: NavCollapsible; href: string }) => {
   return (
     <SidebarMenuItem>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <div className='flex w-full items-center'>
-            <div className='flex-1 cursor-pointer' onClick={handleWorkspaceClick}>
-              <SidebarMenuButton tooltip={item.title} isActive={checkIsActive(href, item)}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-                {item.badge && <NavBadge>{item.badge}</NavBadge>}
-              </SidebarMenuButton>
-            </div>
-            <div className='ml-auto p-1 cursor-pointer' onClick={handleArrowClick}>
-              <ChevronRight className='h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
-            </div>
-          </div>
+          <SidebarMenuButton tooltip={item.title} isActive={checkIsActive(href, item)}>
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+            {item.badge && <NavBadge>{item.badge}</NavBadge>}
+            <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
+          </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent side='right' align='start' sideOffset={4}>
           <DropdownMenuLabel>
@@ -294,10 +134,57 @@ const SidebarMenuCollapsedDropdown = ({
   )
 }
 
-function checkIsActive(href: string, item: NavItem, checkChildren = false): boolean {
-  if (href === item.url) return true
-  if (checkChildren && item.items) {
-    return item.items.some((child) => href === child.url)
+function checkIsActive(href: string, item: NavItem, mainNav = false) {
+  // 处理 workspace 动态 URL 的特殊情况
+  if (item.url?.includes('/workspace/') && href.includes('/workspace/')) {
+    // 分解路径为段落
+    const hrefSegments = href.split('/')
+    const itemSegments = item.url.split('/')
+
+    // 提取 workspace ID
+    const hrefWorkspaceId = hrefSegments[2]
+    const itemWorkspaceId = itemSegments[2]
+
+    // 确保 workspace ID 一致
+    if (hrefWorkspaceId !== itemWorkspaceId) {
+      return false
+    }
+
+    // 确保两者都是 workspace 路径且长度相同
+    if (hrefSegments.length === itemSegments.length) {
+      // 检查除了 workspace ID 外的所有路径段是否匹配
+      let isMatch = true
+      for (let i = 0; i < hrefSegments.length; i++) {
+        // 跳过 workspace ID 部分的比较 (通常是索引 2)
+        if (i === 2) continue
+
+        if (hrefSegments[i] !== itemSegments[i]) {
+          isMatch = false
+          break
+        }
+      }
+
+      return isMatch
+    }
+
+    // 处理子路径的情况（如果当前路径是导航项的子路径）
+    if (mainNav && hrefSegments.length > itemSegments.length) {
+      // 检查前缀是否匹配（包括 workspace ID）
+      const prefixMatch =
+        hrefSegments.slice(0, 3).join('/') === itemSegments.slice(0, 3).join('/') &&
+        hrefSegments.slice(3, itemSegments.length).join('/') === itemSegments.slice(3).join('/')
+
+      return prefixMatch
+    }
+
+    return false
   }
-  return false
+
+  // 原有的匹配逻辑
+  return (
+    href === item.url || // /endpoint?search=param
+    href.split('?')[0] === item.url || // endpoint
+    !!item?.items?.filter((i) => i.url === href).length || // if child nav is active
+    (mainNav && href.split('/')[1] !== '' && href.split('/')[1] === item?.url?.split('/')[1])
+  )
 }
