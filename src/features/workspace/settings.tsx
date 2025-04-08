@@ -36,7 +36,7 @@ const WorkspaceSettings: FC = () => {
     <>
       <Header fixed>
         <div className='flex items-center space-x-4'>
-          <span className='text-lg font-bold'>Setting workspace</span>
+          <span className='text-lg font-bold'>Workspace Settings</span>
         </div>
 
         <div className='ml-auto flex items-center space-x-4'>
