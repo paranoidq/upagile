@@ -39,7 +39,6 @@ import SettingsProfile from '@/features/settings/profile'
 import Sprint from '@/features/sprint'
 import Tasks from '@/features/tasks'
 import Users from '@/features/users'
-import Workspace from '@/features/workspace'
 import WorkspaceSettings from '@/features/workspace/settings'
 
 // 认证布局组件
@@ -118,7 +117,6 @@ const router = createBrowserRouter([
           { path: 'project', element: <Project /> },
           { path: 'requirement', element: <Requirement /> },
           { path: 'sprint', element: <Sprint /> },
-          { path: 'workspace', element: <Workspace /> },
           { path: 'apps', element: <Apps /> },
           { path: 'tasks', element: <Tasks /> },
           { path: 'users', element: <Users /> },
@@ -136,14 +134,9 @@ const router = createBrowserRouter([
               { path: 'notifications', element: <SettingsNotifications /> },
             ],
           },
-          { path: 'my-workspace', element: <Workspace /> },
           { path: 'my-workspace/issues', element: <Issue /> },
           { path: 'my-workspace/sprints', element: <Sprint /> },
           { path: 'my-workspace/releases', element: <Release /> },
-          {
-            path: 'workspace/:teamId',
-            element: <Workspace />,
-          },
           {
             path: 'workspace/:teamId/issues',
             element: <Issue />,

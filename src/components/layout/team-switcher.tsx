@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IconNavigationBolt, IconPlus, IconSettings } from '@tabler/icons-react'
 import { ChevronsUpDown } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,15 +13,29 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { CreateTeamDialog } from '@/features/workspace/components/create-team-dialog'
 
-export function TeamSwitcher() {
+export function NavHeader() {
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // 监听路由变化，关闭 dropdown
+  useEffect(() => {
+    setDropdownOpen(false)
+  }, [location.pathname])
+
+  // 监听 dialogOpen 变化，关闭 dropdown
+  useEffect(() => {
+    if (dialogOpen) {
+      setDropdownOpen(false)
+    }
+  }, [dialogOpen])
 
   /* ------------------ UI render ------------------ */
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size='lg'

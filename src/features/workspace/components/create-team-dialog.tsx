@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Button, Form, Input, Modal } from 'antd'
 import { toast } from 'sonner'
 import { checkTeamNameExisted, useCreateTeam } from '../_lib/services'
@@ -16,9 +17,7 @@ interface CreateTeamDialogProps {
 export function CreateTeamDialog({ open, onOpenChange, onSuccess }: CreateTeamDialogProps) {
   const { mutateAsync: createTeam, isPending: isCreating } = useCreateTeam()
   const [form] = Form.useForm<FormValues>()
-
-  /* ------------------ name check ------------------ */
-  const teamName = Form.useWatch('name', form)
+  const nameInputRef = useRef<HTMLInputElement>(null)
 
   /* ------------------ add team ------------------ */
   const handleAddTeam = async (values: FormValues) => {
@@ -43,6 +42,13 @@ export function CreateTeamDialog({ open, onOpenChange, onSuccess }: CreateTeamDi
     form.resetFields()
     onOpenChange(false)
   }
+
+  // 在 dialog 打开时自动聚焦到 name 输入框
+  useEffect(() => {
+    if (open) {
+      nameInputRef.current?.focus()
+    }
+  }, [open])
 
   return (
     <Modal title='创建Workspace' open={open} centered onCancel={handleCancel} footer={null} destroyOnClose>
@@ -75,7 +81,7 @@ export function CreateTeamDialog({ open, onOpenChange, onSuccess }: CreateTeamDi
             },
           ]}
         >
-          <Input placeholder='输入团队名称' />
+          <Input autoFocus placeholder='输入团队名称' autoComplete='off' />
         </Form.Item>
 
         <Form.Item name='description' label='Workspace描述'>
