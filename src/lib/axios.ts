@@ -2,6 +2,8 @@ import axios, { AxiosHeaders, AxiosResponse, InternalAxiosRequestConfig } from '
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 // 定义响应数据的基础接口
 interface BaseResponse<T = unknown> {
   code: string
@@ -14,6 +16,7 @@ interface BaseResponse<T = unknown> {
 interface RequestConfig extends InternalAxiosRequestConfig {
   skipErrorHandler?: boolean // 是否跳过错误处理
   skipAuth?: boolean // 是否跳过认证
+  loadingDelay?: number // 当请求时间小于 loadingDelay 时，延迟返回response，避免laoding闪烁的问题
 }
 
 // 创建 axios 实例
@@ -48,21 +51,27 @@ http.interceptors.request.use(
 // 响应拦截器
 http.interceptors.response.use(
   // Any status code that lie within the range of 2xx cause this function to trigger
-  <T>(response: AxiosResponse<BaseResponse<T>>) => {
+  async <T>(response: AxiosResponse<BaseResponse<T>>) => {
     const { code, data, msg, reason } = response.data
-
     if (code === '0000000') {
+      const config = response.config as RequestConfig
+
+      if (config.loadingDelay && config.loadingDelay > 0) {
+        // 只有在启用了 loading 配置时才添加延迟
+        const [result] = await Promise.all([data, delay(config.loadingDelay)])
+        return result
+      }
       return data
-    } else {
-      return Promise.reject({
-        code,
-        msg,
-        reason,
-      })
     }
+
+    return Promise.reject({
+      code,
+      msg,
+      reason,
+    })
   },
   // Any status codes that falls outside the range of 2xx cause this function to trigger
-  (error) => {
+  async (error) => {
     if (!error.config?.skipErrorHandler) {
       if (error.response) {
         switch (error.response.status) {
@@ -80,6 +89,11 @@ http.interceptors.response.use(
             break
         }
       }
+    }
+
+    // 只在启用了 loading 配置时添加延迟
+    if (error.config?.loadingDelay > 0) {
+      await delay(error.config.loadingDelay)
     }
 
     return Promise.reject({

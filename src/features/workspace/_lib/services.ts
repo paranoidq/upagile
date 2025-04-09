@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '@/lib/axios'
+import { createRequestConfig } from '@/lib/types'
 import { CreateTeamType, teamSchema, TeamType, UpdateTeamType } from '../types'
 
 // 查询我的团队
@@ -21,7 +22,13 @@ export const useListMyTeams = () => {
 
 // 创建团队
 const createTeam = async (team: CreateTeamType) => {
-  const response = await http.post('/teams/save', team)
+  const response = await http.post(
+    '/teams/save',
+    team,
+    createRequestConfig({
+      loadingDelay: 300,
+    }),
+  )
   if (!response) {
     return null
   }
@@ -38,7 +45,13 @@ export const useCreateTeam = () => {
 
 // 更新团队
 const updateTeam = async (team: UpdateTeamType) => {
-  const response = await http.post('/teams/save', team)
+  const response = await http.post(
+    '/teams/save',
+    team,
+    createRequestConfig({
+      loadingDelay: 300,
+    }),
+  )
   if (!response) {
     return null
   }
