@@ -26,7 +26,7 @@ const createTeam = async (team: CreateTeamType) => {
     '/teams/save',
     team,
     createRequestConfig({
-      loadingDelay: 300,
+      loadingDelay: 500,
     }),
   )
   if (!response) {
@@ -49,7 +49,7 @@ const updateTeam = async (team: UpdateTeamType) => {
     '/teams/save',
     team,
     createRequestConfig({
-      loadingDelay: 300,
+      loadingDelay: 500,
     }),
   )
   if (!response) {
