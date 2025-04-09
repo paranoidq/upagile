@@ -7,7 +7,21 @@ export const teamSchema = z.object({
   owner: z.object({
     id: z.string(),
     username: z.string(),
+    name: z.string(),
+    email: z.string().optional(),
+    avatar: z.string().optional(),
   }),
+  members: z
+    .array(
+      z.object({
+        id: z.string(),
+        username: z.string(),
+        name: z.string(),
+        email: z.string().optional(),
+        avatar: z.string().optional(),
+      }),
+    )
+    .optional(),
   createdTime: z.string().optional(),
   modifiedTime: z.string().optional(),
 })
@@ -19,4 +33,10 @@ export const createTeamSchema = z.object({
   description: z.string().optional(),
 })
 
+export const updateTeamSchema = createTeamSchema.extend({
+  id: z.string(),
+})
+
 export type CreateTeamType = z.infer<typeof createTeamSchema>
+
+export type UpdateTeamType = z.infer<typeof updateTeamSchema>
