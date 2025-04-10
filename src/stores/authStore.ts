@@ -9,7 +9,6 @@ interface AuthUser {
   name: string
   avatar: string | undefined
   email: string | undefined
-  role: string[] | undefined
 }
 
 interface AuthState {

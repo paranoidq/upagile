@@ -8,20 +8,19 @@ export const loginRequestSchema = z.object({
 
 // 登录响应验证模式
 export const accountSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   username: z.string(),
   name: z.string(),
+  avatar: z.string().optional(),
+  email: z.string().optional(),
 })
 
 export const loginResponseSchema = z.object({
-  code: z.string(),
-  data: z.object({
-    accessToken: z.string(),
-    refreshToken: z.string(),
-    tokenType: z.string(),
-    expiresIn: z.string(),
-    account: accountSchema,
-  }),
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  tokenType: z.string(),
+  expiresIn: z.string(),
+  account: accountSchema,
 })
 
 // 类型定义

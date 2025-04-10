@@ -1,5 +1,6 @@
 import { LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '@/stores/authStore'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,9 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { handleLogout } from '@/features/auth/auth'
+import { handleLogout } from '@/features/auth/_lib/services'
 
 export function ProfileDropdown() {
+  const { user } = useAuth()
+
+  console.log(user)
+
   const handleLogoutClick = () => {
     handleLogout()
   }
@@ -23,16 +28,16 @@ export function ProfileDropdown() {
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
-            <AvatarImage src='/avatars/01.png' alt='@shadcn' />
-            <AvatarFallback>SN</AvatarFallback>
+            <AvatarImage src={user?.avatar} alt={user?.name} />
+            <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56' align='end' forceMount>
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
-            <p className='text-sm font-medium leading-none'>satnaing</p>
-            <p className='text-xs leading-none text-muted-foreground'>satnaingdev@gmail.com</p>
+            <p className='text-sm font-medium leading-none'>{user?.name}</p>
+            <p className='text-xs leading-none text-muted-foreground'>{user?.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

@@ -16,7 +16,6 @@ import Apps from '@/features/apps'
 import ForgotPassword from '@/features/auth/forgot-password'
 import Otp from '@/features/auth/otp'
 import SignIn from '@/features/auth/sign-in'
-import SignIn2 from '@/features/auth/sign-in/sign-in-2'
 import SignUp from '@/features/auth/sign-up'
 import BacklogPage from '@/features/backlog'
 import Chats from '@/features/chats'
@@ -157,7 +156,6 @@ const router = createBrowserRouter([
       },
       // 认证相关路由
       { path: 'sign-in', element: <SignIn /> },
-      { path: 'sign-in-2', element: <SignIn2 /> },
       { path: 'sign-up', element: <SignUp /> },
       { path: 'forgot-password', element: <ForgotPassword /> },
       { path: 'otp', element: <Otp /> },

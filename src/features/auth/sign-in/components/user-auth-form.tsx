@@ -3,41 +3,21 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
-import { http } from '@/lib/axios.ts'
 import { cn } from '@/lib/utils'
-import { toast } from '@/hooks/use-toast.ts'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input.tsx'
+import { login } from '../../_lib/services'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
 
 const formSchema = z.object({
-  username: z.string().min(1, '请输入用户名'),
-  password: z.string().min(1, '请输入密码'),
+  username: z.string().min(1, 'please enter your username'),
+  password: z.string().min(1, 'please enter your password'),
 })
-
-interface LoginResponse {
-  accessToken: string
-  refreshToken: string
-  tokenType: string
-  expiresIn: string
-  account: {
-    id: string
-    username: string
-    name: string
-    avatar: string
-    teams: [
-      {
-        id: string
-        name: string
-        owner: string
-      },
-    ]
-  }
-}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
@@ -57,32 +37,32 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   })
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    try {
-      setIsLoading(true)
+    setIsLoading(true)
 
-      const response = await http.post<LoginResponse>('/auth/login', data, {
-        skipAuth: true,
-      })
+    toast.promise(login(data), {
+      loading: '登录中...',
+      success: (data) => {
+        auth.setAccessToken(data.accessToken)
+        auth.setUser({
+          username: data.account.username,
+          name: data.account.name,
+          avatar: data.account.avatar,
+          email: data.account.email,
+        })
 
-      auth.setAccessToken(response.accessToken)
-      auth.setUser({
-        username: response.account.username,
-        name: response.account.name,
-        avatar: response.account.avatar,
-        email: response.account.email,
-      })
+        setIsLoading(false)
 
-      // 使用 React Router 的导航
-      navigate(redirectTo)
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: '登录失败',
-        description: '请检查用户名和密码',
-      })
-    } finally {
-      setIsLoading(false)
-    }
+        navigate(redirectTo, { replace: true })
+
+        return '登录成功'
+      },
+      error: (e) => {
+        setIsLoading(false)
+        return {
+          message: e.msg,
+        }
+      },
+    })
   }
 
   return (
@@ -115,7 +95,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                     </Link>
                   </div>
                   <FormControl>
-                    <PasswordInput placeholder='********' {...field} />
+                    <PasswordInput placeholder='password' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
