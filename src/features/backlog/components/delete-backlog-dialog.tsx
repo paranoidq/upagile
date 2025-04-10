@@ -28,7 +28,6 @@ export function DeleteBacklogsDialog({ backlogs, showTrigger = true, onSuccess, 
   const { mutateAsync: deleteBacklogs, isPending: isDeletePending } = useDeleteBacklogs()
 
   function onDelete() {
-    // TODO: 这里有问题，isDeletePending 会一直为 true
     toast.promise(
       deleteBacklogs({
         ids: backlogs.map((backlog) => Number(backlog.id)),
