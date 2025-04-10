@@ -4,7 +4,6 @@ import {
   IconCube,
   IconFlag,
   IconHelp,
-  IconHomeShield,
   IconLayoutDashboard,
   IconListCheck,
   IconNotification,
@@ -14,11 +13,11 @@ import {
   IconTool,
   IconUserCog,
 } from '@tabler/icons-react'
-import { TeamType } from '@/features/workspace/types'
+import { TeamType as Workspace } from '@/features/workspace/types'
 import { type SidebarData } from '../types'
 
 // 创建一个函数来生成侧边栏数据
-export const getSidebarData = (teams: TeamType[] = []): SidebarData => {
+export const getSidebarData = (workspaces: Workspace[] = []): SidebarData => {
   return {
     navGroups: [
       {
@@ -54,47 +53,25 @@ export const getSidebarData = (teams: TeamType[] = []): SidebarData => {
       {
         title: 'Workspaces',
         items: [
-          {
-            title: 'My Workspace(private)',
-            url: '/my-workspace',
-            icon: IconHomeShield,
-            items: [
-              {
-                title: 'Issues',
-                url: '/my-workspace/issues',
-                icon: IconChecklist,
-              },
-              {
-                title: 'Sprints',
-                url: '/my-workspace/sprints',
-                icon: IconFlag,
-              },
-              {
-                title: 'Releases',
-                url: '/my-workspace/releases',
-                icon: IconTargetArrow,
-              },
-            ],
-          },
           // 动态生成团队列表
-          ...teams.map((team) => ({
-            title: team.name,
-            url: `/workspace/${team.id}`,
+          ...workspaces.map((workspace) => ({
+            title: workspace.name,
+            url: `/workspace/${workspace.id}`,
             icon: IconCube,
             items: [
               {
                 title: 'Issues',
-                url: `/workspace/${team.id}/issues`,
+                url: `/workspace/${workspace.id}/issues`,
                 icon: IconChecklist,
               },
               {
                 title: 'Sprints',
-                url: `/workspace/${team.id}/sprints`,
+                url: `/workspace/${workspace.id}/sprints`,
                 icon: IconFlag,
               },
               {
                 title: 'Releases',
-                url: `/workspace/${team.id}/releases`,
+                url: `/workspace/${workspace.id}/releases`,
                 icon: IconTargetArrow,
               },
             ],
