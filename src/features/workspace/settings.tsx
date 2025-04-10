@@ -13,7 +13,6 @@ import WorkspaceMembersManage from './components/workspace-members-manage'
 
 const WorkspaceSettings: FC = () => {
   const { data: teams } = useListMyTeams()
-
   const [selectedTeamId, setSelectedTeamId] = useState<string>(teams?.[0]?.id || '')
   const [activeTab, setActiveTab] = useState('general')
 

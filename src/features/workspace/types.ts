@@ -1,5 +1,15 @@
 import { z } from 'zod'
 
+export const userSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  name: z.string(),
+  email: z.string().optional(),
+  avatar: z.string().optional(),
+})
+
+export type UserType = z.infer<typeof userSchema>
+
 export const teamSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -11,17 +21,7 @@ export const teamSchema = z.object({
     email: z.string().optional(),
     avatar: z.string().optional(),
   }),
-  members: z
-    .array(
-      z.object({
-        id: z.string(),
-        username: z.string(),
-        name: z.string(),
-        email: z.string().optional(),
-        avatar: z.string().optional(),
-      }),
-    )
-    .optional(),
+  members: z.array(userSchema).optional(),
   createdTime: z.string().optional(),
   modifiedTime: z.string().optional(),
 })
