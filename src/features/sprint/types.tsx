@@ -47,13 +47,15 @@ export const SprintSchema = z.object({
     id: z.string(),
     name: z.string(),
   }),
-  issues: z.array(
-    z
-      .object({
-        id: z.string(),
-      })
-      .optional(),
-  ),
+  issues: z
+    .array(
+      z
+        .object({
+          id: z.string(),
+        })
+        .optional(),
+    )
+    .optional(),
   createdTime: z.string().optional(),
   modifiedTime: z.string().optional(),
 })

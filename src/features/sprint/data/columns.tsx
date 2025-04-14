@@ -1,20 +1,23 @@
 import React from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
-import { IconCalendar } from '@tabler/icons-react'
+import { IconCalendar, IconLayoutKanban, IconPencil, IconTrash } from '@tabler/icons-react'
+import { Tooltip } from 'antd'
 import { Ellipsis } from 'lucide-react'
+import { NavigateFunction } from 'react-router-dom'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/data-table/components/data-table-column-header'
 import { DataTableRowAction } from '@/components/data-table/types'
 import { Sprint, sprintStatus } from '../types'
 
 interface GetColumnsProps {
   setRowAction: React.Dispatch<React.SetStateAction<DataTableRowAction<Sprint> | null>>
+  navigate: NavigateFunction
 }
 
-export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Sprint>[] {
+export function getColumns({ setRowAction, navigate }: GetColumnsProps): ColumnDef<Sprint>[] {
   return [
     {
       id: 'select',
@@ -40,9 +43,8 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Sprint>
     {
       accessorKey: 'id',
       header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
-      cell: ({ cell }) => <div className='flex items-center gap-2'>{cell.getValue() as number}</div>,
+      cell: ({ cell }) => <div className='flex items-center gap-2 max-w-4'>{cell.getValue() as number}</div>,
       enableHiding: false,
-      size: 100,
     },
     {
       accessorKey: 'title',
@@ -50,11 +52,12 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Sprint>
       cell: ({ row }) => {
         return (
           <div className='flex items-center gap-2'>
-            <span className='max-w-[400px] truncate text-ellipsis'>{row.getValue('title')}</span>
+            <span className='w-96 truncate text-ellipsis'>{row.getValue('title')}</span>
             {/* <IconEdit className='size-4 bg-gray-200 rounded-full p-0.5' /> */}
           </div>
         )
       },
+      enableSorting: false,
     },
     {
       accessorKey: 'startTime',
@@ -65,6 +68,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Sprint>
           {formatDate(cell.getValue() as string)}
         </div>
       ),
+      enableSorting: false,
     },
     {
       accessorKey: 'endTime',
@@ -75,6 +79,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Sprint>
           {formatDate(cell.getValue() as string)}
         </div>
       ),
+      enableSorting: false,
     },
     {
       accessorKey: 'status',
@@ -84,7 +89,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Sprint>
         const status = sprintStatus.find((s) => s.value === statusValue)
 
         return (
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-2 w-24'>
             <div
               className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${status?.color || ''} text-white`}
             >
@@ -94,36 +99,63 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Sprint>
           </div>
         )
       },
-      size: 100,
+      enableSorting: false,
     },
     {
       accessorKey: 'team.id',
       header: ({ column }) => <DataTableColumnHeader column={column} title='归属团队' />,
       cell: ({ row }) => <div className='w-[100px]'>{row.original.team.name}</div>,
-    },
-    {
-      accessorKey: 'createdTime',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='创建时间' />,
-      cell: ({ cell }) => <div className='w-[100px]'>{formatDate(cell.getValue() as Date)}</div>,
+      enableSorting: false,
     },
     {
       id: 'actions',
       cell: function Cell({ row }) {
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button aria-label='Open menu' variant='ghost' className='flex size-8 p-0 data-[state=open]:bg-muted'>
-                <Ellipsis className='size-4' aria-hidden='true' />
+          <div className='flex items-center gap-0'>
+            {/* plan action */}
+            <Tooltip title='plan sprint issues'>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={() => {
+                  navigate(`/sprints/${row.original.id}`)
+                }}
+              >
+                <IconLayoutKanban className='size-4' />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='w-40'>
-              <DropdownMenuItem onSelect={() => setRowAction({ row, type: 'update' })}>Edit</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setRowAction({ row, type: 'delete' })}>Delete</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Tooltip>
+
+            {/* edit action */}
+            <Tooltip title='edit sprint'>
+              <Button variant='ghost' size='icon' onClick={() => setRowAction({ row, type: 'update' })}>
+                <IconPencil className='size-4' />
+              </Button>
+            </Tooltip>
+
+            {/* delete action */}
+            <Tooltip title='remove sprint'>
+              <Button variant='ghost' size='icon' onClick={() => setRowAction({ row, type: 'delete' })}>
+                <IconTrash className='size-4 text-red-500' />
+              </Button>
+            </Tooltip>
+
+            {/* other actions */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button aria-label='Open menu' variant='ghost' size='icon'>
+                  <Ellipsis className='size-4' aria-hidden='true' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                {/* <DropdownMenuItem>
+                  <IconPencil className='size-4' />
+                  Edit
+                </DropdownMenuItem> */}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )
       },
-      size: 40,
     },
   ]
 }

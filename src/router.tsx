@@ -41,6 +41,7 @@ import Users from '@/features/users'
 import WorkspaceSettings from '@/features/workspace/settings'
 import Docs from './features/docs'
 import Retro from './features/retro'
+import SprintPlan from './features/sprint/components/sprint-plan'
 
 // 认证布局组件
 function AuthenticatedLayout() {
@@ -114,14 +115,15 @@ const router = createBrowserRouter([
           { index: true, element: <Dashboard /> },
           { path: 'dashboard', element: <Dashboard /> },
           { path: 'backlog', element: <BacklogPage /> },
-          { path: 'issue', element: <Issue /> },
-          { path: 'project', element: <Project /> },
-          { path: 'requirement', element: <Requirement /> },
-          { path: 'sprint', element: <Sprint /> },
+          { path: 'issues', element: <Issue /> },
+          { path: 'projects', element: <Project /> },
+          { path: 'requirements', element: <Requirement /> },
+          { path: 'sprints', element: <Sprint /> },
+          { path: 'sprints/:sprintId', element: <SprintPlan /> },
+          { path: 'releases', element: <Release /> },
           { path: 'apps', element: <Apps /> },
           { path: 'tasks', element: <Tasks /> },
           { path: 'users', element: <Users /> },
-          { path: 'release', element: <Release /> },
           { path: 'chats', element: <Chats /> },
           { path: 'help-center', element: <ComingSoon /> },
           {

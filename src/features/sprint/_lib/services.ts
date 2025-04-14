@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { http } from '@/lib/axios'
+import { createRequestConfig } from '@/lib/types'
 import { Sprint, SprintSchema } from '../types'
 
 // 获取sprints
@@ -39,7 +40,13 @@ export const useDeleteSprints = () => {
 
 // 新增sprint
 export const createSprint = async (sprint: Omit<Sprint, 'id'>): Promise<void> => {
-  await http.post('sprints/create', sprint)
+  await http.post(
+    'sprints/create',
+    sprint,
+    createRequestConfig({
+      loadingDelay: 300,
+    }),
+  )
 }
 
 export const useCreateSprint = () => {
@@ -54,7 +61,13 @@ export const useCreateSprint = () => {
 
 // 修改sprint
 export const updateSprint = async (sprint: Sprint): Promise<void> => {
-  await http.post('sprints/update', sprint)
+  await http.post(
+    'sprints/update',
+    sprint,
+    createRequestConfig({
+      loadingDelay: 300,
+    }),
+  )
 }
 
 export const useUpdateSprint = () => {
@@ -85,5 +98,23 @@ export const useUpdateSprints = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sprints'] })
     },
+  })
+}
+
+// 获取sprint
+export const getSprint = async (sprintId: string | undefined, withIssues = false): Promise<Sprint | null> => {
+  if (!sprintId) {
+    return null
+  }
+
+  const response = await http.post(`/sprints/get`, { id: sprintId, withIssues })
+  return SprintSchema.parse(response)
+}
+
+export const useSprint = (sprintId: string | undefined, withIssues = false) => {
+  return useQuery({
+    queryKey: ['sprints', sprintId, withIssues],
+    queryFn: () => getSprint(sprintId, withIssues),
+    enabled: !!sprintId,
   })
 }

@@ -1,7 +1,12 @@
 import React, { type FC } from 'react'
-import { IconFlag3 } from '@tabler/icons-react'
-import { useParams } from 'react-router-dom'
+import { IconCopyPlus, IconFlag3, IconPlus } from '@tabler/icons-react'
+import { Tooltip } from 'antd'
+import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useTeamStore } from '@/stores/teamStore'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
 import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/components/feature-flags-provider'
 import { DataTable } from '@/components/data-table/data-table'
@@ -13,6 +18,8 @@ import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
 import { ThemeSwitch } from '@/components/theme-switch.tsx'
 import { useSprints } from './_lib/services'
 import { DeleteSprintsDialog } from './components/delete-dialog'
+import SprintCalendar from './components/sprint-calendar'
+import SprintKanban from './components/sprint-kanban'
 import { SprintTableFloatingBar } from './components/table-floating-bar'
 import { UpdateSprintSheet } from './components/update-sheet'
 import { getColumns } from './data/columns'
@@ -21,10 +28,10 @@ import { Sprint, sprintStatus } from './types'
 const SprintPage: FC = () => {
   const { teamId } = useParams()
   const { teams } = useTeamStore()
-  const { data: sprints, isLoading } = useSprints()
-
   // 获取当前工作区名称
   const workspaceName = teamId ? teams.find((t) => t.id === teamId)?.name || '工作区' : undefined
+
+  const { data: sprints, isLoading } = useSprints()
 
   // 根据团队 ID 过滤数据
   const filteredSprints = React.useMemo(() => {
@@ -34,12 +41,24 @@ const SprintPage: FC = () => {
     return sprints.filter((sprint) => sprint.team?.id === teamId)
   }, [sprints, teamId])
 
+  // view
+  const [view, setView] = useQueryState('view', parseAsString.withDefault('list'))
+
   return (
     <>
       {/* common header */}
       <Header fixed>
         <div className='flex items-center space-x-4'>
-          <span className='text-lg font-bold'>{workspaceName ? `${workspaceName} - Sprints` : 'Sprints'}</span>
+          <div className='text-lg font-bold'>{workspaceName ? `${workspaceName} - Sprints` : 'Sprints'}</div>
+          <div>
+            <Tabs value={view} onValueChange={(value) => setView(value)}>
+              <TabsList>
+                <TabsTrigger value='list'>List</TabsTrigger>
+                <TabsTrigger value='kanban'>Kanban</TabsTrigger>
+                <TabsTrigger value='calendar'>Calendar</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
 
         <div className='ml-auto flex items-center space-x-4'>
@@ -50,9 +69,15 @@ const SprintPage: FC = () => {
       <Main>
         <FeatureFlagsProvider>
           {isLoading ? (
-            <DataTableSkeleton columnCount={10} rowCount={10} />
+            <DataTableSkeleton columnCount={6} rowCount={10} />
           ) : (
-            <SprintTable data={filteredSprints ?? []} />
+            <>
+              {view === 'list' && <SprintTable data={filteredSprints ?? []} />}
+
+              {view === 'kanban' && <SprintKanban data={filteredSprints ?? []} />}
+
+              {view === 'calendar' && <SprintCalendar data={filteredSprints ?? []} />}
+            </>
           )}
         </FeatureFlagsProvider>
       </Main>
@@ -68,12 +93,13 @@ type SprintTableProps = {
 
 function SprintTable({ data: sprints }: SprintTableProps) {
   const { featureFlags } = useFeatureFlags()
+  const navigate = useNavigate()
 
   const pageCount = sprints?.length % 10 === 0 ? sprints?.length / 10 : Math.floor(sprints?.length / 10) + 1
 
   const [rowAction, setRowAction] = React.useState<DataTableRowAction<Sprint> | null>(null)
 
-  const columns = React.useMemo(() => getColumns({ setRowAction }), [])
+  const columns = React.useMemo(() => getColumns({ setRowAction, navigate }), [])
 
   /**
    * This component can render either a faceted filter or a search filter based on the `options` prop.
@@ -141,18 +167,38 @@ function SprintTable({ data: sprints }: SprintTableProps) {
     clearOnDefault: true,
   })
 
+  // display recent
+  const [displayRecent, setDisplayRecent] = useQueryState('displayRecent', parseAsBoolean.withDefault(true))
+
   return (
     <>
       <DataTable table={table} floatingBar={enableFloatingBar ? <SprintTableFloatingBar table={table} /> : null}>
-        {/* {enableAdvancedTable ? (
-          <DataTableAdvancedToolbar table={table} filterFields={advancedFilterFields} shallow={false}>
-            <TasksTableToolbarActions table={table} />
-          </DataTableAdvancedToolbar>
-        ) : (
-          <DataTableToolbar table={table} filterFields={filterFields}>
-            <TasksTableToolbarActions table={table} />
-          </DataTableToolbar>
-        )} */}
+        <div className='flex justify-between gap-2'>
+          <div className='items-center flex space-x-2'>
+            <Switch
+              id='displayOnlyRecent'
+              checked={displayRecent}
+              onCheckedChange={(value) => setDisplayRecent(value)}
+            />
+            <label htmlFor='displayOnlyRecent' className=' text-gray-500'>
+              Only show recent sprints
+            </label>
+          </div>
+
+          <div className='flex items-center'>
+            <Tooltip title='New Sprint'>
+              <Button variant='ghost' size='icon'>
+                <IconPlus className='size-4' />
+              </Button>
+            </Tooltip>
+
+            <Tooltip title='Batch create'>
+              <Button variant='ghost' size='icon'>
+                <IconCopyPlus className='size-4' />
+              </Button>
+            </Tooltip>
+          </div>
+        </div>
       </DataTable>
 
       <UpdateSprintSheet

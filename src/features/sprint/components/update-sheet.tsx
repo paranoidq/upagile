@@ -31,7 +31,7 @@ interface UpdateSprintSheetProps extends React.ComponentPropsWithRef<typeof Shee
 
 export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSheetProps) {
   const { mutateAsync: updateSprint, isPending: isUpdatePending } = useUpdateSprint()
-  const { teams } = useTeamStore()
+  const { teams: workspaces } = useTeamStore()
 
   const form = useForm<UpdateSprintSchema>({
     resolver: zodResolver(updateSprintSchema),
@@ -200,20 +200,20 @@ export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSh
               name='teamId'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Team</FormLabel>
+                  <FormLabel>Workspace</FormLabel>
                   <FormControl>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder='Select a team' />
+                          <SelectValue placeholder='Select a workspace' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {teams.map((team) => (
-                          <SelectItem key={team.id} value={team.id}>
+                        {workspaces.map((workspace) => (
+                          <SelectItem key={workspace.id} value={workspace.id}>
                             <div className='flex items-center gap-2 text-sm'>
                               <IconCube className='size-4' />
-                              {team.name}
+                              {workspace.name}
                             </div>
                           </SelectItem>
                         ))}

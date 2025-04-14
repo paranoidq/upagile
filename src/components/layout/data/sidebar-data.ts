@@ -31,12 +31,12 @@ export const getSidebarData = (workspaces: Workspace[] = []): SidebarData => {
         items: [
           {
             title: 'Requirements',
-            url: '/requirement',
+            url: '/requirements',
             icon: IconBulb,
           },
           {
             title: 'Projects',
-            url: '/project',
+            url: '/projects',
             icon: IconLayoutKanban,
           },
         ],
@@ -46,17 +46,17 @@ export const getSidebarData = (workspaces: Workspace[] = []): SidebarData => {
         items: [
           {
             title: 'Issues',
-            url: '/issue',
+            url: '/issues',
             icon: IconChecklist,
           },
           {
             title: 'Sprints',
-            url: '/sprint',
+            url: '/sprints',
             icon: IconFlag,
           },
           {
             title: 'Releases',
-            url: '/release',
+            url: '/releases',
             icon: IconTargetArrow,
           },
         ],

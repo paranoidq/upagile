@@ -46,7 +46,7 @@ export function FeatureFlagsProvider({ children }: FeatureFlagsProviderProps) {
         setFeatureFlags: (value) => void setFeatureFlags(value),
       }}
     >
-      <div className='w-full overflow-x-auto'>
+      <div className='w-full overflow-x-auto hidden'>
         <ToggleGroup
           type='multiple'
           variant='outline'
