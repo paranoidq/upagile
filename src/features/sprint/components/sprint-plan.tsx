@@ -3,6 +3,7 @@ import {
   IconArrowRight,
   IconCalendarTime,
   IconCube,
+  IconFilter,
   IconInfoSquare,
   IconPencil,
   IconReload,
@@ -18,6 +19,8 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -26,6 +29,8 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { useSprint } from '../_lib/services'
 import { Sprint, sprintStatus } from '../types'
 import { DeleteSprintsDialog } from './delete-dialog'
+import { SprintPlanKanban } from './sprint-plan-kanban'
+import SprintPlanList from './sprint-plan-list'
 import { UpdateSprintSheet } from './update-sheet'
 
 type Action = {
@@ -56,7 +61,7 @@ const SprintPlanPage: FC = () => {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href='/sprints'>Sprints</BreadcrumbLink>
+              <BreadcrumbLink onClick={() => navigate('/sprints')}>Sprints</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>{sprint?.id}</BreadcrumbItem>
@@ -64,9 +69,9 @@ const SprintPlanPage: FC = () => {
         </Breadcrumb>
 
         <div className='mt-4'>
-          <Card className='border-none'>
+          <Card>
             <CardHeader>
-              <CardTitle className='border-b border-gray-200'>
+              <CardTitle className=''>
                 <div className='flex items-center justify-between'>
                   <div className='text-lg font-bold'>{sprint?.title}</div>
                   <div className='flex items-center space-x-2'>
@@ -148,7 +153,35 @@ const SprintPlanPage: FC = () => {
                 </div>
               </CardDescription>
             </CardHeader>
-            <CardContent></CardContent>
+
+            <CardContent>
+              <Tabs defaultValue='kanban'>
+                <div className='flex items-center justify-between'>
+                  <TabsList>
+                    <TabsTrigger value='kanban'>Kanban</TabsTrigger>
+                    <TabsTrigger value='list'>List</TabsTrigger>
+                  </TabsList>
+                  <div className='flex items-center w-[150px]'>
+                    <Select defaultValue='status'>
+                      <SelectTrigger>
+                        <IconFilter className='h-4 w-4' />
+                        <SelectValue placeholder='View' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='status'>Status</SelectItem>
+                        <SelectItem value='assignee'>Assignee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <TabsContent value='kanban' className='mt-4'>
+                  <SprintPlanKanban />
+                </TabsContent>
+                <TabsContent value='list'>
+                  <SprintPlanList />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
           </Card>
         </div>
       </Main>
