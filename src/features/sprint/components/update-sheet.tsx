@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { IconCube } from '@tabler/icons-react'
 import { Loader } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTeamStore } from '@/stores/teamStore'
@@ -36,7 +37,6 @@ export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSh
     resolver: zodResolver(updateSprintSchema),
   })
 
-  // 当 backlog 变化时重置表单
   React.useEffect(() => {
     if (sprint) {
       form.reset({
@@ -211,7 +211,10 @@ export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSh
                       <SelectContent>
                         {teams.map((team) => (
                           <SelectItem key={team.id} value={team.id}>
-                            {team.name}
+                            <div className='flex items-center gap-2 text-sm'>
+                              <IconCube className='size-4' />
+                              {team.name}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>

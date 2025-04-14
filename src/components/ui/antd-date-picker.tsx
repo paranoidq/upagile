@@ -2,7 +2,7 @@ import { DatePicker, DatePickerProps } from 'antd'
 import dayjs from 'dayjs'
 
 type AntdDataPickerProps = DatePickerProps & {
-  data: string | undefined
+  data: string | undefined | null
   onChange: (value: dayjs.Dayjs | null) => void
 }
 
