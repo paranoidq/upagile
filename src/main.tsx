@@ -83,7 +83,52 @@ if (!rootElement.innerHTML) {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
-          <ConfigProvider locale={locale} theme={{}}>
+          <ConfigProvider
+            locale={locale}
+            theme={{
+              token: {
+                colorPrimary: 'hsl(var(--primary))',
+                colorPrimaryHover: 'hsl(var(--primary) / 0.9)',
+                colorPrimaryActive: 'hsl(var(--primary) / 0.8)',
+                colorBgContainer: 'hsl(var(--background))',
+                colorText: 'hsl(var(--foreground))',
+                colorBorder: 'hsl(var(--border))',
+                borderRadius: 6,
+              },
+              components: {
+                DatePicker: {
+                  activeBorderColor: 'hsl(var(--primary))',
+                  cellActiveWithRangeBg: 'hsl(var(--primary) / 0.1)',
+                  cellHoverBg: 'hsl(var(--accent))',
+                  controlItemBgActive: 'hsl(var(--primary))',
+                  primaryColor: 'hsl(var(--primary))',
+                },
+                Button: {
+                  primaryColor: 'hsl(var(--primary))',
+                  defaultBg: 'hsl(var(--background))',
+                  defaultBorderColor: 'hsl(var(--border))',
+                },
+                Input: {
+                  activeBorderColor: 'hsl(var(--primary))',
+                  hoverBorderColor: 'hsl(var(--primary) / 0.8)',
+                },
+                Select: {
+                  optionSelectedBg: 'hsl(var(--primary) / 0.1)',
+                  optionActiveBg: 'hsl(var(--accent))',
+                },
+                Modal: {
+                  contentBg: 'hsl(var(--background))',
+                  headerBg: 'hsl(var(--background))',
+                  titleColor: 'hsl(var(--foreground))',
+                },
+                Table: {
+                  headerBg: 'hsl(var(--muted))',
+                  headerColor: 'hsl(var(--foreground))',
+                  rowHoverBg: 'hsl(var(--accent))',
+                },
+              },
+            }}
+          >
             <RouterProvider router={router} />
           </ConfigProvider>
         </ThemeProvider>

@@ -55,6 +55,18 @@ const IssuePage: FC = () => {
             <IssueTable data={filteredIssues ?? []} />
           )}
         </FeatureFlagsProvider>
+
+        <div className='mt-4 space-y-2'>
+          <div>个人分组需要关注的是近期的内容，不要展示太多的其他迭代的issue</div>
+          <div>个人分组下支持card视图</div>
+          <div>
+            个人分组下，多维度自动自动分类分组展示（迭代、类型、...），可以按照迭代(最多3个？)展示为多个tab，然后每个tab下按照issue类型分组展示
+          </div>
+          <div>团队分组下支持看板视图，根据人来划分，是否需要根据其他维度来划分？</div>
+          <div>自定义view</div>
+          <div>提示未完成的issue，以及处理方式？</div>
+          <div>专注模式</div>
+        </div>
       </Main>
     </>
   )

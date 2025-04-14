@@ -69,6 +69,13 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        antd: {
+          primary: 'hsl(var(--primary))',
+          background: 'hsl(var(--background))',
+          foreground: 'hsl(var(--foreground))',
+          border: 'hsl(var(--border))',
+          accent: 'hsl(var(--accent))',
+        },
       },
     },
   },

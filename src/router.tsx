@@ -12,7 +12,7 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import ComingSoon from '@/components/coming-soon'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
-import Apps from '@/features/apps'
+import Application, { default as Apps } from '@/features/application'
 import ForgotPassword from '@/features/auth/forgot-password'
 import Otp from '@/features/auth/otp'
 import SignIn from '@/features/auth/sign-in'
@@ -39,6 +39,8 @@ import Sprint from '@/features/sprint'
 import Tasks from '@/features/tasks'
 import Users from '@/features/users'
 import WorkspaceSettings from '@/features/workspace/settings'
+import Docs from './features/docs'
+import Retro from './features/retro'
 
 // 认证布局组件
 function AuthenticatedLayout() {
@@ -133,9 +135,10 @@ const router = createBrowserRouter([
               { path: 'notifications', element: <SettingsNotifications /> },
             ],
           },
-          { path: 'my-workspace/issues', element: <Issue /> },
-          { path: 'my-workspace/sprints', element: <Sprint /> },
-          { path: 'my-workspace/releases', element: <Release /> },
+          {
+            path: 'workspace/settings',
+            element: <WorkspaceSettings />,
+          },
           {
             path: 'workspace/:teamId/issues',
             element: <Issue />,
@@ -149,8 +152,16 @@ const router = createBrowserRouter([
             element: <Release />,
           },
           {
-            path: 'workspace/settings',
-            element: <WorkspaceSettings />,
+            path: 'workspace/:teamId/systems',
+            element: <Application />,
+          },
+          {
+            path: 'workspace/:teamId/retros',
+            element: <Retro />,
+          },
+          {
+            path: 'workspace/:teamId/docs',
+            element: <Docs />,
           },
         ],
       },

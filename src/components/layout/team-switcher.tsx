@@ -75,7 +75,7 @@ export function NavHeader() {
               className='gap-2 p-2'
               onSelect={(e) => {
                 e.preventDefault()
-                navigate('workspace/settings')
+                navigate('/workspace/settings')
               }}
             >
               <div className='flex size-6 items-center justify-center rounded-md border bg-background'>

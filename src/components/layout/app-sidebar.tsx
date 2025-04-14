@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar'
 import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
 import { NavHeader } from '@/components/layout/team-switcher.tsx'
@@ -58,7 +58,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavUser user={sidebarData.user} />
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   )
 }

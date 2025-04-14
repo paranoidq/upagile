@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTeamStore } from '@/stores/teamStore'
+import AntdDataPicker from '@/components/ui/antd-date-picker'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -27,7 +28,7 @@ interface UpdateSprintSheetProps extends React.ComponentPropsWithRef<typeof Shee
   sprint: Sprint | null
 }
 
-export function UpdateSprintSheet({ sprint, ...props }: UpdateSprintSheetProps) {
+export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSheetProps) {
   const { mutateAsync: updateSprint, isPending: isUpdatePending } = useUpdateSprint()
   const { teams } = useTeamStore()
 
@@ -61,7 +62,7 @@ export function UpdateSprintSheet({ sprint, ...props }: UpdateSprintSheetProps) 
       loading: 'Updating sprint...',
       success: () => {
         form.reset()
-        props.onOpenChange?.(false)
+        onOpenChange?.(false)
         return 'Sprint updated'
       },
       error: (error) => {
@@ -71,7 +72,7 @@ export function UpdateSprintSheet({ sprint, ...props }: UpdateSprintSheetProps) 
   }
 
   return (
-    <Sheet {...props}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className='flex flex-col gap-6 sm:max-w-md'>
         <SheetHeader className='text-left'>
           <SheetTitle>Update sprint</SheetTitle>
@@ -163,7 +164,12 @@ export function UpdateSprintSheet({ sprint, ...props }: UpdateSprintSheetProps) 
                 <FormItem>
                   <FormLabel>Start Time</FormLabel>
                   <FormControl>
-                    <Input type='date' placeholder='' {...field} />
+                    <AntdDataPicker
+                      data={field.value}
+                      onChange={(date) => {
+                        field.onChange(date ? date.format('YYYY-MM-DD') : null)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -177,7 +183,12 @@ export function UpdateSprintSheet({ sprint, ...props }: UpdateSprintSheetProps) 
                 <FormItem>
                   <FormLabel>End Time</FormLabel>
                   <FormControl>
-                    <Input type='date' placeholder='' {...field} />
+                    <AntdDataPicker
+                      data={field.value}
+                      onChange={(date) => {
+                        field.onChange(date ? date.format('YYYY-MM-DD') : null)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -87,6 +87,10 @@ const WorkspaceSettings: FC = () => {
           )}
         </div>
       </Main>
+
+      <ul>
+        <li>通过nuqs管理选择的工作区，从而方便其他地方直接跳转过来</li>
+      </ul>
     </>
   )
 }
