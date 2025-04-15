@@ -21,7 +21,7 @@ const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: 
     return issueStatus.find((status) => status.value === value)?.label || value
   }
   if (value === 'unassigned') {
-    return '未分配'
+    return 'Unassigned'
   }
   return members.find((member) => member.id === value)?.name || value
 }
