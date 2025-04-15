@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import * as Kanban from '@/components/ui/kanban'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { issueStatus } from '@/features/issue/types'
 import { Sprint } from '../types'
 
 type Issue = NonNullable<Sprint['issues']>[number]
@@ -25,36 +26,37 @@ const COLUMN_TITLES = {
 export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
   const [groupBy, setGroupBy] = React.useState<'assignee' | 'status'>('status')
   const { teams } = useTeamStore()
-  const members = teams.find((team) => team.id === sprint?.team.id)?.members
-
+  const members = teams.find((team) => team.id === sprint?.team.id)?.members || []
   const issues = sprint?.issues || []
 
-  let initialColumns: Record<string, Issue[]> = {}
-  if (groupBy === 'assignee') {
-    // 根据 assignee 分组
-    initialColumns = issues.reduce(
-      (acc, issue) => {
-        acc[issue.assignee?.id] = [...(acc[issue.assignee?.id] || []), issue]
-        return acc
-      },
-      {} as Record<string, Issue[]>,
-    )
-  } else {
-    // 根据 status 分组
-    initialColumns = issues.reduce(
-      (acc, issue) => {
-        acc[issue.status] = [...(acc[issue.status] || []), issue]
-        return acc
-      },
-      {} as Record<string, Issue[]>,
-    )
-  }
+  const getInitialColumns = React.useCallback(() => {
+    if (groupBy === 'assignee') {
+      return members.reduce(
+        (acc, member) => {
+          acc[member.id] = issues.filter((issue) => issue?.assignee?.id === member.id)
+          return acc
+        },
+        {} as Record<string, Issue[]>,
+      )
+    } else {
+      return issueStatus.reduce(
+        (acc, status) => {
+          acc[status.value] = issues.filter((issue) => issue?.status === status.value)
+          return acc
+        },
+        {} as Record<string, Issue[]>,
+      )
+    }
+  }, [groupBy, issues, members])
 
-  const [columns, setColumns] = React.useState<Record<string, Issue[]>>({
-    ...initialColumns,
-  })
+  const [columns, setColumns] = React.useState(getInitialColumns)
 
-  console.log(initialColumns)
+  React.useEffect(() => {
+    const newColumns = getInitialColumns()
+    if (JSON.stringify(columns) !== JSON.stringify(newColumns)) {
+      setColumns(newColumns)
+    }
+  }, [groupBy, getInitialColumns])
 
   if (!sprint) return null
 
