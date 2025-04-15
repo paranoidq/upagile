@@ -17,8 +17,6 @@ import { handleLogout } from '@/features/auth/_lib/services'
 export function ProfileDropdown() {
   const { user } = useAuth()
 
-  console.log(user)
-
   const handleLogoutClick = () => {
     handleLogout()
   }

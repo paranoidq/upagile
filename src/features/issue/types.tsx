@@ -1,7 +1,7 @@
 import React from 'react'
 import { z } from 'zod'
 import { IconCheck, IconCircle, IconRotateClockwise2, IconX } from '@tabler/icons-react'
-import { PRIORITIES } from '@/consts/enums'
+import { PRIORITIES, prioritySchema } from '@/consts/enums'
 
 export const issueStatus: {
   label: string
@@ -59,14 +59,18 @@ export const updateIssueSchema = createIssueSchema.extend({
 export type CreateIssueSchema = z.infer<typeof createIssueSchema>
 export type UpdateIssueSchema = z.infer<typeof updateIssueSchema>
 
+export const issueStatusSchema = z.enum(issueStatus.map((status) => status.value) as [string, ...string[]])
+
+export const issueTypeSchema = z.enum(issueType.map((type) => type.value) as [string, ...string[]])
+
 export const BaseIssueSchema = z.object({
   id: z.string(),
   title: z.string().min(1, '标题不能为空'),
   description: z.string().optional(),
-  priority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
-  sprintPriority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
-  status: z.enum(issueStatus.map((status) => status.value) as [string, ...string[]]).optional(),
-  type: z.enum(issueType.map((type) => type.value) as [string, ...string[]]).optional(),
+  priority: prioritySchema.optional(),
+  sprintPriority: prioritySchema.optional(),
+  status: issueStatusSchema.optional(),
+  type: issueTypeSchema.optional(),
   progress: z.number().min(0).max(100).optional(),
   startTime: z.string().date().optional(),
   deadline: z.string().date().optional(),

@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 export const PRIORITIES: {
   label: string
   value: string
@@ -29,3 +31,5 @@ export const PRIORITIES: {
     color: 'text-red-800',
   },
 ]
+
+export const prioritySchema = z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]])

@@ -1,6 +1,8 @@
 import React from 'react'
 import { z } from 'zod'
 import { IconCheck, IconCircle, IconRotateClockwise2, IconX } from '@tabler/icons-react'
+import { prioritySchema } from '@/consts/enums'
+import { issueStatusSchema, issueTypeSchema } from '../issue/types'
 
 export const sprintStatus: {
   label: string
@@ -8,10 +10,10 @@ export const sprintStatus: {
   color: string
   icon?: React.ReactNode
 }[] = [
-  { label: '未开始', value: 'init', color: 'bg-gray-600', icon: <IconCircle /> },
-  { label: '进行中', value: 'progressing', color: 'bg-blue-600', icon: <IconRotateClockwise2 /> },
-  { label: '已完成', value: 'completed', color: 'bg-green-600', icon: <IconCheck /> },
-  { label: '已关闭', value: 'canceled', color: 'bg-red-600', icon: <IconX /> },
+  { label: 'Pending', value: 'pending', color: 'bg-gray-600', icon: <IconCircle /> },
+  { label: 'Progressing', value: 'progressing', color: 'bg-blue-600', icon: <IconRotateClockwise2 /> },
+  { label: 'Completed', value: 'completed', color: 'bg-green-600', icon: <IconCheck /> },
+  { label: 'Canceled', value: 'canceled', color: 'bg-red-600', icon: <IconX /> },
 ]
 
 export const createSprintSchema = z.object({
@@ -52,6 +54,18 @@ export const SprintSchema = z.object({
       z
         .object({
           id: z.string(),
+          title: z.string(),
+          status: issueStatusSchema.optional(),
+          type: issueTypeSchema.optional(),
+          priority: prioritySchema.optional(),
+          assignee: z
+            .object({
+              id: z.string(),
+              name: z.string(),
+              username: z.string(),
+              avatar: z.string().optional(),
+            })
+            .optional(),
         })
         .optional(),
     )
