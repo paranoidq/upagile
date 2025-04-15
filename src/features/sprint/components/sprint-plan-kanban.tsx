@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTeamStore } from '@/stores/teamStore'
@@ -29,6 +30,7 @@ const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: 
 }
 
 export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
+  const queryClient = useQueryClient() // 添加这行
   const [groupBy, setGroupBy] = React.useState<'assignee' | 'status'>('status')
   const { teams } = useTeamStore()
   const { mutateAsync: updateIssue } = useUpdateIssue()

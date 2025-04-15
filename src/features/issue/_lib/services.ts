@@ -32,7 +32,7 @@ export const useDeleteIssues = () => {
   return useMutation({
     mutationFn: deleteIssues,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['backlogs'] })
+      queryClient.invalidateQueries({ queryKey: ['issues'] })
     },
   })
 }
@@ -62,7 +62,12 @@ export const useUpdateIssue = () => {
   return useMutation({
     mutationFn: updateIssue,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['issues'] })
+      queryClient.invalidateQueries({
+        queryKey: ['issues'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['sprints'],
+      })
     },
   })
 }
@@ -87,7 +92,7 @@ export const useBatchUpdateIssue = () => {
   return useMutation({
     mutationFn: bacthUpdateIssue,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['issues'] })
+      queryClient.invalidateQueries({ queryKey: ['issues', 'sprints'] })
     },
   })
 }

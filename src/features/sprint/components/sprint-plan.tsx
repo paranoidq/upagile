@@ -10,8 +10,9 @@ import SprintPlanOverview from './sprint-plan-overview'
 
 const SprintPlanPage: FC = () => {
   const { sprintId } = useParams()
-
   const { data: sprint, refetch: refetchSprint } = useSprint(sprintId, true)
+
+  console.log(sprint)
 
   return (
     <>

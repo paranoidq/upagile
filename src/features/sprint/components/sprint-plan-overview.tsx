@@ -27,6 +27,7 @@ type Action = {
 
 interface SprintPlanOverviewProps {
   sprint: Sprint | undefined | null
+  refetchSprint: () => void
 }
 
 const SprintPlanOverview: FC<SprintPlanOverviewProps> = ({ sprint, refetchSprint }) => {

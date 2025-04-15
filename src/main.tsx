@@ -28,8 +28,8 @@ const queryClient = new QueryClient({
         return !(error instanceof AxiosError && [401, 403].includes(error.response?.status ?? 0))
       },
       refetchOnWindowFocus: import.meta.env.PROD,
-      staleTime: 60 * 1000, // 10s
-      refetchOnMount: false, // 防止组件重新挂载时自动刷新
+      staleTime: 6000 * 1000, // 10s
+      refetchOnMount: true, // 防止组件重新挂载时自动刷新
     },
     mutations: {
       onError: (error) => {
