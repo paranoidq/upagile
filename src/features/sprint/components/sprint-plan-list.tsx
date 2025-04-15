@@ -6,11 +6,11 @@ interface SprintPlanListProps {
   sprint: Sprint | undefined | null
 }
 
-type Issue = Sprint['issues']
+type Issue = NonNullable<Sprint['issues']>[number]
 
 const SprintPlanList: FC<SprintPlanListProps> = ({ sprint }) => {
   const [view, setView] = useState<'kanban' | 'list'>('list')
-  const issues: Issue = sprint?.issues || []
+  const issues: Issue[] = sprint?.issues || []
 
   // 提前返回，如果没有 issues
   if (!issues.length) {

@@ -74,7 +74,7 @@ const SprintInfoCard = ({ sprint }: { sprint: Sprint | undefined | null }) => {
           <Button variant='ghost' size='icon' onClick={() => setAction({ type: 'update', data: sprint })}>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <IconPencil className='h-4 w-4' />
                 </TooltipTrigger>
                 <TooltipContent>Edit Sprint</TooltipContent>
@@ -85,7 +85,7 @@ const SprintInfoCard = ({ sprint }: { sprint: Sprint | undefined | null }) => {
           <Button variant='ghost' size='icon' onClick={() => setAction({ type: 'delete', data: sprint })}>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <IconTrash className='h-4 w-4' />
                 </TooltipTrigger>
                 <TooltipContent>Delete Sprint</TooltipContent>
@@ -96,7 +96,7 @@ const SprintInfoCard = ({ sprint }: { sprint: Sprint | undefined | null }) => {
           <Button variant='ghost' size='icon' onClick={() => {}}>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <IconReload className='h-4 w-4' />
                 </TooltipTrigger>
                 <TooltipContent>Reload Sprint</TooltipContent>
@@ -107,7 +107,7 @@ const SprintInfoCard = ({ sprint }: { sprint: Sprint | undefined | null }) => {
           <Button variant='ghost' size='icon' onClick={() => navigate('/sprints')}>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <IconArrowBackUp className='h-4 w-4' />
                 </TooltipTrigger>
                 <TooltipContent>Back to Sprint List</TooltipContent>
@@ -143,7 +143,7 @@ const SprintInfoCard = ({ sprint }: { sprint: Sprint | undefined | null }) => {
                 {sprintStatus
                   .filter((status) => status.value === sprint?.status)
                   .map((status) => (
-                    <div className='flex items-center space-x-2'>
+                    <div className='flex items-center space-x-2' key={status.value}>
                       <div
                         className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${status?.color || ''} text-white`}
                       >
@@ -218,7 +218,7 @@ const SprintIssuesCard = ({ sprint }: { sprint: Sprint | undefined | null }) => 
           >
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <IconListCheck className='h-4 w-4' />
                 </TooltipTrigger>
                 <TooltipContent>Plan Sprint</TooltipContent>

@@ -55,6 +55,7 @@ export const sprintSchema = z.object({
         .object({
           id: z.string(),
           title: z.string(),
+          description: z.string().optional(),
           status: issueStatusSchema.optional(),
           type: issueTypeSchema.optional(),
           priority: prioritySchema.optional(),
@@ -66,6 +67,8 @@ export const sprintSchema = z.object({
               avatar: z.string().optional(),
             })
             .optional(),
+          deadline: z.string().optional(),
+          duration: z.number().optional(),
         })
         .optional(),
     )
