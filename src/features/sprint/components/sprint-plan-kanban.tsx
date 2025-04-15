@@ -16,11 +16,14 @@ interface SprintPlanKanbanProps {
   sprint: Sprint | undefined | null
 }
 
-const COLUMN_TITLES = {
-  init: '未开始',
-  progressing: '进行中',
-  completed: '已完成',
-  canceled: '已取消',
+const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: any[]) => {
+  if (groupBy === 'status') {
+    return issueStatus.find((status) => status.value === value)?.label || value
+  }
+  if (value === 'unassigned') {
+    return '未分配'
+  }
+  return members.find((member) => member.id === value)?.name || value
 }
 
 export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
@@ -31,13 +34,25 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
 
   const getInitialColumns = React.useCallback(() => {
     if (groupBy === 'assignee') {
-      return members.reduce(
-        (acc, member) => {
-          acc[member.id] = issues.filter((issue) => issue?.assignee?.id === member.id)
-          return acc
-        },
-        {} as Record<string, Issue[]>,
-      )
+      const columns: Record<string, Issue[]> = {}
+
+      members.forEach((member) => {
+        columns[member.id] = []
+      })
+
+      columns['unassigned'] = []
+
+      issues.forEach((issue) => {
+        if (issue?.assignee?.id) {
+          if (columns[issue.assignee.id]) {
+            columns[issue.assignee.id].push(issue)
+          }
+        } else {
+          columns['unassigned'].push(issue)
+        }
+      })
+
+      return columns
     } else {
       return issueStatus.reduce(
         (acc, status) => {
@@ -79,7 +94,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
         <div className='overflow-x-auto'>
           <Kanban.Board className='inline-flex gap-4 min-w-max'>
             {Object.entries(columns).map(([columnValue, issues]) => (
-              <IssueColumn key={columnValue} value={columnValue} issues={issues} />
+              <IssueColumn key={columnValue} value={columnValue} issues={issues} groupBy={groupBy} members={members} />
             ))}
           </Kanban.Board>
         </div>
@@ -88,7 +103,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
             if (variant === 'column') {
               const issues = columns[value] ?? []
 
-              return <IssueColumn value={value} issues={issues} />
+              return <IssueColumn value={value} issues={issues} groupBy={groupBy} members={members} />
             }
 
             const issue = Object.values(columns)
@@ -144,14 +159,16 @@ function IssueCard({ issue, ...props }: IssueCardProps) {
 
 interface IssueColumnProps extends Omit<React.ComponentProps<typeof Kanban.Column>, 'children'> {
   issues: Issue[]
+  groupBy: 'assignee' | 'status'
+  members: any[]
 }
 
-function IssueColumn({ value, issues, ...props }: IssueColumnProps) {
+function IssueColumn({ value, issues, groupBy, members, ...props }: IssueColumnProps) {
   return (
     <Kanban.Column value={value} {...props} className='w-[350px] min-w-[350px] shrink-0'>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
-          <span className='font-semibold text-sm'>{COLUMN_TITLES[value]}</span>
+          <span className='font-semibold text-sm'>{getColumnTitle(value, groupBy, members)}</span>
           <Badge variant='secondary' className='pointer-events-none rounded-sm'>
             {issues.length}
           </Badge>
