@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
       },
       refetchOnWindowFocus: import.meta.env.PROD,
       staleTime: 6000 * 1000, // 10s
-      refetchOnMount: true, // 防止组件重新挂载时自动刷新
+      refetchOnMount: true,
     },
     mutations: {
       onError: (error) => {
