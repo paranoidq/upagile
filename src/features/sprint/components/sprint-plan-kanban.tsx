@@ -2,11 +2,13 @@
 
 import * as React from 'react'
 import { GripVertical } from 'lucide-react'
+import { toast } from 'sonner'
 import { useTeamStore } from '@/stores/teamStore'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import * as Kanban from '@/components/ui/kanban'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useUpdateIssue } from '@/features/issue/_lib/services'
 import { issueStatus } from '@/features/issue/types'
 import { Sprint } from '../types'
 
@@ -29,6 +31,7 @@ const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: 
 export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
   const [groupBy, setGroupBy] = React.useState<'assignee' | 'status'>('status')
   const { teams } = useTeamStore()
+  const { mutateAsync: updateIssue } = useUpdateIssue()
   const members = React.useMemo(() => {
     return teams.find((team) => team.id === sprint?.team.id)?.members || []
   }, [teams, sprint?.team.id])
@@ -77,6 +80,62 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
     setColumns(getInitialColumns())
   }, [groupBy, issues, members])
 
+  const handleDragEnd = React.useCallback(
+    async (event: { active: { id: string }; over: { id: string } | null }) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+
+      const activeIssue = Object.values(columns)
+        .flat()
+        .find((issue) => issue?.id === active.id)
+
+      if (!activeIssue) return
+
+      const newColumnId = over.id
+
+      // 更新本地状态
+      const newColumns = { ...columns }
+      Object.keys(newColumns).forEach((columnId) => {
+        newColumns[columnId] = newColumns[columnId].filter((issue) => issue.id !== activeIssue.id)
+      })
+      if (!newColumns[newColumnId]) {
+        newColumns[newColumnId] = []
+      }
+      newColumns[newColumnId].push(activeIssue)
+      setColumns(newColumns)
+
+      // 构建更新数据
+      const updateData = {
+        id: activeIssue.id,
+        ...(groupBy === 'status'
+          ? { status: newColumnId }
+          : {
+              assignee:
+                newColumnId === 'unassigned'
+                  ? null
+                  : {
+                      id: newColumnId,
+                      name: members.find((m) => m.id === newColumnId)?.name || '',
+                      username: members.find((m) => m.id === newColumnId)?.username || '',
+                    },
+            }),
+      }
+
+      // 调用接口更新
+      toast.promise(updateIssue(updateData), {
+        loading: 'Updating...',
+        success: () => {
+          return 'Updated successfully'
+        },
+        error: () => {
+          setColumns(getInitialColumns())
+          return 'Failed to update'
+        },
+      })
+    },
+    [columns, groupBy, members, updateIssue, getInitialColumns],
+  )
+
   if (!sprint) return null
 
   return (
@@ -94,7 +153,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
         </Select>
       </div>
 
-      <Kanban.Root value={columns} onValueChange={setColumns} getItemValue={(item) => item.id}>
+      <Kanban.Root value={columns} getItemValue={(item) => item.id} onDragEnd={handleDragEnd}>
         <div className='overflow-x-auto'>
           <Kanban.Board className='inline-flex gap-4 min-w-max'>
             {Object.entries(columns).map(([columnValue, issues]) => (
