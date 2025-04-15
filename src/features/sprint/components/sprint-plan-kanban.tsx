@@ -29,10 +29,15 @@ const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: 
 export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
   const [groupBy, setGroupBy] = React.useState<'assignee' | 'status'>('status')
   const { teams } = useTeamStore()
-  const members = teams.find((team) => team.id === sprint?.team.id)?.members || []
+  const members = React.useMemo(() => {
+    return teams.find((team) => team.id === sprint?.team.id)?.members || []
+  }, [teams, sprint?.team.id])
+
   const issues = sprint?.issues || []
 
   const getInitialColumns = React.useCallback(() => {
+    if (!issues?.length) return {}
+
     if (groupBy === 'assignee') {
       const columns: Record<string, Issue[]> = {}
 
@@ -43,6 +48,8 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
       columns['unassigned'] = []
 
       issues.forEach((issue) => {
+        if (!issue) return
+
         if (issue?.assignee?.id) {
           if (columns[issue.assignee.id]) {
             columns[issue.assignee.id].push(issue)
@@ -56,7 +63,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
     } else {
       return issueStatus.reduce(
         (acc, status) => {
-          acc[status.value] = issues.filter((issue) => issue?.status === status.value)
+          acc[status.value] = issues.filter((issue) => issue && issue.status === status.value)
           return acc
         },
         {} as Record<string, Issue[]>,
@@ -64,14 +71,11 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
     }
   }, [groupBy, issues, members])
 
-  const [columns, setColumns] = React.useState(getInitialColumns)
+  const [columns, setColumns] = React.useState<Record<string, Issue[]>>({})
 
   React.useEffect(() => {
-    const newColumns = getInitialColumns()
-    if (JSON.stringify(columns) !== JSON.stringify(newColumns)) {
-      setColumns(newColumns)
-    }
-  }, [groupBy, getInitialColumns])
+    setColumns(getInitialColumns())
+  }, [groupBy, issues, members])
 
   if (!sprint) return null
 
