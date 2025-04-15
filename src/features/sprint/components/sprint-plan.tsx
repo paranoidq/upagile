@@ -11,7 +11,7 @@ import SprintPlanOverview from './sprint-plan-overview'
 const SprintPlanPage: FC = () => {
   const { sprintId } = useParams()
 
-  const { data: sprint } = useSprint(sprintId, true)
+  const { data: sprint, refetch: refetchSprint } = useSprint(sprintId, true)
 
   return (
     <>
@@ -33,7 +33,7 @@ const SprintPlanPage: FC = () => {
       </Header>
       <Main>
         <div className='space-y-4'>
-          <SprintPlanOverview sprint={sprint} />
+          <SprintPlanOverview sprint={sprint} refetchSprint={refetchSprint} />
           <SprintPlanKanban sprint={sprint} />
         </div>
       </Main>

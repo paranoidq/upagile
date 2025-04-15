@@ -29,17 +29,23 @@ interface SprintPlanOverviewProps {
   sprint: Sprint | undefined | null
 }
 
-const SprintPlanOverview: FC<SprintPlanOverviewProps> = ({ sprint }) => {
+const SprintPlanOverview: FC<SprintPlanOverviewProps> = ({ sprint, refetchSprint }) => {
   return (
     <div className='space-y-4'>
-      <SprintInfoCard sprint={sprint} />
+      <SprintInfoCard sprint={sprint} refetchSprint={refetchSprint} />
     </div>
   )
 }
 
 export default SprintPlanOverview
 
-const SprintInfoCard = ({ sprint }: { sprint: Sprint | undefined | null }) => {
+const SprintInfoCard = ({
+  sprint,
+  refetchSprint,
+}: {
+  sprint: Sprint | undefined | null
+  refetchSprint: () => void
+}) => {
   const navigate = useNavigate()
   const [action, setAction] = useState<Action | null>(null)
 
@@ -93,7 +99,7 @@ const SprintInfoCard = ({ sprint }: { sprint: Sprint | undefined | null }) => {
             </TooltipProvider>
           </Button>
 
-          <Button variant='ghost' size='icon' onClick={() => {}}>
+          <Button variant='ghost' size='icon' onClick={() => refetchSprint()}>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
