@@ -5,6 +5,7 @@ import { GripVertical } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import * as Kanban from '@/components/ui/kanban'
+import { Sprint } from '../types'
 
 interface Task {
   id: string
@@ -22,7 +23,11 @@ const COLUMN_TITLES: Record<string, string> = {
   done: 'Done',
 }
 
-export function SprintPlanKanban() {
+interface SprintPlanKanbanProps {
+  sprint: Sprint | undefined | null
+}
+
+export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
   const [columns, setColumns] = React.useState<Record<string, Task[]>>({
     backlog: [
       {

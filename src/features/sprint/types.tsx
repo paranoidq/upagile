@@ -38,7 +38,7 @@ export const updateSprintSchema = z.object({
 export type CreateSprintSchema = z.infer<typeof createSprintSchema>
 export type UpdateSprintSchema = z.infer<typeof updateSprintSchema>
 
-export const SprintSchema = z.object({
+export const sprintSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().optional(),
@@ -73,4 +73,4 @@ export const SprintSchema = z.object({
   createdTime: z.string().optional(),
   modifiedTime: z.string().optional(),
 })
-export type Sprint = z.infer<typeof SprintSchema>
+export type Sprint = z.infer<typeof sprintSchema>

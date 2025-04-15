@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { http } from '@/lib/axios'
 import { createRequestConfig } from '@/lib/types'
-import { Sprint, SprintSchema } from '../types'
+import { Sprint, sprintSchema } from '../types'
 
 // 获取sprints
 export const listSprints = async (): Promise<Sprint[]> => {
@@ -12,7 +12,7 @@ export const listSprints = async (): Promise<Sprint[]> => {
     return []
   }
 
-  return z.array(SprintSchema).parse(response)
+  return z.array(sprintSchema).parse(response)
 }
 
 export const useSprints = () => {
@@ -108,7 +108,7 @@ export const getSprint = async (sprintId: string | undefined, withIssues = false
   }
 
   const response = await http.post(`/sprints/get`, { id: sprintId, withIssues })
-  return SprintSchema.parse(response)
+  return sprintSchema.parse(response)
 }
 
 export const useSprint = (sprintId: string | undefined, withIssues = false) => {

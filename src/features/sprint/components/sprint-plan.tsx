@@ -13,15 +13,8 @@ import {
 } from '@tabler/icons-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -45,10 +38,77 @@ type Action = {
 
 const SprintPlanPage: FC = () => {
   const { sprintId } = useParams()
-  const navigate = useNavigate()
-  const [action, setAction] = useState<Action | null>(null)
 
   const { data: sprint } = useSprint(sprintId, true)
+
+  return (
+    <>
+      {/* common header */}
+      <Header fixed>
+        <div className='flex items-center space-x-4'>
+          <div className='text-lg font-bold'>{sprint?.title}</div>
+        </div>
+
+        <div className='ml-auto flex items-center space-x-4'>
+          <ThemeSwitch />
+          <ProfileDropdown />
+        </div>
+      </Header>
+      <Main>
+        <div className='mt-4'>
+          <SprintInfoCard sprint={sprint} />
+
+          <Card className='mt-4'>
+            <CardHeader>
+              <CardTitle>Sprint Plan</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue='list' className='mt-4'>
+                <div className='flex items-center justify-between'>
+                  <TabsList>
+                    <TabsTrigger value='kanban'>Kanban</TabsTrigger>
+                    <TabsTrigger value='list'>List</TabsTrigger>
+                    <TabsTrigger value='stats'>Stats</TabsTrigger>
+                  </TabsList>
+                  <div className='flex items-center w-[150px]'>
+                    <Select defaultValue='status'>
+                      <SelectTrigger>
+                        <IconFilter className='h-4 w-4' />
+                        <SelectValue placeholder='View' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='status'>Status</SelectItem>
+                        <SelectItem value='assignee'>Assignee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <TabsContent value='kanban'>
+                    <SprintPlanKanban sprint={sprint} />
+                  </TabsContent>
+                  <TabsContent value='list'>
+                    <SprintPlanList sprint={sprint} />
+                  </TabsContent>
+
+                  <TabsContent value='stats'>
+                    <SprintPlanStats />
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </Main>
+    </>
+  )
+}
+
+export default SprintPlanPage
+
+const SprintInfoCard = ({ sprint }: { sprint: Sprint }) => {
+  const navigate = useNavigate()
+  const [action, setAction] = useState<Action | null>(null)
 
   // calculate sprint duration as working days
   const sprintDuration = useMemo(() => {
@@ -74,202 +134,138 @@ const SprintPlanPage: FC = () => {
   }, [sprint])
 
   return (
-    <>
-      {/* common header */}
-      <Header fixed>
-        <div className='flex items-center space-x-4'>
-          <div className='text-lg font-bold'>Sprints</div>
+    <Card>
+      <CardHeader className='flex-row items-center justify-between'>
+        <CardTitle className='font-semibold text-muted-foreground'>Overview</CardTitle>
+        <div className='flex items-center'>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={() => {
+              setAction({ type: 'schedule', data: sprint })
+            }}
+          >
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <IconListCheck className='h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>Plan Sprint</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Button>
+
+          <Button variant='ghost' size='icon' onClick={() => setAction({ type: 'update', data: sprint })}>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <IconPencil className='h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>Edit Sprint</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Button>
+
+          <Button variant='ghost' size='icon' onClick={() => setAction({ type: 'delete', data: sprint })}>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <IconTrash className='h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>Delete Sprint</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Button>
+
+          <Button variant='ghost' size='icon' onClick={() => {}}>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <IconReload className='h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>Reload Sprint</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Button>
+
+          <Button variant='ghost' size='icon' onClick={() => navigate('/sprints')}>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <IconArrowBackUp className='h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>Back to Sprint List</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Button>
         </div>
+      </CardHeader>
+      <CardContent>
+        <div className='flex-col items-center justify-between space-y-2'>
+          <div className='flex items-center space-x-2'>
+            <IconCalendarTime className='h-4 w-4' />
+            <div className='flex items-center space-x-2'>
+              <div>{sprint?.startTime}</div>
+              <IconArrowRight className='h-4 w-4' />
+              <div>{sprint?.endTime}</div>
+              <div className='text-sm rounded-md px-1 border border-blue-500 text-blue-500'>
+                {sprintDuration <= 0 ? '' : `${sprintDuration} working days`}
+              </div>
+            </div>
+          </div>
 
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
-      <Main>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink onClick={() => navigate('/sprints')}>Sprints</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>{sprint?.id}</BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+          <div className='flex items-center space-x-2'>
+            <div className='flex items-center space-x-2'>
+              <IconInfoSquare className='h-4 w-4' />
+              <div>{sprint?.description}</div>
+            </div>
+          </div>
 
-        <div className='mt-4'>
-          <Card>
-            <CardHeader>
-              <CardTitle className=''>
-                <div className='flex items-center justify-between'>
-                  <div className='text-lg font-bold'>{sprint?.title}</div>
-                  <div className='flex items-center space-x-2'>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      onClick={() => {
-                        setAction({ type: 'schedule', data: sprint })
-                      }}
-                    >
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <IconListCheck className='h-4 w-4' />
-                          </TooltipTrigger>
-                          <TooltipContent>Plan Sprint</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Button>
-
-                    <Button variant='ghost' size='icon' onClick={() => setAction({ type: 'update', data: sprint })}>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <IconPencil className='h-4 w-4' />
-                          </TooltipTrigger>
-                          <TooltipContent>Edit Sprint</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Button>
-
-                    <Button variant='ghost' size='icon' onClick={() => setAction({ type: 'delete', data: sprint })}>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <IconTrash className='h-4 w-4' />
-                          </TooltipTrigger>
-                          <TooltipContent>Delete Sprint</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Button>
-
-                    <Button variant='ghost' size='icon' onClick={() => {}}>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <IconReload className='h-4 w-4' />
-                          </TooltipTrigger>
-                          <TooltipContent>Reload Sprint</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Button>
-
-                    <Button variant='ghost' size='icon' onClick={() => navigate('/sprints')}>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <IconArrowBackUp className='h-4 w-4' />
-                          </TooltipTrigger>
-                          <TooltipContent>Back to Sprint List</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Button>
-                  </div>
-                </div>
-              </CardTitle>
-
-              <CardDescription className='flex flex-col gap-2 text-base'>
-                <div className='flex items-center space-x-2'>
-                  <IconCalendarTime className='h-4 w-4' />
-                  <div className='flex items-center space-x-2'>
-                    <div>{sprint?.startTime}</div>
-                    <IconArrowRight className='h-4 w-4' />
-                    <div>{sprint?.endTime}</div>
-                    <div className='text-sm rounded-md px-1 border border-blue-500 text-blue-500'>
-                      {sprintDuration <= 0 ? '' : `${sprintDuration} working days`}
+          <div className='flex items-center space-x-2'>
+            <div className='flex items-center space-x-2'>
+              <div>
+                {sprintStatus
+                  .filter((status) => status.value === sprint?.status)
+                  .map((status) => (
+                    <div className='flex items-center space-x-2'>
+                      <div
+                        className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${status?.color || ''} text-white`}
+                      >
+                        {status?.icon}
+                      </div>
+                      <div>{status?.label}</div>
                     </div>
-                  </div>
-                </div>
+                  ))}
+              </div>
+              <div
+                className={cn(
+                  'text-sm rounded-md px-1 text-white border',
+                  progress === 1
+                    ? 'text-green-500 border-green-500'
+                    : progress === 0
+                      ? 'text-gray-500 border-gray-500'
+                      : 'text-blue-500 border-blue-500',
+                )}
+              >
+                {progressText}
+              </div>
 
-                <div className='flex items-center space-x-2'>
-                  <div className='flex items-center space-x-2'>
-                    <IconInfoSquare className='h-4 w-4' />
-                    <div>{sprint?.description}</div>
-                  </div>
-                </div>
-
-                <div className='flex items-center space-x-2'>
-                  <div className='flex items-center space-x-2'>
-                    <div>
-                      {sprintStatus
-                        .filter((status) => status.value === sprint?.status)
-                        .map((status) => (
-                          <div className='flex items-center space-x-2'>
-                            <div
-                              className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${status?.color || ''} text-white`}
-                            >
-                              {status?.icon}
-                            </div>
-                            <div>{status?.label}</div>
-                          </div>
-                        ))}
-                    </div>
-                    <div
-                      className={cn(
-                        'text-sm rounded-md px-1 text-white border',
-                        progress === 1
-                          ? 'text-green-500 border-green-500'
-                          : progress === 0
-                            ? 'text-gray-500 border-gray-500'
-                            : 'text-blue-500 border-blue-500',
-                      )}
-                    >
-                      {progressText}
-                    </div>
-
-                    {/* {progress === 1 && (
+              {/* {progress === 1 && (
                       <Button variant='outline' onClick={() => {}} size='sm'>
                         Mark as Completed
                       </Button>
                     )} */}
-                  </div>
-                </div>
+            </div>
+          </div>
 
-                <div className='flex items-center space-x-2'>
-                  <div className='flex items-center space-x-2'>
-                    <IconCube className='h-4 w-4' />
-                    <div>{sprint?.team.name}</div>
-                  </div>
-                </div>
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <Tabs defaultValue='kanban'>
-                <div className='flex items-center justify-between'>
-                  <TabsList>
-                    <TabsTrigger value='kanban'>Kanban</TabsTrigger>
-                    <TabsTrigger value='list'>List</TabsTrigger>
-                    <TabsTrigger value='stats'>Stats</TabsTrigger>
-                  </TabsList>
-                  <div className='flex items-center w-[150px]'>
-                    <Select defaultValue='status'>
-                      <SelectTrigger>
-                        <IconFilter className='h-4 w-4' />
-                        <SelectValue placeholder='View' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='status'>Status</SelectItem>
-                        <SelectItem value='assignee'>Assignee</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <TabsContent value='kanban' className='mt-4'>
-                  <SprintPlanKanban />
-                </TabsContent>
-                <TabsContent value='list'>
-                  <SprintPlanList />
-                </TabsContent>
-
-                <TabsContent value='stats'>
-                  <SprintPlanStats />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+          <div className='flex items-center space-x-2'>
+            <div className='flex items-center space-x-2'>
+              <IconCube className='h-4 w-4' />
+              <div>{sprint?.team.name}</div>
+            </div>
+          </div>
         </div>
-      </Main>
+      </CardContent>
 
       <UpdateSprintSheet
         open={action?.type === 'update'}
@@ -290,8 +286,6 @@ const SprintPlanPage: FC = () => {
         onOpenChange={() => setAction(null)}
         sprint={action?.data ?? null}
       />
-    </>
+    </Card>
   )
 }
-
-export default SprintPlanPage
