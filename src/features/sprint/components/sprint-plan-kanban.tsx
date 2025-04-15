@@ -21,6 +21,8 @@ const COLUMN_TITLES: Record<string, string> = {
   inProgress: 'In Progress',
   review: 'Review',
   done: 'Done',
+  unassigned: 'Unassigned',
+  completed: 'Completed',
 }
 
 interface SprintPlanKanbanProps {
@@ -77,33 +79,67 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
         dueDate: '2024-03-24',
       },
     ],
+    unassigned: [
+      {
+        id: '9',
+        title: 'Setup project',
+        priority: 'high',
+        assignee: 'Eve Davis',
+        dueDate: '2024-03-25',
+      },
+      {
+        id: '10',
+        title: 'Initial commit',
+        priority: 'low',
+        assignee: 'Frank White',
+        dueDate: '2024-03-24',
+      },
+    ],
+    completed: [
+      {
+        id: '11',
+        title: 'Setup project',
+        priority: 'high',
+      },
+    ],
+    cancelled: [
+      {
+        id: '12',
+        title: 'Setup project',
+        priority: 'high',
+      },
+    ],
   })
 
   return (
-    <Kanban.Root value={columns} onValueChange={setColumns} getItemValue={(item) => item.id}>
-      <Kanban.Board className='grid auto-rows-fr grid-cols-3'>
-        {Object.entries(columns).map(([columnValue, tasks]) => (
-          <TaskColumn key={columnValue} value={columnValue} tasks={tasks} />
-        ))}
-      </Kanban.Board>
-      <Kanban.Overlay>
-        {({ value, variant }) => {
-          if (variant === 'column') {
-            const tasks = columns[value] ?? []
+    <div className='w-full'>
+      <Kanban.Root value={columns} onValueChange={setColumns} getItemValue={(item) => item.id}>
+        <div className='overflow-x-auto'>
+          <Kanban.Board className='inline-flex gap-4 min-w-max'>
+            {Object.entries(columns).map(([columnValue, tasks]) => (
+              <TaskColumn key={columnValue} value={columnValue} tasks={tasks} />
+            ))}
+          </Kanban.Board>
+        </div>
+        <Kanban.Overlay>
+          {({ value, variant }) => {
+            if (variant === 'column') {
+              const tasks = columns[value] ?? []
 
-            return <TaskColumn value={value} tasks={tasks} />
-          }
+              return <TaskColumn value={value} tasks={tasks} />
+            }
 
-          const task = Object.values(columns)
-            .flat()
-            .find((task) => task.id === value)
+            const task = Object.values(columns)
+              .flat()
+              .find((task) => task.id === value)
 
-          if (!task) return null
+            if (!task) return null
 
-          return <TaskCard task={task} />
-        }}
-      </Kanban.Overlay>
-    </Kanban.Root>
+            return <TaskCard task={task} />
+          }}
+        </Kanban.Overlay>
+      </Kanban.Root>
+    </div>
   )
 }
 
@@ -146,7 +182,7 @@ interface TaskColumnProps extends Omit<React.ComponentProps<typeof Kanban.Column
 
 function TaskColumn({ value, tasks, ...props }: TaskColumnProps) {
   return (
-    <Kanban.Column value={value} {...props}>
+    <Kanban.Column value={value} {...props} className='w-[350px] min-w-[350px] shrink-0'>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <span className='font-semibold text-sm'>{COLUMN_TITLES[value]}</span>
