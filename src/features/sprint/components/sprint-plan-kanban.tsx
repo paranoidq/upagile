@@ -1,7 +1,12 @@
 'use client'
 
 import * as React from 'react'
+import { AvatarImage } from '@radix-ui/react-avatar'
+import { IconCalendarTime, IconPlus, IconUserCircle } from '@tabler/icons-react'
+import { DragEndEvent } from '@dnd-kit/core'
 import { GripVertical } from 'lucide-react'
+import { toast } from 'sonner'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import * as Kanban from '@/components/ui/kanban'
@@ -20,33 +25,154 @@ interface SprintPlanKanbanProps {
 }
 
 const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: Member[]) => {
+  let title
   if (groupBy === 'status') {
-    return issueStatus.find((status) => status.value === value)?.label || value
+    const { color, label, icon } = issueStatus.find((status) => status.value === value) || {}
+    title = label || value
+
+    return (
+      <div className='flex items-center gap-1'>
+        <div
+          className={`flex size-4 px-0.5 font-extrabold items-center justify-center cursor-pointer rounded-full ${color || ''} text-white`}
+        >
+          {icon}
+        </div>
+        <span className='text-xs'>{label}</span>
+      </div>
+    )
+  } else if (groupBy === 'assignee') {
+    const member = members.find((member) => member.username === value)
+    if (value === 'unassigned') {
+      title = 'Unassigned'
+    } else {
+      title = member?.name || value
+    }
+
+    return (
+      <div className='flex items-center gap-1'>
+        <Avatar className='w-4 h-4 rounded-full overflow-hidden'>
+          <AvatarImage src={member?.avatar} />
+          <AvatarFallback>
+            <IconUserCircle className='w-4 h-4' />
+          </AvatarFallback>
+        </Avatar>
+        <span className='line-clamp-1'>{title}</span>
+      </div>
+    )
   }
-  if (value === 'unassigned') {
-    return 'Unassigned'
-  }
-  return members.find((member) => member.id === value)?.name || value
 }
 
 export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
-  const [groupBy, setGroupBy] = React.useState<'assignee' | 'status'>('status')
+  const [groupBy, setGroupBy] = React.useState<'assignee' | 'status'>('assignee')
   const { data: team } = useGetTeamMembers(sprint?.team.id || '')
   const members = team?.members || []
   const { mutateAsync: updateIssue } = useUpdateIssue()
 
   const issues = sprint?.issues || []
 
-  const columns = React.useMemo(() => {
-    return issues.reduce(
-      (acc, issue) => {
-        if (!issue) return acc
-        acc[issue.status] = [...(acc[issue.status] || []), issue]
-        return acc
-      },
-      {} as Record<string, Issue[]>,
-    )
-  }, [issues])
+  const getInitialColumns = React.useCallback(() => {
+    if (!issues?.length) return {}
+
+    if (groupBy === 'assignee') {
+      const columns: Record<string, Issue[]> = {
+        unassigned: [],
+      }
+
+      members.forEach((member) => {
+        columns[member.username] = []
+      })
+
+      // group issues by assignee
+      issues.forEach((issue) => {
+        if (!issue) return
+
+        if (issue?.assignee?.username) {
+          if (columns[issue.assignee.username]) {
+            columns[issue.assignee.username].push(issue)
+          }
+        } else {
+          columns['unassigned'].push(issue)
+        }
+      })
+
+      return columns
+    } else {
+      // group issues by status
+      return issueStatus.reduce(
+        (acc, status) => {
+          acc[status.value] = issues.filter((issue) => issue && issue.status === status.value)
+          return acc
+        },
+        {} as Record<string, Issue[]>,
+      )
+    }
+  }, [groupBy, issues, members])
+
+  const [previousColumns, setPreviousColumns] = React.useState<Record<string, Issue[]>>({})
+  const [columns, setColumns] = React.useState<Record<string, Issue[]>>({})
+
+  // 初始化 columns
+  React.useEffect(() => {
+    const initialColumns = getInitialColumns()
+    if (JSON.stringify(initialColumns) !== JSON.stringify(columns)) {
+      setColumns(initialColumns)
+    }
+  }, [groupBy, issues, members])
+
+  // handle drag
+  const handleDragEnd = React.useCallback(
+    (e: DragEndEvent) => {
+      const {
+        active: { id },
+      } = e
+
+      const issue = issues.find((issue) => issue?.id === id)
+
+      if (!issue) return
+
+      // find status of the issue in the current columns
+      const currentColumn = Object.keys(columns).find((column) => columns[column].includes(issue))
+
+      const columnUnChanged =
+        (groupBy === 'status' && currentColumn === issue.status) ||
+        (groupBy === 'assignee' && currentColumn === issue.assignee?.username)
+
+      if (!currentColumn || columnUnChanged) return
+
+      if (groupBy === 'status') {
+        toast.promise(
+          updateIssue({
+            id: issue.id,
+            status: currentColumn,
+          }),
+          {
+            loading: 'Updating issue status...',
+            success: 'Issue status updated',
+            error: (e) => ({
+              message: e.msg,
+              description: e.error,
+            }),
+          },
+        )
+      } else {
+        toast.promise(
+          updateIssue({
+            id: issue.id,
+            assigneeId: members.find((member) => member.username === currentColumn)?.id,
+          }),
+          {
+            loading: 'Updating issue assignee...',
+            success: 'Issue assignee updated',
+            error: (e) => ({
+              message: e.msg,
+              description: e.error,
+            }),
+          },
+        )
+      }
+    },
+    [columns],
+  )
 
   if (!sprint) return null
 
@@ -66,7 +192,19 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
       </div>
 
       {/* kanban */}
-      <Kanban.Root value={columns} getItemValue={(item) => item.id}>
+      <Kanban.Root
+        value={columns}
+        onValueChange={(value) => {
+          setColumns(value)
+        }}
+        onDragStart={() => {
+          setPreviousColumns(columns)
+        }}
+        onDragEnd={(e) => {
+          handleDragEnd(e)
+        }}
+        getItemValue={(item) => item.id}
+      >
         <div className='overflow-x-auto'>
           <Kanban.Board className='inline-flex gap-4 min-w-max'>
             {Object.entries(columns).map(([columnValue, issues]) => (
@@ -88,7 +226,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
 
             if (!issue) return null
 
-            return <IssueCard issue={issue} />
+            return <IssueCard issue={issue} groupBy={groupBy} />
           }}
         </Kanban.Overlay>
       </Kanban.Root>
@@ -98,10 +236,13 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
 
 interface IssueCardProps extends Omit<React.ComponentProps<typeof Kanban.Item>, 'value'> {
   issue: NonNullable<Issue>
+  groupBy: 'assignee' | 'status'
 }
 
-function IssueCard({ issue, ...props }: IssueCardProps) {
+function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
   if (!issue) return null
+
+  const { color, label, icon } = issueStatus.find((status) => status.value === issue.status) || {}
 
   return (
     <Kanban.Item key={issue.id} value={issue.id} asChild {...props}>
@@ -119,13 +260,37 @@ function IssueCard({ issue, ...props }: IssueCardProps) {
             </Badge>
           </div>
           <div className='flex items-center justify-between text-muted-foreground text-xs'>
-            {issue.assignee && (
+            {groupBy === 'status' && issue.assignee && (
               <div className='flex items-center gap-1'>
-                <div className='size-2 rounded-full bg-primary/20' />
+                <div>
+                  <Avatar className='w-4 h-4 rounded-full overflow-hidden'>
+                    <AvatarImage src={issue.assignee.avatar} />
+                    <AvatarFallback>
+                      <IconUserCircle className='w-4 h-4' />
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
                 <span className='line-clamp-1'>{issue.assignee.name}</span>
               </div>
             )}
-            {issue.deadline && <time className='text-[10px] tabular-nums'>{issue.deadline}</time>}
+
+            {groupBy === 'assignee' && issue.status && (
+              <div className='flex items-center gap-1'>
+                <div
+                  className={`flex size-4 px-0.5 font-extrabold items-center justify-center cursor-pointer rounded-full ${color || ''} text-white`}
+                >
+                  {icon}
+                </div>
+                <span className='text-xs'>{label}</span>
+              </div>
+            )}
+
+            {issue.deadline && (
+              <time className='text-[10px] tabular-nums flex items-center gap-1'>
+                <IconCalendarTime className='w-2.5 h-2.5' />
+                {issue.deadline}
+              </time>
+            )}
           </div>
         </div>
       </div>
@@ -143,24 +308,31 @@ function IssueColumn({ value, issues, groupBy, members, ...props }: IssueColumnP
   return (
     <Kanban.Column value={value} {...props} className='w-[350px] min-w-[350px] shrink-0'>
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center'>
           <span className='font-semibold text-sm'>{getColumnTitle(value, groupBy, members)}</span>
-          <Badge variant='secondary' className='pointer-events-none rounded-sm'>
-            {issues.length}
+          <Badge variant='secondary' className='pointer-events-none text-muted-foreground font-bold'>
+            ({issues.length})
           </Badge>
         </div>
-        <Kanban.ColumnHandle asChild>
-          <Button variant='ghost' size='icon'>
-            <GripVertical className='h-4 w-4' />
-          </Button>
-        </Kanban.ColumnHandle>
+        <div>
+          <Kanban.ColumnHandle asChild>
+            <Button variant='ghost' size='icon'>
+              <GripVertical className='h-4 w-4' />
+            </Button>
+          </Kanban.ColumnHandle>
+        </div>
       </div>
       <div className='flex flex-col gap-2 p-0.5'>
         {issues
           .filter((issue) => !!issue)
           .map((issue) => (
-            <IssueCard key={issue.id} issue={issue} asHandle />
+            <IssueCard key={issue.id} issue={issue} groupBy={groupBy} asHandle />
           ))}
+      </div>
+      <div className='flex items-center justify-between'>
+        <Button variant='outline' size='icon' className='w-full'>
+          <IconPlus className='h-4 w-4' />
+        </Button>
       </div>
     </Kanban.Column>
   )

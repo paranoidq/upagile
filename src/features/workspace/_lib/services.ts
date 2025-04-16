@@ -93,8 +93,6 @@ const getTeamMembers = async (id: string): Promise<Team | undefined> => {
   return teamSchema.parse(response)
 }
 export const useGetTeamMembers = (id: string) => {
-  console.log('response', id)
-
   return useQuery({
     queryKey: ['teams', 'members', id],
     queryFn: () => getTeamMembers(id),

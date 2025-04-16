@@ -46,7 +46,7 @@ export const createIssueSchema = z.object({
   parentId: z.string().optional(),
   inParentOrder: z.number().optional(),
   teamId: z.string().optional(),
-  assigneeIds: z.array(z.string()).optional(),
+  assigneeId: z.string().optional(),
   labelsIds: z.array(z.string()).optional(),
   sprintIds: z.array(z.string()).optional(),
   releaseId: z.string().optional(),
@@ -54,6 +54,7 @@ export const createIssueSchema = z.object({
 
 export const updateIssueSchema = createIssueSchema.extend({
   id: z.string(),
+  title: z.string().optional(),
 })
 
 export type CreateIssueSchema = z.infer<typeof createIssueSchema>

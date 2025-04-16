@@ -1,3 +1,67 @@
-帮我优化kanban的实现：
-
-1. 目前实现太复杂了，我希望简化一下，改成用户可以自由拖动或排序，但是不是立即更新到后台，而是用户的拖动之后，在顶部展示一个标记，让用户点击后保存
+{
+    "activatorEvent": {
+        "isTrusted": true,
+        "dndKit": {}
+    },
+    "active": {
+        "id": "2",
+        "data": {
+            "current": {
+                "sortable": {
+                    "containerId": "Sortable-4",
+                    "index": 0,
+                    "items": [
+                        "2"
+                    ]
+                }
+            }
+        },
+        "rect": {
+            "current": {
+                "initial": null,
+                "translated": null
+            }
+        }
+    },
+    "collisions": [
+        {
+            "id": "2"
+        }
+    ],
+    "delta": {
+        "x": 307,
+        "y": -7,
+        "scaleX": 1,
+        "scaleY": 1
+    },
+    "over": {
+        "id": "2",
+        "rect": {
+            "width": 324,
+            "height": 70,
+            "top": 397,
+            "bottom": 467,
+            "right": 609,
+            "left": 285
+        },
+        "data": {
+            "current": {
+                "sortable": {
+                    "containerId": "Sortable-2",
+                    "index": 0,
+                    "items": [
+                        "2",
+                        "3",
+                        "10",
+                        "11",
+                        "12",
+                        "13",
+                        "14",
+                        "15"
+                    ]
+                }
+            }
+        },
+        "disabled": false
+    }
+}
