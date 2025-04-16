@@ -85,7 +85,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
   const handleDragEnd = React.useCallback(
     async (event: { active: { id: string }; over: { id: string } | null }) => {
       const { active, over } = event
-      if (!over || active.id === over.id) return
+      if (!over) return
 
       const activeIssue = Object.values(columns)
         .flat()
@@ -93,47 +93,83 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
 
       if (!activeIssue) return
 
-      const newColumnId = over.id
+      // 检查是否在同一列内拖动
+      const activeColumnId = Object.entries(columns).find(([_, issues]) =>
+        issues.some((issue) => issue.id === active.id),
+      )?.[0]
+
+      if (!activeColumnId) return
+
+      // 找到目标列ID和目标Issue
+      let targetColumnId = activeColumnId
+      const overIssueId = over.id
+
+      // 如果over.id存在于columns的键中，说明是拖到了列上
+      if (Object.keys(columns).includes(over.id)) {
+        targetColumnId = over.id
+      } else {
+        // 否则是拖到了某个issue上，需要找到该issue所在的列
+        targetColumnId =
+          Object.entries(columns).find(([_, issues]) => issues.some((issue) => issue.id === over.id))?.[0] ||
+          activeColumnId
+      }
+
+      // 如果是同一列内的拖动且目标是列而不是具体的issue，不执行任何操作
+      if (activeColumnId === targetColumnId && !columns[targetColumnId].some((issue) => issue.id === overIssueId))
+        return
 
       // 更新本地状态
       const newColumns = { ...columns }
-      Object.keys(newColumns).forEach((columnId) => {
-        newColumns[columnId] = newColumns[columnId].filter((issue) => issue.id !== activeIssue.id)
-      })
-      if (!newColumns[newColumnId]) {
-        newColumns[newColumnId] = []
+      // 从原列中移除
+      newColumns[activeColumnId] = newColumns[activeColumnId].filter((issue) => issue.id !== activeIssue.id)
+
+      // 添加到新列
+      if (!newColumns[targetColumnId]) {
+        newColumns[targetColumnId] = []
       }
-      newColumns[newColumnId].push(activeIssue)
+
+      // 如果是拖到具体issue上，找到目标位置插入
+      const targetIndex = newColumns[targetColumnId].findIndex((issue) => issue.id === overIssueId)
+
+      if (targetIndex !== -1) {
+        // 如果找到目标位置，在目标位置插入
+        newColumns[targetColumnId].splice(targetIndex, 0, activeIssue)
+      } else {
+        // 否则添加到列表末尾
+        newColumns[targetColumnId].push(activeIssue)
+      }
+
       setColumns(newColumns)
 
-      // 构建更新数据
-      const updateData = {
-        id: activeIssue.id,
-        ...(groupBy === 'status'
-          ? { status: newColumnId }
-          : {
-              assignee:
-                newColumnId === 'unassigned'
-                  ? null
-                  : {
-                      id: newColumnId,
-                      name: members.find((m) => m.id === newColumnId)?.name || '',
-                      username: members.find((m) => m.id === newColumnId)?.username || '',
-                    },
-            }),
-      }
+      // 只有在跨列拖动时才更新后端
+      if (activeColumnId !== targetColumnId) {
+        const updateData = {
+          id: activeIssue.id,
+          ...(groupBy === 'status'
+            ? { status: targetColumnId }
+            : {
+                assignee:
+                  targetColumnId === 'unassigned'
+                    ? null
+                    : {
+                        id: targetColumnId,
+                        name: members.find((m) => m.id === targetColumnId)?.name || '',
+                        username: members.find((m) => m.id === targetColumnId)?.username || '',
+                      },
+              }),
+        }
 
-      // 调用接口更新
-      toast.promise(updateIssue(updateData), {
-        loading: 'Updating...',
-        success: () => {
-          return 'Updated successfully'
-        },
-        error: () => {
-          setColumns(getInitialColumns())
-          return 'Failed to update'
-        },
-      })
+        toast.promise(updateIssue(updateData), {
+          loading: 'Updating...',
+          success: () => {
+            return 'Updated successfully'
+          },
+          error: () => {
+            setColumns(getInitialColumns())
+            return 'Failed to update'
+          },
+        })
+      }
     },
     [columns, groupBy, members, updateIssue, getInitialColumns],
   )
