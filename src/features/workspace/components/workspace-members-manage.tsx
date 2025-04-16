@@ -28,10 +28,10 @@ import {
   useRemoveMember as useRemoveMembers,
   useTransferOwnership,
 } from '../_lib/services'
-import { TeamType, UserType } from '../types'
+import { Team, UserType } from '../types'
 
 interface WorkspaceMembersManageProps {
-  selectedWorkspace: TeamType | undefined
+  selectedWorkspace: Team | undefined
 }
 
 const WorkspaceMembersManage = ({ selectedWorkspace }: WorkspaceMembersManageProps) => {
@@ -112,7 +112,7 @@ const AddMemberDialog = ({
   selectedWorkspace,
   members,
 }: {
-  selectedWorkspace: TeamType | undefined
+  selectedWorkspace: Team | undefined
   members: UserType[]
 }) => {
   const [open, setOpen] = useState(false)
@@ -186,7 +186,7 @@ const RemoveMemberDialog = ({
   selectedWorkspace,
   member,
 }: {
-  selectedWorkspace: TeamType | undefined
+  selectedWorkspace: Team | undefined
   member: UserType
 }) => {
   const [open, setOpen] = useState(false)
@@ -237,7 +237,7 @@ const TransferOwnershipDialog = ({
   selectedWorkspace,
   members,
 }: {
-  selectedWorkspace: TeamType | undefined
+  selectedWorkspace: Team | undefined
   members: UserType[]
 }) => {
   const [open, setOpen] = useState(false)
@@ -312,7 +312,7 @@ const TransferOwnershipDialog = ({
   )
 }
 
-const LeaveWorkspaceDialog = ({ selectedWorkspace }: { selectedWorkspace: TeamType | undefined }) => {
+const LeaveWorkspaceDialog = ({ selectedWorkspace }: { selectedWorkspace: Team | undefined }) => {
   const [open, setOpen] = useState(false)
   const { mutateAsync: leaveTeam, isPending: isLeaveTeamPending } = useLeaveTeam()
 

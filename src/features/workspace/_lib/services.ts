@@ -2,10 +2,10 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '@/lib/axios'
 import { createRequestConfig } from '@/lib/types'
-import { CreateTeamType, teamSchema, TeamType, UpdateTeamType, userSchema, UserType } from '../types'
+import { CreateTeamType, Team, teamSchema, UpdateTeamType, userSchema, UserType } from '../types'
 
 // 查询我的团队
-const listMyTeams = async (): Promise<TeamType[]> => {
+const listMyTeams = async (): Promise<Team[]> => {
   const response = await http.post('/teams/my')
   if (!response) {
     return []
@@ -85,7 +85,7 @@ export const useCheckTeamName = (name: string) => {
 }
 
 // 获取团队成员
-const getTeamMembers = async (id: string): Promise<TeamType | undefined> => {
+const getTeamMembers = async (id: string): Promise<Team | undefined> => {
   const response = await http.get(`/teams/${id}`)
   if (!response) {
     return undefined
@@ -93,9 +93,12 @@ const getTeamMembers = async (id: string): Promise<TeamType | undefined> => {
   return teamSchema.parse(response)
 }
 export const useGetTeamMembers = (id: string) => {
+  console.log('response', id)
+
   return useQuery({
     queryKey: ['teams', 'members', id],
     queryFn: () => getTeamMembers(id),
+    enabled: !!id,
   })
 }
 

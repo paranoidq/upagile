@@ -14,10 +14,10 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { useDeleteWorkspace } from '../_lib/services'
-import { TeamType } from '../types'
+import { Team } from '../types'
 
 interface WorkspaceAdvancedManageProps {
-  selectedWorkspace: TeamType | undefined
+  selectedWorkspace: Team | undefined
 }
 
 const WorkspaceAdvancedManage = ({ selectedWorkspace }: WorkspaceAdvancedManageProps) => {
@@ -48,7 +48,7 @@ const DeleteWorkspaceDialog = ({
   selectedWorkspace,
   isOwner,
 }: {
-  selectedWorkspace: TeamType | undefined
+  selectedWorkspace: Team | undefined
   isOwner: boolean
 }) => {
   const { mutateAsync: deleteWorkspace, isPending: isDeleteWorkspacePending } = useDeleteWorkspace()

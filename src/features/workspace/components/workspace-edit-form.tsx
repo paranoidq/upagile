@@ -10,10 +10,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useUpdateTeam } from '../_lib/services'
-import { TeamType, updateTeamSchema } from '../types'
+import { Team, updateTeamSchema } from '../types'
 
 interface WorkspaceEditFormProps {
-  selectedWorkspace: TeamType | undefined
+  selectedWorkspace: Team | undefined
 }
 
 export function WorkspaceEditForm({ selectedWorkspace }: WorkspaceEditFormProps) {

@@ -1,11 +1,11 @@
 import { create } from 'zustand'
-import { TeamType } from '@/features/workspace/types'
+import { Team } from '@/features/workspace/types'
 
 interface TeamState {
-  teams: TeamType[]
-  currentTeam: TeamType | null
-  setTeams: (teams: TeamType[] | null) => void
-  setCurrentTeam: (team: TeamType) => void
+  teams: Team[]
+  currentTeam: Team | null
+  setTeams: (teams: Team[] | null) => void
+  setCurrentTeam: (team: Team) => void
   isLoading: boolean
 }
 

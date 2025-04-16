@@ -19,7 +19,7 @@ import {
   IconTool,
   IconUserCog,
 } from '@tabler/icons-react'
-import { TeamType as Workspace } from '@/features/workspace/types'
+import { Team as Workspace } from '@/features/workspace/types'
 import { type SidebarData } from '../types'
 
 // 创建一个函数来生成侧边栏数据

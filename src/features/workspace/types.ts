@@ -26,7 +26,7 @@ export const teamSchema = z.object({
   modifiedTime: z.string().optional(),
 })
 
-export type TeamType = z.infer<typeof teamSchema>
+export type Team = z.infer<typeof teamSchema>
 
 export const createTeamSchema = z.object({
   name: z.string(),
