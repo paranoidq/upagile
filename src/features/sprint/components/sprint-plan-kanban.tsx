@@ -50,7 +50,7 @@ const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: 
 
     return (
       <div className='flex items-center gap-1'>
-        <Avatar className='w-4 h-4 rounded-full overflow-hidden'>
+        <Avatar className='w-4 h-4 rounded-full'>
           <AvatarImage src={member?.avatar} />
           <AvatarFallback>
             <IconUserCircle className='w-4 h-4' />
@@ -205,7 +205,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
         }}
         getItemValue={(item) => item.id}
       >
-        <div className='overflow-x-auto'>
+        <div className='w-full overflow-x-auto'>
           <Kanban.Board className='inline-flex gap-4 min-w-max'>
             {Object.entries(columns).map(([columnValue, issues]) => (
               <IssueColumn key={columnValue} value={columnValue} issues={issues} groupBy={groupBy} members={members} />
