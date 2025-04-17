@@ -109,7 +109,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
     }
   }, [groupBy, issues, members])
 
-  const [previousColumns, setPreviousColumns] = React.useState<Record<string, Issue[]>>({})
+  const previousColumns = React.useRef<Record<string, Issue[]>>({})
   const [columns, setColumns] = React.useState<Record<string, Issue[]>>({})
 
   // 初始化 columns
@@ -136,7 +136,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
 
       const columnUnChanged =
         (groupBy === 'status' && currentColumn === issue.status) ||
-        (groupBy === 'assignee' && currentColumn === issue.assignee?.username)
+        (groupBy === 'assignee' && currentColumn === (issue.assignee?.username || 'unassigned'))
 
       if (!currentColumn || columnUnChanged) return
 
@@ -199,7 +199,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
           setColumns(value)
         }}
         onDragStart={() => {
-          setPreviousColumns(columns)
+          previousColumns.current = columns
         }}
         onDragEnd={(e) => {
           handleDragEnd(e)
@@ -234,7 +234,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
 
             if (!issue) return null
 
-            return <IssueCard issue={issue} groupBy={groupBy} asHandle />
+            return <IssueCard issue={issue} groupBy={groupBy} />
           }}
         </Kanban.Overlay>
       </Kanban.Root>
