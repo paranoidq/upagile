@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { http } from '@/lib/axios'
+import { createRequestConfig } from '@/lib/types'
 import { Issue, IssueSchema, updateIssueSchema } from '../types'
 
 // 获取issues
@@ -39,7 +40,13 @@ export const useDeleteIssues = () => {
 
 // 新增issue
 export const createIssue = async (issue: Omit<Issue, 'id'>): Promise<void> => {
-  await http.post('issues/create', issue)
+  await http.post(
+    'issues/create',
+    issue,
+    createRequestConfig({
+      loadingDelay: 1000,
+    }),
+  )
 }
 
 export const useCreateIssue = () => {
@@ -54,7 +61,13 @@ export const useCreateIssue = () => {
 
 // 修改issue
 export const updateIssue = async (issue: z.infer<typeof updateIssueSchema>): Promise<void> => {
-  await http.post('issues/update', issue)
+  await http.post(
+    'issues/update',
+    issue,
+    createRequestConfig({
+      loadingDelay: 1000,
+    }),
+  )
 }
 
 export const useUpdateIssue = () => {

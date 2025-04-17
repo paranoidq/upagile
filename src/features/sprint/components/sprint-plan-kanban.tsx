@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import * as Kanban from '@/components/ui/kanban'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useUpdateIssue } from '@/features/issue/_lib/services'
+import { useCreateIssue, useUpdateIssue } from '@/features/issue/_lib/services'
 import { UpdateIssueSheet } from '@/features/issue/components/update-sheet'
 import { issueStatus } from '@/features/issue/types'
 import { useGetTeamMembers } from '@/features/workspace/_lib/services'
@@ -209,7 +209,14 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
         <div className='w-full overflow-x-auto'>
           <Kanban.Board className='inline-flex gap-4 min-w-max'>
             {Object.entries(columns).map(([columnValue, issues]) => (
-              <IssueColumn key={columnValue} value={columnValue} issues={issues} groupBy={groupBy} members={members} />
+              <IssueColumn
+                key={columnValue}
+                value={columnValue}
+                issues={issues}
+                groupBy={groupBy}
+                teamId={team?.id}
+                members={members}
+              />
             ))}
           </Kanban.Board>
         </div>
@@ -309,39 +316,54 @@ function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
 interface IssueColumnProps extends Omit<React.ComponentProps<typeof Kanban.Column>, 'children'> {
   issues: Issue[]
   groupBy: 'assignee' | 'status'
-  members: any[]
+  teamId: string | undefined
+  members: Member[]
 }
 
-function IssueColumn({ value, issues, groupBy, members, ...props }: IssueColumnProps) {
+function IssueColumn({ value, issues, groupBy, teamId, members, ...props }: IssueColumnProps) {
+  const [isCreating, setIsCreating] = React.useState(false)
+  const { mutateAsync: createIssue, isPending: isCreatingIssue } = useCreateIssue()
+
   return (
-    <Kanban.Column value={value} {...props} className='w-[350px] min-w-[350px] shrink-0'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center'>
-          <span className='font-semibold text-sm'>{getColumnTitle(value, groupBy, members)}</span>
-          <Badge variant='secondary' className='pointer-events-none text-muted-foreground font-bold'>
-            ({issues.length})
-          </Badge>
+    <>
+      <Kanban.Column value={value} {...props} className='w-[350px] min-w-[350px] shrink-0'>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center'>
+            <span className='font-semibold text-sm'>{getColumnTitle(value, groupBy, members)}</span>
+            <Badge variant='secondary' className='pointer-events-none text-muted-foreground font-bold'>
+              ({issues.length})
+            </Badge>
+          </div>
+          <div>
+            <Kanban.ColumnHandle asChild>
+              <Button variant='ghost' size='icon'>
+                <GripVertical className='h-4 w-4' />
+              </Button>
+            </Kanban.ColumnHandle>
+          </div>
         </div>
-        <div>
-          <Kanban.ColumnHandle asChild>
-            <Button variant='ghost' size='icon'>
-              <GripVertical className='h-4 w-4' />
-            </Button>
-          </Kanban.ColumnHandle>
+        <div className='flex flex-col gap-2 p-0.5'>
+          {issues
+            .filter((issue) => !!issue)
+            .map((issue) => (
+              <IssueCard key={issue.id} issue={issue} groupBy={groupBy} asHandle />
+            ))}
         </div>
-      </div>
-      <div className='flex flex-col gap-2 p-0.5'>
-        {issues
-          .filter((issue) => !!issue)
-          .map((issue) => (
-            <IssueCard key={issue.id} issue={issue} groupBy={groupBy} asHandle />
-          ))}
-      </div>
-      <div className='flex items-center justify-between'>
-        <Button variant='outline' size='icon' className='w-full'>
-          <IconPlus className='h-4 w-4' />
-        </Button>
-      </div>
-    </Kanban.Column>
+        <div className='flex items-center justify-between'>
+          <Button variant='outline' size='icon' className='w-full' onClick={() => setIsCreating(true)}>
+            <IconPlus className='h-4 w-4' />
+          </Button>
+        </div>
+      </Kanban.Column>
+
+      {isCreating && (
+        <UpdateIssueSheet
+          issue={null}
+          open={isCreating}
+          certainWorkspaceId={teamId}
+          onOpenChange={() => setIsCreating(false)}
+        />
+      )}
+    </>
   )
 }

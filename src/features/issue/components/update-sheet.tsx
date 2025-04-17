@@ -12,52 +12,47 @@ import { toast } from 'sonner'
 import { useTeamStore } from '@/stores/teamStore'
 import { cn } from '@/lib/utils'
 import AntdDatePicker from '@/components/ui/antd-date-picker'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { useUpdateIssue } from '../_lib/services'
-import { Issue, issueStatus, issueType } from '../types'
+import { useCreateIssue, useUpdateIssue } from '../_lib/services'
+import { createIssueSchema, Issue, issueStatus, issueType, updateIssueSchema } from '../types'
 
 interface UpdateIssueSheetProps extends React.ComponentPropsWithRef<typeof Sheet> {
   open: boolean
   onOpenChange: (open: boolean) => void
   issue: Issue | null
+  certainWorkspaceId?: string
 }
 
-// 定义表单验证schema
-const formSchema = z.object({
-  id: z.string(),
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().optional(),
-  type: z.string(),
-  status: z.string(),
-  priority: z.string(),
-  startTime: z.string().date().nullable(),
-  deadline: z.string().date().nullable(),
-  teamId: z.string(),
-})
+export function UpdateIssueSheet({ issue, certainWorkspaceId, ...props }: UpdateIssueSheetProps) {
+  const isUpdating = !!issue?.id
 
-type FormValues = z.infer<typeof formSchema>
-
-export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
   const { mutateAsync: updateIssue, isPending: isUpdatePending } = useUpdateIssue()
+  const { mutateAsync: createIssue, isPending: isCreatePending } = useCreateIssue()
+
   const { teams } = useTeamStore()
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  // 使用 createIssueSchema 作为表单验证
+
+  type UpdateFormValues = z.infer<typeof updateIssueSchema>
+  type CreateFormValues = z.infer<typeof createIssueSchema>
+  const form = useForm<UpdateFormValues | CreateFormValues>({
+    resolver: zodResolver(isUpdating ? updateIssueSchema : createIssueSchema),
     defaultValues: {
       id: issue?.id,
-      title: issue?.title,
-      description: issue?.description,
-      type: issue?.type,
-      status: issue?.status,
-      priority: issue?.priority,
-      startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : null,
-      deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : null,
-      teamId: issue?.team?.id,
+      title: issue?.title || '',
+      description: issue?.description || '',
+      type: issue?.type || 'unset',
+      status: issue?.status || 'init',
+      priority: issue?.priority || 'low',
+      startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : undefined,
+      deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : undefined,
+      teamId: issue?.team?.id || certainWorkspaceId || '',
     },
   })
 
@@ -70,38 +65,54 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
         type: issue.type,
         status: issue.status,
         priority: issue.priority,
-        startTime: issue.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : null,
-        deadline: issue.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : null,
-        teamId: issue.team?.id,
+        startTime: issue.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : undefined,
+        deadline: issue.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : undefined,
+        teamId: issue.team?.id || certainWorkspaceId,
       })
     }
   }, [issue])
 
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = async (values: UpdateFormValues) => {
     const data = {
       ...values,
       startTime: values.startTime ? dayjs(values.startTime).format('YYYY-MM-DD') : undefined,
       deadline: values.deadline ? dayjs(values.deadline).format('YYYY-MM-DD') : undefined,
     }
 
-    toast.promise(updateIssue(data), {
-      loading: 'Updating issue...',
-      success: () => {
-        props.onOpenChange?.(false)
-        return 'Issue updated'
-      },
-      error: (error) => ({
-        message: error.msg,
-        description: error.reason,
-      }),
-    })
+    if (isUpdating) {
+      toast.promise(updateIssue(data), {
+        loading: 'Updating issue...',
+        success: () => {
+          props.onOpenChange?.(false)
+          return 'Issue updated'
+        },
+        error: (error) => ({
+          message: error.msg,
+          description: error.reason,
+        }),
+      })
+    } else {
+      const { id, ...createData } = data // 移除 id 字段
+
+      toast.promise(createIssue(createData), {
+        loading: 'Creating issue...',
+        success: () => {
+          props.onOpenChange?.(false)
+          return 'Issue created'
+        },
+        error: (error) => ({
+          message: error.msg,
+          description: error.reason,
+        }),
+      })
+    }
   }
 
   return (
     <Sheet open={props.open} onOpenChange={props.onOpenChange}>
       <SheetContent className='w-[400px] sm:w-[540px] overflow-y-auto'>
         <SheetHeader>
-          <SheetTitle>Update Issue</SheetTitle>
+          <SheetTitle>{isUpdating ? 'Update Issue' : 'Create Issue'}</SheetTitle>
         </SheetHeader>
 
         <Form {...form}>
@@ -113,8 +124,9 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder='Enter issue title' />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -126,8 +138,9 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea {...field} placeholder='Enter issue description' />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -141,19 +154,22 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder='Select issue type' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {issueType.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
-                          <span className={cn('px-2 py-1 rounded text-white font-semibold', type.color)}>
-                            {type.label}
-                          </span>
+                          <div className='flex items-center gap-2'>
+                            <Badge variant='outline' className={cn('text-white font-semibold', type?.color)}>
+                              {type?.label || type.value}
+                            </Badge>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -168,20 +184,26 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder='Select issue status' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {issueStatus.map((status) => (
-                          <SelectItem key={status.value} value={status.value}>
-                            <span className={cn('px-2 py-1 rounded text-white font-semibold', status.color)}>
-                              {status.label}
-                            </span>
+                        {issueStatus.map((item) => (
+                          <SelectItem key={item.value} value={item.value} className='capitalize'>
+                            <div className='flex items-center gap-2'>
+                              <div
+                                className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${item?.color || ''} text-white`}
+                              >
+                                {item?.icon}
+                              </div>
+                              <span className='inline-flex items-center'>{item?.label}</span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -211,6 +233,7 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
                       </SelectContent>
                     </Select>
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -222,8 +245,15 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
                 <FormItem>
                   <FormLabel>Start Time</FormLabel>
                   <FormControl>
-                    <AntdDatePicker data={field.value} onChange={field.onChange} />
+                    <AntdDatePicker
+                      data={field.value}
+                      onChange={(date) => {
+                        field.onChange(date?.format('YYYY-MM-DD'))
+                      }}
+                      placeholder='Select start time'
+                    />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -235,8 +265,15 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
                 <FormItem>
                   <FormLabel>Deadline</FormLabel>
                   <FormControl>
-                    <AntdDatePicker data={field.value} onChange={field.onChange} />
+                    <AntdDatePicker
+                      data={field.value}
+                      onChange={(date) => {
+                        field.onChange(date?.format('YYYY-MM-DD'))
+                      }}
+                      placeholder='Select deadline'
+                    />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -246,12 +283,12 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
               name='teamId'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Team</FormLabel>
+                  <FormLabel>Workspace</FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!!certainWorkspaceId}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder='Select workspace' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -266,6 +303,7 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
                       </SelectContent>
                     </Select>
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -274,8 +312,8 @@ export function UpdateIssueSheet({ issue, ...props }: UpdateIssueSheetProps) {
               <Button variant='outline' onClick={() => props.onOpenChange?.(false)}>
                 Cancel
               </Button>
-              <Button type='submit' disabled={isUpdatePending}>
-                {isUpdatePending ? 'Updating...' : 'Update'}
+              <Button type='submit' disabled={isUpdatePending || isCreatePending}>
+                {isUpdatePending ? 'Updating...' : isCreatePending ? 'Creating...' : isUpdating ? 'Update' : 'Create'}
               </Button>
             </div>
           </form>
