@@ -83,14 +83,14 @@ export const BaseIssueSchema = z.object({
       name: z.string(),
     })
     .optional(),
-  assignees: z
-    .array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        avatar: z.string().optional(),
-      }),
-    )
+  assignee: z
+    .object({
+      id: z.string(),
+      username: z.string(),
+      name: z.string(),
+      email: z.string().optional(),
+      avatar: z.string().optional(),
+    })
     .optional(),
   labels: z
     .array(

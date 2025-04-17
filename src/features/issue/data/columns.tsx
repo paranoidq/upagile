@@ -1,6 +1,6 @@
 import React from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
-import { IconCalendar, IconCube, IconFlag3Filled } from '@tabler/icons-react'
+import { IconCalendar, IconCube, IconFlag3Filled, IconUserCircle } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
 import { Ellipsis } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
@@ -120,27 +120,30 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
     {
       accessorKey: 'assignee.id',
       header: ({ column }) => <DataTableColumnHeader column={column} title='负责人' />,
-      cell: ({ row }) => (
-        <div className='w-[150px] flex items-center gap-2'>
-          {row.original.assignees?.map((assignee) => (
-            <TooltipProvider key={assignee.id} delayDuration={100}>
+      cell: ({ row }) => {
+        const assignee = row.original.assignee
+        return (
+          <div className='w-[150px] flex items-center gap-2'>
+            <TooltipProvider key={assignee?.id} delayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Avatar className='h-6 w-6 cursor-pointer'>
-                    <AvatarImage src={assignee.avatar} />
-                    <AvatarFallback className='bg-gray-200 text-gray-400 text-[10px] font-bold'>
-                      {assignee.name.slice(0, 2)}
+                    <AvatarImage src={row.original.assignee?.avatar} />
+                    <AvatarFallback className='bg-transparent text-gray-400'>
+                      <IconUserCircle className='size-5' />
                     </AvatarFallback>
                   </Avatar>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{assignee.name}</p>
+                  <p>{row.original.assignee?.name}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          ))}
-        </div>
-      ),
+
+            {row.original.assignee?.name}
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'startTime',
