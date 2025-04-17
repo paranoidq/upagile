@@ -227,7 +227,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
 
             if (!issue) return null
 
-            return <IssueCard issue={issue} groupBy={groupBy} />
+            return <IssueCard issue={issue} groupBy={groupBy} asHandle />
           }}
         </Kanban.Overlay>
       </Kanban.Root>
@@ -268,10 +268,10 @@ function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
               {groupBy === 'status' && issue.assignee && (
                 <div className='flex items-center gap-1'>
                   <div>
-                    <Avatar className='w-4 h-4 rounded-full overflow-hidden'>
+                    <Avatar className='w-3 h-3 rounded-full overflow-hidden'>
                       <AvatarImage src={issue.assignee.avatar} />
                       <AvatarFallback>
-                        <IconUserCircle className='w-4 h-4' />
+                        <IconUserCircle className='w-3 h-3' />
                       </AvatarFallback>
                     </Avatar>
                   </div>
@@ -291,8 +291,8 @@ function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
               )}
 
               {issue.deadline && (
-                <time className='text-[10px] tabular-nums flex items-center gap-1'>
-                  <IconCalendarTime className='w-2.5 h-2.5' />
+                <time className='text-xs flex items-center gap-1'>
+                  <IconCalendarTime className='w-3 h-3' />
                   {issue.deadline}
                 </time>
               )}
