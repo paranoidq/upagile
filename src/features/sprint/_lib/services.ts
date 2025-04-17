@@ -6,8 +6,8 @@ import { createRequestConfig } from '@/lib/types'
 import { Sprint, sprintSchema, updateSprintSchema } from '../types'
 
 // 获取sprints
-export const listSprints = async (): Promise<Sprint[]> => {
-  const response = await http.post('/sprints')
+export const listSprints = async (teamId?: string): Promise<Sprint[]> => {
+  const response = await http.post('/sprints', teamId ? { teamId } : undefined)
   if (!response) {
     return []
   }
@@ -15,10 +15,10 @@ export const listSprints = async (): Promise<Sprint[]> => {
   return z.array(sprintSchema).parse(response)
 }
 
-export const useSprints = () => {
+export const useSprints = (teamId?: string) => {
   return useQuery({
-    queryKey: ['sprints'],
-    queryFn: () => listSprints(),
+    queryKey: ['sprints', teamId],
+    queryFn: () => listSprints(teamId),
     enabled: useAuthStore.getState().auth.user !== null,
   })
 }

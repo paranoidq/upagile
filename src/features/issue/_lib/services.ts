@@ -44,7 +44,7 @@ export const createIssue = async (issue: Omit<Issue, 'id'>): Promise<void> => {
     'issues/create',
     issue,
     createRequestConfig({
-      loadingDelay: 1000,
+      loadingDelay: 500,
     }),
   )
 }
@@ -65,7 +65,7 @@ export const updateIssue = async (issue: z.infer<typeof updateIssueSchema>): Pro
     'issues/update',
     issue,
     createRequestConfig({
-      loadingDelay: 1000,
+      loadingDelay: 200,
     }),
   )
 }

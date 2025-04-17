@@ -31,15 +31,7 @@ const SprintPage: FC = () => {
   // 获取当前工作区名称
   const workspaceName = teamId ? teams.find((t) => t.id === teamId)?.name || '工作区' : undefined
 
-  const { data: sprints, isLoading } = useSprints()
-
-  // 根据团队 ID 过滤数据
-  const filteredSprints = React.useMemo(() => {
-    if (!sprints) return []
-    if (!teamId) return sprints
-
-    return sprints.filter((sprint) => sprint.team?.id === teamId)
-  }, [sprints, teamId])
+  const { data: sprints, isLoading } = useSprints(teamId)
 
   // view
   const [view, setView] = useQueryState('view', parseAsString.withDefault('list'))
@@ -72,11 +64,11 @@ const SprintPage: FC = () => {
             <DataTableSkeleton columnCount={6} rowCount={10} />
           ) : (
             <>
-              {view === 'list' && <SprintTable data={filteredSprints ?? []} />}
+              {view === 'list' && <SprintTable data={sprints ?? []} />}
 
-              {view === 'kanban' && <SprintKanban data={filteredSprints ?? []} />}
+              {view === 'kanban' && <SprintKanban data={sprints ?? []} />}
 
-              {view === 'calendar' && <SprintCalendar data={filteredSprints ?? []} />}
+              {view === 'calendar' && <SprintCalendar data={sprints ?? []} />}
             </>
           )}
         </FeatureFlagsProvider>
