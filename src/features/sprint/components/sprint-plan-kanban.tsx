@@ -159,7 +159,7 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
         toast.promise(
           updateIssue({
             id: issue.id,
-            assigneeId: members.find((member) => member.username === currentColumn)?.id,
+            assigneeId: members.find((member) => member.username === currentColumn)?.id || null,
           }),
           {
             loading: 'Updating issue assignee...',
