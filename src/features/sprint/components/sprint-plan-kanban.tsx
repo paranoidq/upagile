@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import * as Kanban from '@/components/ui/kanban'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useUpdateIssue } from '@/features/issue/_lib/services'
+import { UpdateIssueSheet } from '@/features/issue/components/update-sheet'
 import { issueStatus } from '@/features/issue/types'
 import { useGetTeamMembers } from '@/features/workspace/_lib/services'
 import { Team } from '@/features/workspace/types'
@@ -240,61 +241,68 @@ interface IssueCardProps extends Omit<React.ComponentProps<typeof Kanban.Item>, 
 }
 
 function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
+  const [isEditing, setIsEditing] = React.useState(false)
+  const { mutateAsync: updateIssue, isPending: isUpdatingIssue } = useUpdateIssue()
+
   if (!issue) return null
 
   const { color, label, icon } = issueStatus.find((status) => status.value === issue.status) || {}
 
   return (
-    <Kanban.Item key={issue.id} value={issue.id} asChild {...props}>
-      <div className='rounded-md border bg-card p-3 shadow-xs'>
-        <div className='flex flex-col gap-2'>
-          <div className='flex items-center justify-between gap-2'>
-            <span className='line-clamp-1 font-medium text-sm'>{issue.title}</span>
-            <Badge
-              variant={
-                issue.priority === 'high' ? 'destructive' : issue.priority === 'medium' ? 'default' : 'secondary'
-              }
-              className='pointer-events-none h-5 rounded-sm px-1.5 text-[11px] capitalize'
-            >
-              {issue.priority}
-            </Badge>
-          </div>
-          <div className='flex items-center justify-between text-muted-foreground text-xs'>
-            {groupBy === 'status' && issue.assignee && (
-              <div className='flex items-center gap-1'>
-                <div>
-                  <Avatar className='w-4 h-4 rounded-full overflow-hidden'>
-                    <AvatarImage src={issue.assignee.avatar} />
-                    <AvatarFallback>
-                      <IconUserCircle className='w-4 h-4' />
-                    </AvatarFallback>
-                  </Avatar>
+    <>
+      <Kanban.Item key={issue.id} value={issue.id} asChild {...props}>
+        <div className='rounded-md border bg-card p-3 shadow-xs'>
+          <div className='flex flex-col gap-2'>
+            <div className='flex items-center justify-between gap-2'>
+              <span className='line-clamp-1 font-medium text-sm'>{issue.title}</span>
+              <Badge
+                variant={
+                  issue.priority === 'high' ? 'destructive' : issue.priority === 'medium' ? 'default' : 'secondary'
+                }
+                className='pointer-events-none h-5 rounded-sm px-1.5 text-[11px] capitalize'
+              >
+                {issue.priority}
+              </Badge>
+            </div>
+            <div className='flex items-center justify-between text-muted-foreground text-xs'>
+              {groupBy === 'status' && issue.assignee && (
+                <div className='flex items-center gap-1'>
+                  <div>
+                    <Avatar className='w-4 h-4 rounded-full overflow-hidden'>
+                      <AvatarImage src={issue.assignee.avatar} />
+                      <AvatarFallback>
+                        <IconUserCircle className='w-4 h-4' />
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <span className='line-clamp-1'>{issue.assignee.name}</span>
                 </div>
-                <span className='line-clamp-1'>{issue.assignee.name}</span>
-              </div>
-            )}
+              )}
 
-            {groupBy === 'assignee' && issue.status && (
-              <div className='flex items-center gap-1'>
-                <div
-                  className={`flex size-4 px-0.5 font-extrabold items-center justify-center cursor-pointer rounded-full ${color || ''} text-white`}
-                >
-                  {icon}
+              {groupBy === 'assignee' && issue.status && (
+                <div className='flex items-center gap-1'>
+                  <div
+                    className={`flex size-4 px-0.5 font-extrabold items-center justify-center cursor-pointer rounded-full ${color || ''} text-white`}
+                  >
+                    {icon}
+                  </div>
+                  <span className='text-xs'>{label}</span>
                 </div>
-                <span className='text-xs'>{label}</span>
-              </div>
-            )}
+              )}
 
-            {issue.deadline && (
-              <time className='text-[10px] tabular-nums flex items-center gap-1'>
-                <IconCalendarTime className='w-2.5 h-2.5' />
-                {issue.deadline}
-              </time>
-            )}
+              {issue.deadline && (
+                <time className='text-[10px] tabular-nums flex items-center gap-1'>
+                  <IconCalendarTime className='w-2.5 h-2.5' />
+                  {issue.deadline}
+                </time>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </Kanban.Item>
+      </Kanban.Item>
+
+      {isEditing && <UpdateIssueSheet issue={issue} onSuccess={() => setIsEditing(false)} />}
+    </>
   )
 }
 
