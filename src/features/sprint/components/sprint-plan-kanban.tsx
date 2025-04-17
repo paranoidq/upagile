@@ -63,7 +63,7 @@ const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: 
 }
 
 export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
-  const [groupBy, setGroupBy] = React.useState<'assignee' | 'status'>('assignee')
+  const [groupBy, setGroupBy] = React.useState<'assignee' | 'status'>('status')
   const { data: team } = useGetTeamMembers(sprint?.team.id || '')
   const members = team?.members || []
   const { mutateAsync: updateIssue } = useUpdateIssue()

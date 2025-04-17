@@ -3,18 +3,21 @@ import {
   IconArrowBackUp,
   IconArrowRight,
   IconCalendarTime,
+  IconCheck,
   IconCube,
   IconInfoSquare,
   IconListCheck,
+  IconLoader,
   IconPencil,
   IconReload,
   IconTrash,
 } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
-import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useUpdateSprint } from '../_lib/services'
 import { Sprint, sprintStatus } from '../types'
 import { DeleteSprintsDialog } from './delete-dialog'
 import { SprintPlanDialog } from './sprint-plan-dialog'
@@ -49,6 +52,7 @@ const SprintInfoCard = ({
 }) => {
   const navigate = useNavigate()
   const [action, setAction] = useState<Action | null>(null)
+  const { mutateAsync: updateSprint, isPending: isUpdatingSprint } = useUpdateSprint()
 
   // calculate sprint duration as working days
   const sprintDuration = useMemo(() => {
@@ -65,12 +69,13 @@ const SprintInfoCard = ({
     return workingDays
   }, [sprint])
 
-  // calculate sprint progress(completed issues / total issues)
+  // calculate sprint progress(completed issues + canceled issues / total issues)
   const [progress, progressText] = useMemo(() => {
     if (!sprint) return [0, '']
     const completedIssues = sprint.issues?.filter((issue) => issue?.status === 'completed')?.length ?? 0
+    const canceledIssues = sprint.issues?.filter((issue) => issue?.status === 'canceled')?.length ?? 0
     const totalIssues = sprint.issues?.length ?? 1
-    return [completedIssues / totalIssues, `${completedIssues}/${totalIssues}`]
+    return [(completedIssues + canceledIssues) / totalIssues, `${completedIssues + canceledIssues}/${totalIssues}`]
   }, [sprint])
 
   return (
@@ -124,16 +129,16 @@ const SprintInfoCard = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className='flex-col items-center justify-between space-y-2'>
+        <div className='flex-col items-center justify-between space-y-3'>
           <div className='flex items-center space-x-2'>
             <IconCalendarTime className='h-4 w-4' />
             <div className='flex items-center space-x-2'>
               <div>{sprint?.startTime}</div>
               <IconArrowRight className='h-4 w-4' />
               <div>{sprint?.endTime}</div>
-              <div className='text-sm rounded-md px-1 border border-blue-500 text-blue-500'>
+              <Button variant='outline' size='sm'>
                 {sprintDuration <= 0 ? '' : `${sprintDuration} working days`}
-              </div>
+              </Button>
             </div>
           </div>
 
@@ -145,40 +150,49 @@ const SprintInfoCard = ({
           </div>
 
           <div className='flex items-center space-x-2'>
-            <div className='flex items-center space-x-2'>
-              <div>
-                {sprintStatus
-                  .filter((status) => status.value === sprint?.status)
-                  .map((status) => (
-                    <div className='flex items-center space-x-2' key={status.value}>
-                      <div
-                        className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${status?.color || ''} text-white`}
-                      >
-                        {status?.icon}
-                      </div>
-                      <div>{status?.label}</div>
+            <div>
+              {sprintStatus
+                .filter((status) => status.value === sprint?.status)
+                .map((status) => (
+                  <div className='flex items-center space-x-2' key={status.value}>
+                    <div
+                      className={`flex h-4 w-4 px-0.5 font-extrabold items-center justify-center rounded-full ${status?.color || ''} text-white`}
+                    >
+                      {status?.icon}
                     </div>
-                  ))}
-              </div>
-              <div
-                className={cn(
-                  'text-sm rounded-md px-1 text-white border',
-                  progress === 1
-                    ? 'text-green-500 border-green-500'
-                    : progress === 0
-                      ? 'text-gray-500 border-gray-500'
-                      : 'text-blue-500 border-blue-500',
-                )}
-              >
-                {progressText}
-              </div>
-
-              {/* {progress === 1 && (
-                      <Button variant='outline' onClick={() => {}} size='sm'>
-                        Mark as Completed
-                      </Button>
-                    )} */}
+                    <div>{status?.label}</div>
+                  </div>
+                ))}
             </div>
+            {progress === 1 && sprint?.status !== 'completed' && (
+              <Button
+                disabled={isUpdatingSprint}
+                variant='outline'
+                size='sm'
+                onClick={() => {
+                  toast.promise(
+                    updateSprint({
+                      id: sprint?.id ?? '',
+                      status: 'completed',
+                    }),
+                    {
+                      loading: 'Marking sprint as completed...',
+                      success: 'Sprint status updated',
+                      error: (e) => {
+                        return {
+                          message: e.msg,
+                          description: e.reason,
+                        }
+                      },
+                    },
+                  )
+                }}
+                className='text-green-700 hover:text-white hover:bg-green-700'
+              >
+                {isUpdatingSprint ? <IconLoader className='h-4 w-4 animate-spin' /> : <IconCheck className='h-4 w-4' />}
+                Mark sprint as completed
+              </Button>
+            )}
           </div>
 
           <div className='flex items-center space-x-2'>
