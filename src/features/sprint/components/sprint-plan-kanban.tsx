@@ -272,19 +272,24 @@ function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
               </Badge>
             </div>
             <div className='flex items-center justify-between text-muted-foreground text-xs'>
-              {groupBy === 'status' && issue.assignee && (
-                <div className='flex items-center gap-1'>
-                  <div>
-                    <Avatar className='w-3 h-3 rounded-full overflow-hidden'>
-                      <AvatarImage src={issue.assignee.avatar} />
-                      <AvatarFallback>
-                        <IconUserCircle className='w-3 h-3' />
-                      </AvatarFallback>
-                    </Avatar>
+              {groupBy === 'status' &&
+                (issue.assignee ? (
+                  <div className='flex items-center gap-1'>
+                    <div>
+                      <Avatar className='w-3 h-3 rounded-full overflow-hidden'>
+                        <AvatarImage src={issue.assignee.avatar} />
+                        <AvatarFallback>
+                          <IconUserCircle className='w-3 h-3' />
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <span className='line-clamp-1'>{issue.assignee.name}</span>
                   </div>
-                  <span className='line-clamp-1'>{issue.assignee.name}</span>
-                </div>
-              )}
+                ) : (
+                  <div className='flex items-center gap-1'>
+                    <span className='text-xs bg-red-300 text-white px-1.5 py-0.5'>unassigned</span>
+                  </div>
+                ))}
 
               {groupBy === 'assignee' && issue.status && (
                 <div className='flex items-center gap-1'>
