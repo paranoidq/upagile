@@ -14,7 +14,7 @@ import { ThemeSwitch } from '@/components/theme-switch.tsx'
 import { useIssues } from './_lib/services'
 import { DeleteIssuesDialog } from './components/delete-dialog'
 import { IssueTableFloatingBar } from './components/table-floating-bar'
-import { UpdateIssueSheet } from './components/update-sheet'
+import { UpdateOrCreateIssueSheet } from './components/update-sheet'
 import { getColumns } from './data/columns'
 import { Issue, issueStatus } from './types'
 
@@ -155,7 +155,7 @@ function IssueTable({ data: issues }: IssueTableProps) {
         )} */}
       </DataTable>
 
-      <UpdateIssueSheet
+      <UpdateOrCreateIssueSheet
         open={rowAction?.type === 'update'}
         onOpenChange={(_) => setRowAction(null)}
         issue={rowAction?.row.original ?? null}

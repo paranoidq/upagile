@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import * as Kanban from '@/components/ui/kanban'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCreateIssue, useUpdateIssue } from '@/features/issue/_lib/services'
-import { UpdateIssueSheet } from '@/features/issue/components/update-sheet'
+import { UpdateOrCreateIssueSheet } from '@/features/issue/components/update-sheet'
 import { issueStatus } from '@/features/issue/types'
 import { useGetTeamMembers } from '@/features/workspace/_lib/services'
 import { Team } from '@/features/workspace/types'
@@ -313,7 +313,7 @@ function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
         </div>
       </Kanban.Item>
 
-      {isEditing && <UpdateIssueSheet issue={issue} onSuccess={() => setIsEditing(false)} />}
+      {isEditing && <UpdateOrCreateIssueSheet issue={issue} onSuccess={() => setIsEditing(false)} />}
     </>
   )
 }
@@ -362,7 +362,7 @@ function IssueColumn({ value, issues, groupBy, teamId, members, ...props }: Issu
       </Kanban.Column>
 
       {isCreating && (
-        <UpdateIssueSheet
+        <UpdateOrCreateIssueSheet
           issue={null}
           open={isCreating}
           certainWorkspaceId={teamId}

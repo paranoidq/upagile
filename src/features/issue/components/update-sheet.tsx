@@ -32,7 +32,7 @@ interface UpdateIssueSheetProps extends React.ComponentPropsWithRef<typeof Sheet
   certainWorkspaceId?: string
 }
 
-export function UpdateIssueSheet({ issue, certainWorkspaceId, ...props }: UpdateIssueSheetProps) {
+export function UpdateOrCreateIssueSheet({ issue, certainWorkspaceId, ...props }: UpdateIssueSheetProps) {
   const isUpdating = !!issue?.id
 
   const { mutateAsync: updateIssue, isPending: isUpdatePending } = useUpdateIssue()
@@ -64,20 +64,18 @@ export function UpdateIssueSheet({ issue, certainWorkspaceId, ...props }: Update
   const members = teamData?.members || []
 
   useEffect(() => {
-    if (issue) {
-      form.reset({
-        id: issue.id,
-        title: issue.title,
-        description: issue.description,
-        type: issue.type,
-        status: issue.status,
-        priority: issue.priority,
-        startTime: issue.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : undefined,
-        deadline: issue.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : undefined,
-        teamId: issue.team?.id || certainWorkspaceId,
-        assigneeId: issue.assignee?.id || undefined,
-      })
-    }
+    form.reset({
+      id: issue?.id,
+      title: issue?.title,
+      description: issue?.description,
+      type: issue?.type,
+      status: issue?.status,
+      priority: issue?.priority,
+      startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : '',
+      deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : '',
+      teamId: issue?.team?.id || certainWorkspaceId,
+      assigneeId: issue?.assignee?.id || undefined,
+    })
   }, [issue])
 
   // 处理表单提交
