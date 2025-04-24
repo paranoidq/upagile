@@ -13,7 +13,7 @@ import * as Kanban from '@/components/ui/kanban'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { useCreateIssue, useUpdateIssue } from '@/features/issue/_lib/services'
+import { useUpdateIssue } from '@/features/issue/_lib/services'
 import { UpdateOrCreateIssueSheet } from '@/features/issue/components/update-sheet'
 import { issueStatus } from '@/features/issue/types'
 import { useGetTeamMembers } from '@/features/workspace/_lib/services'
@@ -236,6 +236,7 @@ export function SprintPlanKanban({ sprint, onPlan }: SprintPlanKanbanProps) {
                 groupBy={groupBy}
                 teamId={team?.id}
                 members={members}
+                sprintId={sprint?.id}
               />
             ))}
           </Kanban.Board>
@@ -245,7 +246,16 @@ export function SprintPlanKanban({ sprint, onPlan }: SprintPlanKanbanProps) {
             if (variant === 'column') {
               const issues = columns[value] ?? []
 
-              return <IssueColumn value={value} issues={issues} groupBy={groupBy} members={members} />
+              return (
+                <IssueColumn
+                  value={value}
+                  issues={issues}
+                  groupBy={groupBy}
+                  members={members}
+                  teamId={team?.id}
+                  sprintId={sprint?.id}
+                />
+              )
             }
 
             const issue = Object.values(columns)
@@ -282,14 +292,16 @@ function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
           <div className='flex flex-col gap-2'>
             <div className='flex items-center justify-between gap-2'>
               <span className='line-clamp-1 font-medium text-sm'>{issue.title}</span>
-              <Badge
-                variant={
-                  issue.priority === 'high' ? 'destructive' : issue.priority === 'medium' ? 'default' : 'secondary'
-                }
-                className='pointer-events-none h-5 rounded-sm px-1.5 text-[11px] capitalize'
-              >
-                {issue.priority}
-              </Badge>
+              {issue.priority && (
+                <Badge
+                  variant={
+                    issue.priority === 'high' ? 'destructive' : issue.priority === 'medium' ? 'default' : 'secondary'
+                  }
+                  className='pointer-events-none h-5 rounded-sm px-1.5 text-[11px] capitalize'
+                >
+                  {issue.priority}
+                </Badge>
+              )}
             </div>
             <div className='flex items-center justify-between text-muted-foreground text-xs'>
               {groupBy === 'status' &&
@@ -343,11 +355,11 @@ interface IssueColumnProps extends Omit<React.ComponentProps<typeof Kanban.Colum
   groupBy: 'assignee' | 'status'
   teamId: string | undefined
   members: Member[]
+  sprintId: string
 }
 
-function IssueColumn({ value, issues, groupBy, teamId, members, ...props }: IssueColumnProps) {
+function IssueColumn({ value, issues, groupBy, teamId, members, sprintId, ...props }: IssueColumnProps) {
   const [isCreating, setIsCreating] = React.useState(false)
-  const { mutateAsync: createIssue, isPending: isCreatingIssue } = useCreateIssue()
 
   return (
     <>
@@ -385,7 +397,10 @@ function IssueColumn({ value, issues, groupBy, teamId, members, ...props }: Issu
         <UpdateOrCreateIssueSheet
           issue={null}
           open={isCreating}
-          certainWorkspaceId={teamId}
+          givenWorkspaceId={teamId}
+          givenSprintId={sprintId}
+          defaultStatus={groupBy === 'status' ? (value as string) : undefined}
+          defaultAssignee={groupBy === 'assignee' ? (value as string) : undefined}
           onOpenChange={() => setIsCreating(false)}
         />
       )}

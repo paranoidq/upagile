@@ -55,6 +55,7 @@ export const useCreateIssue = () => {
     mutationFn: createIssue,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['issues'] })
+      queryClient.invalidateQueries({ queryKey: ['sprints'] })
     },
   })
 }

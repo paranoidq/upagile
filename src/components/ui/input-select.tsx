@@ -240,7 +240,7 @@ export const InputSelectTrigger = React.forwardRef<
           </div>
         ) : (
           <div className='flex items-center justify-between w-full mx-auto'>
-            <span className='mx-3 text-sm text-muted-foreground'>{placeholder}</span>
+            <span className='mx-3 text-sm text-primary font-normal'>{placeholder}</span>
             <ChevronDown className='h-4 mx-1 cursor-pointer text-muted-foreground' />
           </div>
         )}

@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconCube, IconFlagFilled, IconUserCircle } from '@tabler/icons-react'
+import { IconCube, IconFlag, IconFlagFilled, IconUserCircle } from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
@@ -17,10 +17,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { InputMultiSelect, InputMultiSelectTrigger } from '@/components/ui/input-multi-select'
 import { InputSelect, InputSelectTrigger } from '@/components/ui/input-select'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
+import { useSprints } from '@/features/sprint/_lib/services'
 import { useGetTeamMembers } from '@/features/workspace/_lib/services'
 import { useCreateIssue, useUpdateIssue } from '../_lib/services'
 import { createIssueSchema, Issue, issueStatus, issueType, updateIssueSchema } from '../types'
@@ -29,10 +31,20 @@ interface UpdateIssueSheetProps extends React.ComponentPropsWithRef<typeof Sheet
   open: boolean
   onOpenChange: (open: boolean) => void
   issue: Issue | null
-  certainWorkspaceId?: string
+  givenWorkspaceId?: string
+  givenSprintId?: string
+  defaultStatus?: string
+  defaultAssignee?: string
 }
 
-export function UpdateOrCreateIssueSheet({ issue, certainWorkspaceId, ...props }: UpdateIssueSheetProps) {
+export function UpdateOrCreateIssueSheet({
+  issue,
+  givenWorkspaceId,
+  givenSprintId,
+  defaultStatus,
+  defaultAssignee,
+  ...props
+}: UpdateIssueSheetProps) {
   const isUpdating = !!issue?.id
 
   const { mutateAsync: updateIssue, isPending: isUpdatePending } = useUpdateIssue()
@@ -49,12 +61,13 @@ export function UpdateOrCreateIssueSheet({ issue, certainWorkspaceId, ...props }
       title: issue?.title || '',
       description: issue?.description || '',
       type: issue?.type || 'unset',
-      status: issue?.status || 'init',
+      status: issue?.status || defaultStatus || 'init',
       priority: issue?.priority || 'low',
       startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : undefined,
       deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : undefined,
-      teamId: issue?.team?.id || certainWorkspaceId || '',
-      assigneeId: issue?.assignee?.id || undefined,
+      teamId: issue?.team?.id || givenWorkspaceId || '',
+      sprintIds: issue?.sprints?.map((sprint) => sprint.id) || [givenSprintId],
+      assigneeId: issue?.assignee?.id || defaultAssignee || undefined,
     },
   })
 
@@ -62,6 +75,7 @@ export function UpdateOrCreateIssueSheet({ issue, certainWorkspaceId, ...props }
   const watchedTeamId = form.watch('teamId')
   const { data: teamData } = useGetTeamMembers(watchedTeamId)
   const members = teamData?.members || []
+  const { data: sprints } = useSprints(watchedTeamId)
 
   useEffect(() => {
     form.reset({
@@ -69,12 +83,13 @@ export function UpdateOrCreateIssueSheet({ issue, certainWorkspaceId, ...props }
       title: issue?.title,
       description: issue?.description,
       type: issue?.type,
-      status: issue?.status,
+      status: issue?.status || defaultStatus || 'init',
       priority: issue?.priority,
       startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : '',
       deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : '',
-      teamId: issue?.team?.id || certainWorkspaceId,
-      assigneeId: issue?.assignee?.id || undefined,
+      teamId: issue?.team?.id || givenWorkspaceId,
+      sprintIds: issue?.sprints?.map((sprint) => sprint.id) || [givenSprintId],
+      assigneeId: issue?.assignee?.id || defaultAssignee || undefined,
     })
   }, [issue])
 
@@ -294,7 +309,7 @@ export function UpdateOrCreateIssueSheet({ issue, certainWorkspaceId, ...props }
                 <FormItem>
                   <FormLabel>Workspace</FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!!certainWorkspaceId}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!!givenWorkspaceId}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select workspace' />
@@ -311,6 +326,35 @@ export function UpdateOrCreateIssueSheet({ issue, certainWorkspaceId, ...props }
                         ))}
                       </SelectContent>
                     </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 在 teamId 选择框后添加 sprints 选择框 */}
+            <FormField
+              control={form.control}
+              name='sprintIds'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sprints</FormLabel>
+                  <FormControl>
+                    <InputMultiSelect
+                      disabled={!!givenSprintId}
+                      placeholder='Select sprint'
+                      options={
+                        sprints?.map((sprint) => ({
+                          value: sprint.id,
+                          label: sprint.title,
+                          icon: () => <IconFlag className='size-4' />,
+                        })) || []
+                      }
+                      value={field.value || []}
+                      onValueChange={field.onChange}
+                    >
+                      {(provided) => <InputMultiSelectTrigger {...provided} />}
+                    </InputMultiSelect>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
