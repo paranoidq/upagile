@@ -33,15 +33,15 @@ export const issueType: {
 ]
 
 export const createIssueSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
+  title: z.string().min(1, 'title is required'),
   description: z.string().optional(),
   priority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
   sprintPriority: z.enum(PRIORITIES.map((priority) => priority.value) as [string, ...string[]]).optional(),
   status: z.enum(issueStatus.map((status) => status.value) as [string, ...string[]]).optional(),
   type: z.enum(issueType.map((type) => type.value) as [string, ...string[]]).optional(),
   progress: z.number().min(0).max(100).optional(),
-  startTime: z.string().date().optional(),
-  deadline: z.string().date().optional(),
+  startTime: z.string().optional(),
+  deadline: z.string().optional(),
   duration: z.number().optional(),
   parentId: z.string().optional(),
   inParentOrder: z.number().optional(),
