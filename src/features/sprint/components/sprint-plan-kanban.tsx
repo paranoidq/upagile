@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { AvatarImage } from '@radix-ui/react-avatar'
-import { IconCalendarTime, IconPlus, IconUserCircle } from '@tabler/icons-react'
+import { IconCalendarTime, IconFilterEdit, IconPlus, IconUserCircle } from '@tabler/icons-react'
 import { DragEndEvent } from '@dnd-kit/core'
 import { GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
@@ -11,6 +11,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import * as Kanban from '@/components/ui/kanban'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useCreateIssue, useUpdateIssue } from '@/features/issue/_lib/services'
 import { UpdateOrCreateIssueSheet } from '@/features/issue/components/update-sheet'
 import { issueStatus } from '@/features/issue/types'
@@ -23,6 +25,7 @@ type Member = NonNullable<Team['members']>[number]
 
 interface SprintPlanKanbanProps {
   sprint: Sprint | undefined | null
+  onPlan: () => void
 }
 
 const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: Member[]) => {
@@ -63,7 +66,7 @@ const getColumnTitle = (value: string, groupBy: 'assignee' | 'status', members: 
   }
 }
 
-export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
+export function SprintPlanKanban({ sprint, onPlan }: SprintPlanKanbanProps) {
   const [groupBy, setGroupBy] = React.useState<'assignee' | 'status'>('status')
   const { data: team } = useGetTeamMembers(sprint?.team.id || '')
   const members = team?.members || []
@@ -180,16 +183,33 @@ export function SprintPlanKanban({ sprint }: SprintPlanKanbanProps) {
   return (
     <div className='w-full'>
       {/*  group by select */}
-      <div className='flex items-center gap-2 mb-4 w-[200px]'>
-        <Select value={groupBy} onValueChange={(value) => setGroupBy(value as 'assignee' | 'status')}>
-          <SelectTrigger>
-            <SelectValue placeholder='Group by' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='status'>Group by status</SelectItem>
-            <SelectItem value='assignee'>Group by assignee</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-2 mb-4 w-[200px]'>
+          <Select value={groupBy} onValueChange={(value) => setGroupBy(value as 'assignee' | 'status')}>
+            <SelectTrigger>
+              <SelectValue placeholder='Group by' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='status'>Group by status</SelectItem>
+              <SelectItem value='assignee'>Group by assignee</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Separator orientation='vertical' className='h-4 ml-4' />
+
+          <div className='flex items-center gap-2'>
+            <TooltipProvider>
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger>
+                  <Button variant='ghost' size='icon' onClick={onPlan}>
+                    <IconFilterEdit className='w-4 h-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>replan issues in sprint</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
       </div>
 
       {/* kanban */}

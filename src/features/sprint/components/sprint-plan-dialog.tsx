@@ -5,7 +5,7 @@ import { Sprint } from '../types'
 interface SprintPlanDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  sprint: Sprint | null
+  sprint: Sprint
 }
 
 export const SprintPlanDialog: FC<SprintPlanDialogProps> = ({ open, onOpenChange, sprint }) => {

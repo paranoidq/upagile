@@ -1,10 +1,11 @@
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useSprint } from '../_lib/services'
+import { SprintPlanDialog } from './sprint-plan-dialog'
 import { SprintPlanKanban } from './sprint-plan-kanban'
 import SprintPlanOverview from './sprint-plan-overview'
 
@@ -12,7 +13,7 @@ const SprintPlanPage: FC = () => {
   const { sprintId } = useParams()
   const { data: sprint, refetch: refetchSprint } = useSprint(sprintId, true)
 
-  console.log(sprint)
+  const [open, setOpen] = useState(false)
 
   return (
     <>
@@ -35,8 +36,11 @@ const SprintPlanPage: FC = () => {
       <Main>
         <div className='space-y-4'>
           <SprintPlanOverview sprint={sprint} refetchSprint={refetchSprint} />
-          <SprintPlanKanban sprint={sprint} />
+
+          <SprintPlanKanban sprint={sprint} onPlan={() => setOpen(true)} />
         </div>
+
+        <SprintPlanDialog open={open} onOpenChange={setOpen} sprint={sprint} />
       </Main>
     </>
   )
