@@ -184,7 +184,7 @@ export function SprintPlanKanban({ sprint, onPlan }: SprintPlanKanbanProps) {
     <div className='w-full'>
       {/*  group by select */}
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2 mb-4 w-[200px]'>
+        <div className='flex items-center gap-2 mb-4 min-w-[250px]'>
           <Select value={groupBy} onValueChange={(value) => setGroupBy(value as 'assignee' | 'status')}>
             <SelectTrigger>
               <SelectValue placeholder='Group by' />
@@ -200,7 +200,7 @@ export function SprintPlanKanban({ sprint, onPlan }: SprintPlanKanbanProps) {
           <div className='flex items-center gap-2'>
             <TooltipProvider>
               <Tooltip delayDuration={100}>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <Button variant='ghost' size='icon' onClick={onPlan}>
                     <IconFilterEdit className='w-4 h-4' />
                   </Button>
@@ -264,7 +264,7 @@ export function SprintPlanKanban({ sprint, onPlan }: SprintPlanKanbanProps) {
 
             if (!issue) return null
 
-            return <IssueCard issue={issue} groupBy={groupBy} />
+            return <IssueCard issue={issue} groupBy={groupBy} sprintId={sprint?.id} />
           }}
         </Kanban.Overlay>
       </Kanban.Root>
@@ -275,13 +275,16 @@ export function SprintPlanKanban({ sprint, onPlan }: SprintPlanKanbanProps) {
 interface IssueCardProps extends Omit<React.ComponentProps<typeof Kanban.Item>, 'value'> {
   issue: NonNullable<Issue>
   groupBy: 'assignee' | 'status'
+  sprintId: string
 }
 
-function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
+function IssueCard({ issue, groupBy, sprintId, ...props }: IssueCardProps) {
+  const [isEditing, setIsEditing] = React.useState(false)
+
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    alert(`Editing issue: ${issue.title}`)
+    setIsEditing(true)
   }
 
   if (!issue) return null
@@ -289,73 +292,89 @@ function IssueCard({ issue, groupBy, ...props }: IssueCardProps) {
   const { color, label, icon } = issueStatus.find((status) => status.value === issue.status) || {}
 
   return (
-    <Kanban.Item key={issue.id} value={issue.id} {...props}>
-      <div className='rounded-md border bg-card p-3 shadow-xs group relative'>
-        {/* 拖动手柄区域 */}
-        <Kanban.ItemHandle asChild>
-          <div className='absolute left-1 top-1/2 -translate-y-1/2 cursor-move p-1'>
-            <GripVertical className='h-4 w-4 text-muted-foreground' />
-          </div>
-        </Kanban.ItemHandle>
+    <>
+      <Kanban.Item key={issue.id} value={issue.id} {...props}>
+        <div className='rounded-md border bg-card p-3 shadow-xs group relative'>
+          {/* 拖动手柄区域 */}
+          <Kanban.ItemHandle asChild>
+            <div className='absolute left-1 top-1/2 -translate-y-1/2 cursor-move p-1'>
+              <GripVertical className='h-4 w-4 text-muted-foreground' />
+            </div>
+          </Kanban.ItemHandle>
 
-        <div className='flex flex-col gap-2 pl-5'>
-          <div className='flex items-center justify-between gap-2'>
-            {/* 标题区域 */}
-            <div onClick={handleEdit} className='cursor-pointer'>
-              <span className='line-clamp-1 font-medium text-sm hover:text-primary hover:underline'>{issue.title}</span>
+          <div className='flex flex-col gap-2 pl-5'>
+            <div className='flex items-center justify-between gap-2'>
+              {/* 标题区域 */}
+              <div onClick={handleEdit} className='cursor-pointer'>
+                <span className='line-clamp-1 font-medium text-sm hover:text-primary hover:underline'>
+                  {issue.title}
+                </span>
+              </div>
+
+              {issue.priority && (
+                <Badge
+                  variant={
+                    issue.priority === 'high' ? 'destructive' : issue.priority === 'medium' ? 'default' : 'secondary'
+                  }
+                  className='pointer-events-none h-5 rounded-sm px-1.5 text-[11px] capitalize'
+                >
+                  {issue.priority}
+                </Badge>
+              )}
             </div>
 
-            {issue.priority && (
-              <Badge
-                variant={
-                  issue.priority === 'high' ? 'destructive' : issue.priority === 'medium' ? 'default' : 'secondary'
-                }
-                className='pointer-events-none h-5 rounded-sm px-1.5 text-[11px] capitalize'
-              >
-                {issue.priority}
-              </Badge>
-            )}
-          </div>
+            <div className='flex items-center justify-between text-muted-foreground text-xs'>
+              {groupBy === 'status' &&
+                (issue.assignee ? (
+                  <div className='flex items-center gap-1'>
+                    <Avatar className='w-3 h-3 rounded-full overflow-hidden'>
+                      <AvatarImage src={issue.assignee.avatar} />
+                      <AvatarFallback>
+                        <IconUserCircle className='w-3 h-3' />
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className='line-clamp-1'>{issue.assignee.name}</span>
+                  </div>
+                ) : (
+                  <div className='flex items-center gap-1'>
+                    <span className='text-xs bg-red-300 text-white px-1.5 py-0.5'>unassigned</span>
+                  </div>
+                ))}
 
-          <div className='flex items-center justify-between text-muted-foreground text-xs'>
-            {groupBy === 'status' &&
-              (issue.assignee ? (
+              {groupBy === 'assignee' && issue.status && (
                 <div className='flex items-center gap-1'>
-                  <Avatar className='w-3 h-3 rounded-full overflow-hidden'>
-                    <AvatarImage src={issue.assignee.avatar} />
-                    <AvatarFallback>
-                      <IconUserCircle className='w-3 h-3' />
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className='line-clamp-1'>{issue.assignee.name}</span>
+                  <div
+                    className={`flex size-4 px-0.5 font-extrabold items-center justify-center cursor-pointer rounded-full ${color || ''} text-white`}
+                  >
+                    {icon}
+                  </div>
+                  <span className='text-xs'>{label}</span>
                 </div>
-              ) : (
-                <div className='flex items-center gap-1'>
-                  <span className='text-xs bg-red-300 text-white px-1.5 py-0.5'>unassigned</span>
-                </div>
-              ))}
+              )}
 
-            {groupBy === 'assignee' && issue.status && (
-              <div className='flex items-center gap-1'>
-                <div
-                  className={`flex size-4 px-0.5 font-extrabold items-center justify-center cursor-pointer rounded-full ${color || ''} text-white`}
-                >
-                  {icon}
-                </div>
-                <span className='text-xs'>{label}</span>
-              </div>
-            )}
-
-            {issue.deadline && (
-              <time className='text-xs flex items-center gap-1'>
-                <IconCalendarTime className='w-3 h-3' />
-                {issue.deadline}
-              </time>
-            )}
+              {issue.deadline && (
+                <time className='text-xs flex items-center gap-1'>
+                  <IconCalendarTime className='w-3 h-3' />
+                  {issue.deadline}
+                </time>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </Kanban.Item>
+      </Kanban.Item>
+
+      {isEditing && (
+        <UpdateOrCreateIssueSheet
+          issue={issue}
+          givenSprintId={sprintId}
+          givenWorkspaceId={issue.team?.id}
+          defaultAssignee={issue.assignee?.id}
+          enableGivenFieldsChange={true}
+          open={isEditing}
+          onOpenChange={() => setIsEditing(false)}
+        />
+      )}
+    </>
   )
 }
 
@@ -392,7 +411,7 @@ function IssueColumn({ value, issues, groupBy, teamId, members, sprintId, ...pro
           {issues
             .filter((issue) => !!issue)
             .map((issue) => (
-              <IssueCard key={issue.id} issue={issue} groupBy={groupBy} />
+              <IssueCard key={issue.id} issue={issue} groupBy={groupBy} sprintId={sprintId} />
             ))}
         </div>
         <div className='flex items-center justify-between'>

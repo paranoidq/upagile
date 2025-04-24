@@ -35,6 +35,7 @@ interface UpdateIssueSheetProps extends React.ComponentPropsWithRef<typeof Sheet
   givenSprintId?: string
   defaultStatus?: string
   defaultAssignee?: string
+  enableGivenFieldsChange?: boolean
 }
 
 export function UpdateOrCreateIssueSheet({
@@ -43,6 +44,7 @@ export function UpdateOrCreateIssueSheet({
   givenSprintId,
   defaultStatus,
   defaultAssignee,
+  enableGivenFieldsChange = false,
   ...props
 }: UpdateIssueSheetProps) {
   const isUpdating = !!issue?.id
@@ -309,7 +311,11 @@ export function UpdateOrCreateIssueSheet({
                 <FormItem>
                   <FormLabel>Workspace</FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!!givenWorkspaceId}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!!givenWorkspaceId && !enableGivenFieldsChange}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select workspace' />
@@ -341,7 +347,7 @@ export function UpdateOrCreateIssueSheet({
                   <FormLabel>Sprints</FormLabel>
                   <FormControl>
                     <InputMultiSelect
-                      disabled={!!givenSprintId}
+                      disabled={!!givenSprintId && !enableGivenFieldsChange}
                       placeholder='Select sprint'
                       options={
                         sprints?.map((sprint) => ({

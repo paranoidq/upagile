@@ -67,8 +67,13 @@ export const sprintSchema = z.object({
               avatar: z.string().optional(),
             })
             .optional(),
+          startTime: z.string().optional(),
           deadline: z.string().optional(),
           duration: z.number().optional(),
+          team: z.object({
+            id: z.string(),
+            name: z.string(),
+          }),
         })
         .optional(),
     )
