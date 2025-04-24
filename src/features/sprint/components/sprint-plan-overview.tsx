@@ -133,11 +133,11 @@ const SprintInfoCard = ({
           <div className='flex items-center space-x-2'>
             <IconCalendarTime className='h-4 w-4' />
             <div className='flex items-center space-x-2'>
-              <div>{sprint?.startTime}</div>
+              <div>{sprint?.startTime || '?'}</div>
               <IconArrowRight className='h-4 w-4' />
-              <div>{sprint?.endTime}</div>
+              <div>{sprint?.endTime || '?'}</div>
               <Button variant='outline' size='sm'>
-                {sprintDuration <= 0 ? '' : `${sprintDuration} working days`}
+                {`${sprintDuration} working days`}
               </Button>
             </div>
           </div>
@@ -145,7 +145,7 @@ const SprintInfoCard = ({
           <div className='flex items-center space-x-2'>
             <div className='flex items-center space-x-2'>
               <IconInfoSquare className='h-4 w-4' />
-              <div>{sprint?.description}</div>
+              <div>{sprint?.description || '-'}</div>
             </div>
           </div>
 

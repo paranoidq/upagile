@@ -22,7 +22,7 @@ export const createSprintSchema = z.object({
   startTime: z.string().optional(),
   endTime: z.string().optional(),
   status: z.enum(sprintStatus.map((status) => status.value) as [string, ...string[]]).optional(),
-  teamId: z.string().optional(),
+  teamId: z.string(),
 })
 
 export const updateSprintSchema = z.object({
