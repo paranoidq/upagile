@@ -17,7 +17,7 @@ export const sprintStatus: {
 ]
 
 export const createSprintSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
+  title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
   startTime: z.string().optional(),
   endTime: z.string().optional(),
@@ -27,7 +27,7 @@ export const createSprintSchema = z.object({
 
 export const updateSprintSchema = z.object({
   id: z.string(),
-  title: z.string().min(1, '标题不能为空').optional(),
+  title: z.string().min(1, 'Title is required').optional(),
   description: z.string().optional(),
   startTime: z.string().optional(),
   endTime: z.string().optional(),
