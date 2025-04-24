@@ -17,7 +17,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { InputSelect, InputSelectTrigger } from '@/components/ui/input-select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import { useGetTeamMembers } from '@/features/workspace/_lib/services'
@@ -326,41 +327,27 @@ export function UpdateIssueSheet({ issue, certainWorkspaceId, ...props }: Update
                 <FormItem>
                   <FormLabel>Assignee</FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!watchedTeamId}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select assignee' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {members &&
-                          members.map((member) => (
-                            <SelectItem key={member.id} value={member.id}>
-                              <div className='flex items-center gap-2'>
-                                <Avatar className='h-6 w-6'>
-                                  <AvatarImage src={member.avatar} />
-                                  <AvatarFallback>
-                                    <IconUserCircle className='h-4 w-4' />
-                                  </AvatarFallback>
-                                </Avatar>
-                                {member.name}
-                              </div>
-                            </SelectItem>
-                          ))}
-
-                        <SelectSeparator />
-                        <Button
-                          className='w-full px-2'
-                          variant='secondary'
-                          size='sm'
-                          onClick={(e) => {
-                            form.setValue('assigneeId', '')
-                          }}
-                        >
-                          Clear
-                        </Button>
-                      </SelectContent>
-                    </Select>
+                    <InputSelect
+                      placeholder='Select assignee'
+                      options={members.map((member) => ({
+                        value: member.id,
+                        label: member.name,
+                        icon: () => (
+                          <Avatar className='h-4 w-4'>
+                            <AvatarImage src={member.avatar} alt={member.name} />
+                            <AvatarFallback className='rounded-lg'>
+                              <IconUserCircle className='size-4' />
+                            </AvatarFallback>
+                          </Avatar>
+                        ),
+                      }))}
+                      value={field.value || undefined}
+                      onValueChange={field.onChange}
+                      clearable
+                      disabled={!watchedTeamId}
+                    >
+                      {(provided) => <InputSelectTrigger {...provided} />}
+                    </InputSelect>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
