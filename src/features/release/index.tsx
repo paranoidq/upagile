@@ -1,7 +1,6 @@
 import React, { type FC } from 'react'
 import { IconFlag3 } from '@tabler/icons-react'
-import { useParams } from 'react-router-dom'
-import { useTeamStore } from '@/stores/teamStore'
+import { useCurrentTeam, useTeamStore } from '@/stores/teamStore'
 import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
 import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/components/feature-flags-provider'
 import { DataTable } from '@/components/data-table/data-table'
@@ -19,7 +18,8 @@ import { getColumns } from './data/columns'
 import { Release, releaseStatus } from './types'
 
 const ReleasePage: FC = () => {
-  const { teamId } = useParams()
+  const { id: teamId } = useCurrentTeam()
+
   const { teams } = useTeamStore()
   const { data: releases, isLoading } = useReleases()
 
@@ -164,15 +164,15 @@ function ReleaseTable({ data: releases }: ReleaseTableProps) {
       <UpdateReleaseSheet
         open={rowAction?.type === 'update'}
         onOpenChange={() => setRowAction(null)}
-        release={rowAction?.row.original ?? null}
+        release={rowAction?.row?.original ?? null}
       />
 
       <DeleteReleasesDialog
         open={rowAction?.type === 'delete'}
         onOpenChange={() => setRowAction(null)}
-        releases={rowAction?.row.original ? [rowAction?.row.original] : []}
+        releases={rowAction?.row?.original ? [rowAction?.row?.original] : []}
         showTrigger={false}
-        onSuccess={() => rowAction?.row.toggleSelected(false)}
+        onSuccess={() => rowAction?.row?.toggleSelected(false)}
       />
     </>
   )

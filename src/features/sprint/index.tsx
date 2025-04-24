@@ -1,12 +1,13 @@
 import React, { type FC } from 'react'
+import { TooltipTrigger } from '@radix-ui/react-tooltip'
 import { IconCopyPlus, IconFlag3, IconPlus } from '@tabler/icons-react'
-import { Tooltip } from 'antd'
 import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useTeamStore } from '@/stores/teamStore'
+import { useNavigate } from 'react-router-dom'
+import { useCurrentTeam, useTeamStore } from '@/stores/teamStore'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
 import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/components/feature-flags-provider'
 import { DataTable } from '@/components/data-table/data-table'
@@ -26,7 +27,7 @@ import { getColumns } from './data/columns'
 import { Sprint, sprintStatus } from './types'
 
 const SprintPage: FC = () => {
-  const { teamId } = useParams()
+  const { id: teamId } = useCurrentTeam()
   const { teams } = useTeamStore()
   // 获取当前工作区名称
   const workspaceName = teamId ? teams.find((t) => t.id === teamId)?.name || '工作区' : undefined
@@ -178,17 +179,27 @@ function SprintTable({ data: sprints }: SprintTableProps) {
           </div>
 
           <div className='flex items-center'>
-            <Tooltip title='New Sprint'>
-              <Button variant='ghost' size='icon' onClick={() => setRowAction({ type: 'create' })}>
-                <IconPlus className='size-4' />
-              </Button>
-            </Tooltip>
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant='ghost' size='icon' onClick={() => setRowAction({ type: 'create' })}>
+                    <IconPlus className='size-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>New Issue</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-            <Tooltip title='Batch create'>
-              <Button variant='ghost' size='icon'>
-                <IconCopyPlus className='size-4' />
-              </Button>
-            </Tooltip>
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant='ghost' size='icon'>
+                    <IconCopyPlus className='size-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Batch create</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </DataTable>

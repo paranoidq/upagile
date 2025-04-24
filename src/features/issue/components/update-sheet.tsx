@@ -68,7 +68,7 @@ export function UpdateOrCreateIssueSheet({
       startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : undefined,
       deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : undefined,
       teamId: issue?.team?.id || givenWorkspaceId || '',
-      sprintIds: issue?.sprints?.map((sprint) => sprint.id) || [givenSprintId],
+      sprintIds: issue?.sprints?.map((sprint) => sprint.id) || (givenSprintId ? [givenSprintId] : []),
       assigneeId: issue?.assignee?.id || defaultAssignee || undefined,
     },
   })
@@ -90,7 +90,7 @@ export function UpdateOrCreateIssueSheet({
       startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : '',
       deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : '',
       teamId: issue?.team?.id || givenWorkspaceId,
-      sprintIds: issue?.sprints?.map((sprint) => sprint.id) || [givenSprintId],
+      sprintIds: issue?.sprints?.map((sprint) => sprint.id) || (givenSprintId ? [givenSprintId] : []),
       assigneeId: issue?.assignee?.id || defaultAssignee || undefined,
     })
   }, [issue])
@@ -404,7 +404,7 @@ export function UpdateOrCreateIssueSheet({
 
             <SheetFooter className='gap-2 pt-2 sm:space-x-0'>
               <SheetClose asChild>
-                <Button type='button' variant='outline'>
+                <Button type='button' variant='outline' onClick={() => form.reset()}>
                   Cancel
                 </Button>
               </SheetClose>

@@ -10,17 +10,13 @@ interface MainProps extends React.HTMLAttributes<HTMLElement> {
 
 export const Main = ({ fixed, ...props }: MainProps) => {
   const { data: teams } = useListMyTeams()
-  const { setTeams, setCurrentTeam } = useTeamStore()
+  const { setTeams } = useTeamStore()
 
   useEffect(() => {
     if (teams) {
       setTeams(teams)
-      // 只有当没有当前选中的团队时，才设置第一个团队为当前团队
-      if (!useTeamStore.getState().currentTeam && teams.length > 0) {
-        setCurrentTeam(teams[0])
-      }
     }
-  }, [teams, setTeams, setCurrentTeam])
+  }, [teams, setTeams])
 
   return (
     <main

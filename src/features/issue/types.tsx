@@ -45,7 +45,7 @@ export const createIssueSchema = z.object({
   duration: z.number().optional(),
   parentId: z.string().optional(),
   inParentOrder: z.number().optional(),
-  teamId: z.string().optional(),
+  teamId: z.string(),
   assigneeId: z.string().or(z.null()).optional(),
   labelsIds: z.array(z.string()).optional(),
   sprintIds: z.array(z.string()).optional(),
