@@ -10,7 +10,7 @@ export const sprintStatus: {
   color: string
   icon?: React.ReactNode
 }[] = [
-  { label: 'Pending', value: 'pending', color: 'bg-gray-600', icon: <IconCircle /> },
+  { label: 'Pending', value: 'init', color: 'bg-gray-600', icon: <IconCircle /> },
   { label: 'Progressing', value: 'progressing', color: 'bg-blue-600', icon: <IconRotateClockwise2 /> },
   { label: 'Completed', value: 'completed', color: 'bg-green-600', icon: <IconCheck /> },
   { label: 'Canceled', value: 'canceled', color: 'bg-red-600', icon: <IconX /> },

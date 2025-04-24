@@ -1,10 +1,11 @@
 'use client'
 
 import * as React from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconCube } from '@tabler/icons-react'
-import { Loader } from 'lucide-react'
+import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { useTeamStore } from '@/stores/teamStore'
 import AntdDataPicker from '@/components/ui/antd-date-picker'
@@ -22,78 +23,121 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { useUpdateSprint } from '../_lib/services'
-import { Sprint, sprintStatus, updateSprintSchema, UpdateSprintSchema } from '../types'
+import { useCreateSprint, useUpdateSprint } from '../_lib/services'
+import { createSprintSchema, Sprint, sprintStatus, updateSprintSchema } from '../types'
 
 interface UpdateSprintSheetProps extends React.ComponentPropsWithRef<typeof Sheet> {
   sprint: Sprint | null
 }
 
-export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSheetProps) {
+export function UpdateOrCreateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSheetProps) {
+  const isUpdating = !!sprint?.id
+
   const { mutateAsync: updateSprint, isPending: isUpdatePending } = useUpdateSprint()
+
+  const { mutateAsync: createSprint, isPending: isCreatePending } = useCreateSprint()
+
   const { teams: workspaces } = useTeamStore()
 
-  const form = useForm<UpdateSprintSchema>({
-    resolver: zodResolver(updateSprintSchema),
+  type UpdateFormValues = z.infer<typeof updateSprintSchema>
+  type CreateFormValues = z.infer<typeof createSprintSchema>
+
+  const form = useForm<UpdateFormValues | CreateFormValues>({
+    resolver: zodResolver(isUpdating ? updateSprintSchema : createSprintSchema),
+    defaultValues: {
+      id: sprint?.id,
+      title: sprint?.title ?? '',
+      description: sprint?.description ?? '',
+      startTime: sprint?.startTime ? dayjs(sprint.startTime).format('YYYY-MM-DD') : '',
+      endTime: sprint?.endTime ? dayjs(sprint.endTime).format('YYYY-MM-DD') : '',
+      status: sprint?.status || 'init',
+      teamId: sprint?.team?.id,
+    },
   })
 
   React.useEffect(() => {
-    if (sprint) {
-      form.reset({
-        id: sprint.id,
-        title: sprint.title ?? '',
-        description: sprint?.description ?? '',
-        startTime: sprint?.startTime,
-        endTime: sprint?.endTime,
-        status: sprint?.status,
-        teamId: sprint?.team?.id,
-      })
-    }
+    form.reset({
+      id: sprint?.id,
+      title: sprint?.title ?? '',
+      description: sprint?.description ?? '',
+      startTime: sprint?.startTime ? dayjs(sprint.startTime).format('YYYY-MM-DD') : '',
+      endTime: sprint?.endTime ? dayjs(sprint.endTime).format('YYYY-MM-DD') : '',
+      status: sprint?.status || 'init',
+      teamId: sprint?.team?.id,
+    })
   }, [sprint])
 
-  function onSubmit(input: UpdateSprintSchema) {
-    // 确保 title 有值
+  function onSubmit(input: UpdateFormValues | CreateFormValues) {
     const data = {
       ...input,
-      title: input.title || sprint?.title || '',
+      startTime: input.startTime ? dayjs(input.startTime).format('YYYY-MM-DD') : undefined,
+      endTime: input.endTime ? dayjs(input.endTime).format('YYYY-MM-DD') : undefined,
     }
 
-    toast.promise(updateSprint(data), {
-      loading: 'Updating sprint...',
-      success: () => {
-        form.reset()
-        onOpenChange?.(false)
-        return 'Sprint updated'
-      },
-      error: (error) => {
-        return 'Failed to update sprint' + error.message
-      },
-    })
+    if (isUpdating) {
+      toast.promise(updateSprint(data as UpdateFormValues), {
+        loading: 'Updating sprint...',
+        success: () => {
+          onOpenChange?.(false)
+          form.reset()
+          return 'Sprint updated'
+        },
+        error: (error) => {
+          return {
+            message: error.msg,
+            description: error.reason,
+          }
+        },
+      })
+    } else {
+      const { ...createData } = data as CreateFormValues
+
+      toast.promise(
+        createSprint({
+          ...createData,
+          title: createData.title || '',
+        }),
+        {
+          loading: 'Creating sprint...',
+          success: () => {
+            onOpenChange?.(false)
+            form.reset()
+            return 'Sprint created'
+          },
+          error: (error) => ({
+            message: error.msg,
+            description: error.reason,
+          }),
+        },
+      )
+    }
   }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className='flex flex-col gap-6 sm:max-w-md'>
-        <SheetHeader className='text-left'>
-          <SheetTitle>Update sprint</SheetTitle>
+      <SheetContent className='w-[400px] sm:w-[540px] overflow-y-auto'>
+        <SheetHeader>
+          <SheetTitle>{isUpdating ? 'Update Sprint' : 'Create Sprint'}</SheetTitle>
           <SheetDescription>Update the sprint details and save the changes</SheetDescription>
         </SheetHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
-            <FormField
-              control={form.control}
-              name='id'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ID</FormLabel>
-                  <FormControl>
-                    <Input placeholder='' {...field} disabled />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isUpdating && (
+              <FormField
+                control={form.control}
+                name='id'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ID</FormLabel>
+                    <FormControl>
+                      <Input placeholder='' {...field} disabled />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -132,7 +176,7 @@ export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSh
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger className='capitalize'>
-                        <SelectValue placeholder='Select a priority' />
+                        <SelectValue placeholder='Select a status' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -166,6 +210,7 @@ export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSh
                   <FormControl>
                     <AntdDataPicker
                       data={field.value}
+                      placeholder='Select start time'
                       onChange={(date) => {
                         field.onChange(date ? date.format('YYYY-MM-DD') : null)
                       }}
@@ -184,6 +229,7 @@ export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSh
                   <FormLabel>End Time</FormLabel>
                   <FormControl>
                     <AntdDataPicker
+                      placeholder='Select end time'
                       data={field.value}
                       onChange={(date) => {
                         field.onChange(date ? date.format('YYYY-MM-DD') : null)
@@ -227,13 +273,12 @@ export function UpdateSprintSheet({ sprint, onOpenChange, open }: UpdateSprintSh
 
             <SheetFooter className='gap-2 pt-2 sm:space-x-0'>
               <SheetClose asChild>
-                <Button type='button' variant='outline'>
+                <Button type='button' variant='outline' onClick={() => form.reset()}>
                   Cancel
                 </Button>
               </SheetClose>
-              <Button disabled={isUpdatePending}>
-                {isUpdatePending && <Loader className='mr-2 size-4 animate-spin' aria-hidden='true' />}
-                Save
+              <Button disabled={isUpdatePending || isCreatePending}>
+                {isUpdatePending ? 'Updating...' : isCreatePending ? 'Creating...' : isUpdating ? 'Update' : 'Create'}
               </Button>
             </SheetFooter>
           </form>

@@ -21,7 +21,7 @@ import { useUpdateSprint } from '../_lib/services'
 import { Sprint, sprintStatus } from '../types'
 import { DeleteSprintsDialog } from './delete-dialog'
 import { SprintPlanDialog } from './sprint-plan-dialog'
-import { UpdateSprintSheet } from './update-sheet'
+import { UpdateOrCreateSprintSheet } from './update-sheet'
 
 type Action = {
   type: 'update' | 'delete' | 'schedule'
@@ -204,7 +204,7 @@ const SprintInfoCard = ({
         </div>
       </CardContent>
 
-      <UpdateSprintSheet
+      <UpdateOrCreateSprintSheet
         open={action?.type === 'update'}
         onOpenChange={() => setAction(null)}
         sprint={action?.data ?? null}

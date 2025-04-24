@@ -19,7 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { InputSelect, InputSelectTrigger } from '@/components/ui/input-select'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import { useGetTeamMembers } from '@/features/workspace/_lib/services'
 import { useCreateIssue, useUpdateIssue } from '../_lib/services'
@@ -81,7 +81,7 @@ export function UpdateIssueSheet({ issue, certainWorkspaceId, ...props }: Update
   }, [issue])
 
   // 处理表单提交
-  const handleSubmit = async (values: UpdateFormValues) => {
+  const handleSubmit = async (values: UpdateFormValues | CreateFormValues) => {
     const data = {
       ...values,
       startTime: values.startTime ? dayjs(values.startTime).format('YYYY-MM-DD') : undefined,
@@ -354,14 +354,16 @@ export function UpdateIssueSheet({ issue, certainWorkspaceId, ...props }: Update
               )}
             />
 
-            <div className='flex justify-end gap-2 pt-4'>
-              <Button variant='outline' onClick={() => props.onOpenChange?.(false)}>
-                Cancel
-              </Button>
+            <SheetFooter className='gap-2 pt-2 sm:space-x-0'>
+              <SheetClose asChild>
+                <Button type='button' variant='outline'>
+                  Cancel
+                </Button>
+              </SheetClose>
               <Button type='submit' disabled={isUpdatePending || isCreatePending}>
                 {isUpdatePending ? 'Updating...' : isCreatePending ? 'Creating...' : isUpdating ? 'Update' : 'Create'}
               </Button>
-            </div>
+            </SheetFooter>
           </form>
         </Form>
       </SheetContent>

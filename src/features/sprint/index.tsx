@@ -21,7 +21,7 @@ import { DeleteSprintsDialog } from './components/delete-dialog'
 import SprintCalendar from './components/sprint-calendar'
 import SprintKanban from './components/sprint-kanban'
 import { SprintTableFloatingBar } from './components/table-floating-bar'
-import { UpdateSprintSheet } from './components/update-sheet'
+import { UpdateOrCreateSprintSheet } from './components/update-sheet'
 import { getColumns } from './data/columns'
 import { Sprint, sprintStatus } from './types'
 
@@ -179,7 +179,7 @@ function SprintTable({ data: sprints }: SprintTableProps) {
 
           <div className='flex items-center'>
             <Tooltip title='New Sprint'>
-              <Button variant='ghost' size='icon'>
+              <Button variant='ghost' size='icon' onClick={() => setRowAction({ type: 'create' })}>
                 <IconPlus className='size-4' />
               </Button>
             </Tooltip>
@@ -193,18 +193,18 @@ function SprintTable({ data: sprints }: SprintTableProps) {
         </div>
       </DataTable>
 
-      <UpdateSprintSheet
-        open={rowAction?.type === 'update'}
+      <UpdateOrCreateSprintSheet
+        open={rowAction?.type === 'update' || rowAction?.type === 'create'}
         onOpenChange={() => setRowAction(null)}
-        sprint={rowAction?.row.original ?? null}
+        sprint={rowAction?.row?.original ?? null}
       />
 
       <DeleteSprintsDialog
         open={rowAction?.type === 'delete'}
         onOpenChange={() => setRowAction(null)}
-        sprints={rowAction?.row.original ? [rowAction?.row.original] : []}
+        sprints={rowAction?.row?.original ? [rowAction?.row?.original] : []}
         showTrigger={false}
-        onSuccess={() => rowAction?.row.toggleSelected(false)}
+        onSuccess={() => rowAction?.row?.toggleSelected(false)}
       />
     </>
   )
