@@ -56,21 +56,24 @@ export function UpdateOrCreateIssueSheet({
 
   type UpdateFormValues = z.infer<typeof updateIssueSchema>
   type CreateFormValues = z.infer<typeof createIssueSchema>
+
+  const defaultValues = {
+    id: issue?.id,
+    title: issue?.title || '',
+    description: issue?.description || '',
+    type: issue?.type || 'unset',
+    status: issue?.status || defaultStatus || 'init',
+    priority: issue?.priority || 'low',
+    startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : '',
+    deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : '',
+    teamId: issue?.team?.id || givenWorkspaceId || '',
+    sprintIds: issue?.sprints?.map((sprint) => sprint.id) || (givenSprintId ? [givenSprintId] : []),
+    assigneeId: issue?.assignee?.id || defaultAssignee || undefined,
+  }
+
   const form = useForm<UpdateFormValues | CreateFormValues>({
     resolver: zodResolver(isUpdating ? updateIssueSchema : createIssueSchema),
-    defaultValues: {
-      id: issue?.id,
-      title: issue?.title || '',
-      description: issue?.description || '',
-      type: issue?.type || 'unset',
-      status: issue?.status || defaultStatus || 'init',
-      priority: issue?.priority || 'low',
-      startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : undefined,
-      deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : undefined,
-      teamId: issue?.team?.id || givenWorkspaceId || '',
-      sprintIds: issue?.sprints?.map((sprint) => sprint.id) || (givenSprintId ? [givenSprintId] : []),
-      assigneeId: issue?.assignee?.id || defaultAssignee || undefined,
-    },
+    defaultValues,
   })
 
   // team和assignee的联动
@@ -80,20 +83,15 @@ export function UpdateOrCreateIssueSheet({
   const { data: sprints } = useSprints(watchedTeamId)
 
   useEffect(() => {
-    form.reset({
-      id: issue?.id,
-      title: issue?.title,
-      description: issue?.description,
-      type: issue?.type,
-      status: issue?.status || defaultStatus || 'init',
-      priority: issue?.priority,
-      startTime: issue?.startTime ? dayjs(issue.startTime).format('YYYY-MM-DD') : '',
-      deadline: issue?.deadline ? dayjs(issue.deadline).format('YYYY-MM-DD') : '',
-      teamId: issue?.team?.id || givenWorkspaceId,
-      sprintIds: issue?.sprints?.map((sprint) => sprint.id) || (givenSprintId ? [givenSprintId] : []),
-      assigneeId: issue?.assignee?.id || defaultAssignee || undefined,
-    })
+    form.reset(defaultValues)
   }, [issue])
+
+  // 只在弹窗关闭时重置表单
+  useEffect(() => {
+    if (!props.open) {
+      form.reset()
+    }
+  }, [props.open])
 
   // 处理表单提交
   const handleSubmit = async (values: UpdateFormValues | CreateFormValues) => {
@@ -347,7 +345,7 @@ export function UpdateOrCreateIssueSheet({
                   <FormLabel>Sprints</FormLabel>
                   <FormControl>
                     <InputMultiSelect
-                      disabled={!!givenSprintId && !enableGivenFieldsChange}
+                      disabled={!watchedTeamId}
                       placeholder='Select sprint'
                       options={
                         sprints?.map((sprint) => ({
@@ -404,7 +402,7 @@ export function UpdateOrCreateIssueSheet({
 
             <SheetFooter className='gap-2 pt-2 sm:space-x-0'>
               <SheetClose asChild>
-                <Button type='button' variant='outline' onClick={() => form.reset()}>
+                <Button type='button' variant='outline'>
                   Cancel
                 </Button>
               </SheetClose>

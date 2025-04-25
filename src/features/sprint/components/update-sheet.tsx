@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -42,30 +43,30 @@ export function UpdateOrCreateSprintSheet({ sprint, onOpenChange, open }: Update
   type UpdateFormValues = z.infer<typeof updateSprintSchema>
   type CreateFormValues = z.infer<typeof createSprintSchema>
 
+  const defaultValues = {
+    id: sprint?.id,
+    title: sprint?.title ?? '',
+    description: sprint?.description ?? '',
+    startTime: sprint?.startTime ? dayjs(sprint.startTime).format('YYYY-MM-DD') : '',
+    endTime: sprint?.endTime ? dayjs(sprint.endTime).format('YYYY-MM-DD') : '',
+    status: sprint?.status || 'init',
+    teamId: sprint?.team?.id,
+  }
+
   const form = useForm<UpdateFormValues | CreateFormValues>({
     resolver: zodResolver(isUpdating ? updateSprintSchema : createSprintSchema),
-    defaultValues: {
-      id: sprint?.id,
-      title: sprint?.title ?? '',
-      description: sprint?.description ?? '',
-      startTime: sprint?.startTime ? dayjs(sprint.startTime).format('YYYY-MM-DD') : '',
-      endTime: sprint?.endTime ? dayjs(sprint.endTime).format('YYYY-MM-DD') : '',
-      status: sprint?.status || 'init',
-      teamId: sprint?.team?.id,
-    },
+    defaultValues,
   })
 
-  React.useEffect(() => {
-    form.reset({
-      id: sprint?.id,
-      title: sprint?.title ?? '',
-      description: sprint?.description ?? '',
-      startTime: sprint?.startTime ? dayjs(sprint.startTime).format('YYYY-MM-DD') : '',
-      endTime: sprint?.endTime ? dayjs(sprint.endTime).format('YYYY-MM-DD') : '',
-      status: sprint?.status || 'init',
-      teamId: sprint?.team?.id,
-    })
+  useEffect(() => {
+    form.reset(defaultValues)
   }, [sprint])
+
+  useEffect(() => {
+    if (!open) {
+      form.reset(defaultValues)
+    }
+  }, [open])
 
   function onSubmit(input: UpdateFormValues | CreateFormValues) {
     const data = {
@@ -273,7 +274,7 @@ export function UpdateOrCreateSprintSheet({ sprint, onOpenChange, open }: Update
 
             <SheetFooter className='gap-2 pt-2 sm:space-x-0'>
               <SheetClose asChild>
-                <Button type='button' variant='outline' onClick={() => form.reset()}>
+                <Button type='button' variant='outline'>
                   Cancel
                 </Button>
               </SheetClose>

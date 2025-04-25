@@ -178,6 +178,7 @@ function IssueTable({ data: issues }: IssueTableProps) {
         open={rowAction?.type === 'update' || rowAction?.type === 'create'}
         onOpenChange={() => setRowAction(null)}
         issue={rowAction?.row?.original ?? null}
+        enableGivenFieldsChange={true}
       />
 
       <DeleteIssuesDialog
