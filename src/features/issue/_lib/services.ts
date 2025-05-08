@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { http } from '@/lib/axios'
 import { createRequestConfig } from '@/lib/types'
-import { Issue, IssueSchema, updateIssueSchema } from '../types'
+import { CreateIssueSchema, Issue, IssueSchema, updateIssueSchema } from '../types'
 
 // 获取issues
 export const listIssues = async (): Promise<Issue[]> => {
@@ -39,7 +39,7 @@ export const useDeleteIssues = () => {
 }
 
 // 新增issue
-export const createIssue = async (issue: Omit<Issue, 'id'>): Promise<void> => {
+export const createIssue = async (issue: CreateIssueSchema): Promise<void> => {
   await http.post(
     'issues/create',
     issue,

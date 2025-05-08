@@ -40,7 +40,7 @@ export function UpdateOrCreateSprintSheet({ sprint, onOpenChange, open }: Update
 
   const { teams: workspaces } = useTeamStore()
 
-  type UpdateFormValues = z.infer<typeof updateSprintSchema>
+  type UpdateFormValues = zr.infer<typeof updateSprintSchema>
   type CreateFormValues = z.infer<typeof createSprintSchema>
 
   const defaultValues = {

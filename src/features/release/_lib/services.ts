@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { http } from '@/lib/axios'
-import { Release, ReleaseSchema } from '../types'
+import { createReleaseSchema, Release, ReleaseSchema, updateReleaseSchema } from '../types'
 
 // 获取releases
 export const listReleases = async (): Promise<Release[]> => {
@@ -38,7 +38,7 @@ export const useDeleteReleases = () => {
 }
 
 // 新增release
-export const createRelease = async (release: Omit<Release, 'id'>): Promise<void> => {
+export const createRelease = async (release: z.infer<typeof createReleaseSchema>): Promise<void> => {
   await http.post('releases/create', release)
 }
 
@@ -53,7 +53,7 @@ export const useCreateRelease = () => {
 }
 
 // 修改release
-export const updateRelease = async (release: Release): Promise<void> => {
+export const updateRelease = async (release: z.infer<typeof updateReleaseSchema>): Promise<void> => {
   await http.post('releases/update', release)
 }
 

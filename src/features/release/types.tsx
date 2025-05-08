@@ -17,30 +17,20 @@ export const releaseStatus: {
 ]
 
 export const createReleaseSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
+  title: z.string().min(1, 'title is required'),
   description: z.string().optional(),
   testTime: z.string().optional(),
   releaseTime: z.string().optional(),
   productionTime: z.string().optional(),
   status: z.enum(releaseStatus.map((status) => status.value) as [string, ...string[]]).optional(),
   principalId: z.string().optional(),
-  applicationId: z.string().optional(),
+  applicationId: z.string({ message: 'application is required' }),
+  teamId: z.string().optional(),
 })
 
-export const updateReleaseSchema = z.object({
+export const updateReleaseSchema = createReleaseSchema.extend({
   id: z.string(),
-  title: z.string().min(1, '标题不能为空').optional(),
-  description: z.string().optional(),
-  testTime: z.string().optional(),
-  releaseTime: z.string().optional(),
-  productionTime: z.string().optional(),
-  status: z.enum(releaseStatus.map((status) => status.value) as [string, ...string[]]).optional(),
-  principalId: z.string().optional(),
-  applicationId: z.string().optional(),
 })
-
-export type CreateReleaseSchema = z.infer<typeof createReleaseSchema>
-export type UpdateReleaseSchema = z.infer<typeof updateReleaseSchema>
 
 export const ReleaseSchema = z.object({
   id: z.string(),
@@ -55,11 +45,16 @@ export const ReleaseSchema = z.object({
       id: z.string(),
       name: z.string(),
       username: z.string(),
+      avatar: z.string().optional(),
     })
     .optional(),
   application: z.object({
     id: z.string(),
     name: z.string(),
+    team: z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
   }),
   issues: z
     .array(

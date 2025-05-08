@@ -25,7 +25,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useSprints } from '@/features/sprint/_lib/services'
 import { useGetTeamMembers } from '@/features/workspace/_lib/services'
 import { useCreateIssue, useUpdateIssue } from '../_lib/services'
-import { createIssueSchema, Issue, issueStatus, issueType, updateIssueSchema } from '../types'
+import { CreateIssueSchema, createIssueSchema, Issue, issueStatus, issueType, updateIssueSchema } from '../types'
 
 interface UpdateIssueSheetProps extends React.ComponentPropsWithRef<typeof Sheet> {
   open: boolean
@@ -52,8 +52,6 @@ export function UpdateOrCreateIssueSheet({
   const { mutateAsync: updateIssue, isPending: isUpdatePending } = useUpdateIssue()
   const { mutateAsync: createIssue, isPending: isCreatePending } = useCreateIssue()
 
-  const { teams } = useTeamStore()
-
   type UpdateFormValues = z.infer<typeof updateIssueSchema>
   type CreateFormValues = z.infer<typeof createIssueSchema>
 
@@ -77,6 +75,8 @@ export function UpdateOrCreateIssueSheet({
   })
 
   // team和assignee的联动
+  const { teams } = useTeamStore()
+
   const watchedTeamId = form.watch('teamId')
   const { data: teamData } = useGetTeamMembers(watchedTeamId)
   const members = teamData?.members || []
@@ -86,7 +86,6 @@ export function UpdateOrCreateIssueSheet({
     form.reset(defaultValues)
   }, [issue])
 
-  // 只在弹窗关闭时重置表单
   useEffect(() => {
     if (!props.open) {
       form.reset()
@@ -104,7 +103,7 @@ export function UpdateOrCreateIssueSheet({
     }
 
     if (isUpdating) {
-      toast.promise(updateIssue(data), {
+      toast.promise(updateIssue(data as UpdateFormValues), {
         loading: 'Updating issue...',
         success: () => {
           props.onOpenChange?.(false)
@@ -116,9 +115,10 @@ export function UpdateOrCreateIssueSheet({
         }),
       })
     } else {
-      const { id, ...createData } = data // 移除 id 字段
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...createData } = data
 
-      toast.promise(createIssue(createData), {
+      toast.promise(createIssue(createData as CreateIssueSchema), {
         loading: 'Creating issue...',
         success: () => {
           props.onOpenChange?.(false)

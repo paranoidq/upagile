@@ -1,6 +1,8 @@
 import React, { type FC } from 'react'
-import { IconFlag3 } from '@tabler/icons-react'
+import { IconCopyPlus, IconFlag3, IconPlus } from '@tabler/icons-react'
 import { useCurrentTeam, useTeamStore } from '@/stores/teamStore'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
 import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/components/feature-flags-provider'
 import { DataTable } from '@/components/data-table/data-table'
@@ -150,19 +152,37 @@ function ReleaseTable({ data: releases }: ReleaseTableProps) {
   return (
     <>
       <DataTable table={table} floatingBar={enableFloatingBar ? <ReleaseTableFloatingBar table={table} /> : null}>
-        {/* {enableAdvancedTable ? (
-          <DataTableAdvancedToolbar table={table} filterFields={advancedFilterFields} shallow={false}>
-            <TasksTableToolbarActions table={table} />
-          </DataTableAdvancedToolbar>
-        ) : (
-          <DataTableToolbar table={table} filterFields={filterFields}>
-            <TasksTableToolbarActions table={table} />
-          </DataTableToolbar>
-        )} */}
+        <div className='flex justify-between gap-2'>
+          <div className='items-center flex space-x-2'></div>
+
+          <div className='flex items-center'>
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant='ghost' size='icon' onClick={() => setRowAction({ type: 'create' })}>
+                    <IconPlus className='size-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>New Release</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant='ghost' size='icon'>
+                    <IconCopyPlus className='size-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Batch create</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
       </DataTable>
 
       <UpdateReleaseSheet
-        open={rowAction?.type === 'update'}
+        open={rowAction?.type === 'update' || rowAction?.type === 'create'}
         onOpenChange={() => setRowAction(null)}
         release={rowAction?.row?.original ?? null}
       />

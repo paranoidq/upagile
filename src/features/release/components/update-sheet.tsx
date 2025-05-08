@@ -1,10 +1,15 @@
 'use client'
 
 import * as React from 'react'
+import { useEffect } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader } from 'lucide-react'
+import { IconCode, IconCube, IconUserCircle } from '@tabler/icons-react'
+import dayjs from 'dayjs'
 import { toast } from 'sonner'
+import { useTeamStore } from '@/stores/teamStore'
+import AntdDatePicker from '@/components/ui/antd-date-picker'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -19,61 +24,107 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { useUpdateRelease } from '../_lib/services'
-import { Release, releaseStatus, updateReleaseSchema, UpdateReleaseSchema } from '../types'
+import { useApplications } from '@/features/application/_lib/services'
+import { useGetTeamMembers } from '@/features/workspace/_lib/services'
+import { useCreateRelease, useUpdateRelease } from '../_lib/services'
+import { createReleaseSchema, Release, releaseStatus, updateReleaseSchema } from '../types'
 
 interface UpdateReleaseSheetProps extends React.ComponentPropsWithRef<typeof Sheet> {
   release: Release | null
 }
 
-export function UpdateReleaseSheet({ release, ...props }: UpdateReleaseSheetProps) {
+export function UpdateReleaseSheet({ release, onOpenChange, open }: UpdateReleaseSheetProps) {
+  const isUpdating = !!release?.id
+
   const { mutateAsync: updateRelease, isPending: isUpdatePending } = useUpdateRelease()
 
-  const form = useForm<UpdateReleaseSchema>({
-    resolver: zodResolver(updateReleaseSchema),
+  const { mutateAsync: createRelease, isPending: isCreatePending } = useCreateRelease()
+
+  type UpdateFormValues = z.infer<typeof updateReleaseSchema>
+  type CreateFormValues = z.infer<typeof createReleaseSchema>
+
+  const defaultValues = {
+    id: release?.id,
+    title: release?.title || '',
+    description: release?.description ?? '',
+    testTime: release?.testTime ? dayjs(release.testTime).format('YYYY-MM-DD') : '',
+    releaseTime: release?.releaseTime ? dayjs(release.releaseTime).format('YYYY-MM-DD') : '',
+    productionTime: release?.productionTime ? dayjs(release.productionTime).format('YYYY-MM-DD') : '',
+    status: release?.status || 'init',
+    principalId: release?.principal?.id,
+    applicationId: release?.application?.id,
+    teamId: release?.application?.team?.id,
+  }
+
+  const form = useForm<UpdateFormValues | CreateFormValues>({
+    resolver: zodResolver(isUpdating ? updateReleaseSchema : createReleaseSchema),
+    defaultValues,
   })
 
-  // 当 backlog 变化时重置表单
-  React.useEffect(() => {
+  // team和assignee的联动
+  const { teams } = useTeamStore()
+
+  const watchedTeamId = form.watch('teamId')
+  const { data: teamData } = useGetTeamMembers(watchedTeamId)
+  const members = teamData?.members || []
+  const { data: applications } = useApplications(watchedTeamId)
+
+  useEffect(() => {
     if (release) {
-      form.reset({
-        id: release.id,
-        title: release.title ?? '',
-        description: release?.description ?? '',
-        testTime: release?.testTime,
-        releaseTime: release?.releaseTime,
-        productionTime: release?.productionTime,
-        status: release?.status,
-        principalId: release?.principal?.id,
-        applicationId: release?.application?.id,
-      })
+      form.reset(defaultValues)
     }
   }, [release])
 
-  function onSubmit(input: UpdateReleaseSchema) {
-    // 确保 title 有值
+  useEffect(() => {
+    if (!open) {
+      form.reset(defaultValues)
+    }
+  }, [open])
+
+  function onSubmit(values: UpdateFormValues | CreateFormValues) {
     const data = {
-      ...input,
-      title: input.title || release?.title || '',
+      ...values,
+      title: values.title || release?.title || '',
+      testTime: values.testTime ? dayjs(values.testTime).format('YYYY-MM-DD') : undefined,
+      releaseTime: values.releaseTime ? dayjs(values.releaseTime).format('YYYY-MM-DD') : undefined,
+      productionTime: values.productionTime ? dayjs(values.productionTime).format('YYYY-MM-DD') : undefined,
+      principalId: values.principalId === undefined ? null : values.principalId,
+      applicationId: values.applicationId === undefined ? null : values.applicationId,
     }
 
-    toast.promise(updateRelease(data), {
-      loading: 'Updating release...',
-      success: () => {
-        form.reset()
-        props.onOpenChange?.(false)
-        return 'Release updated'
-      },
-      error: (e) => ({
-        message: e.message,
-        description: e.reason,
-      }),
-    })
+    if (isUpdating) {
+      toast.promise(updateRelease(data as UpdateFormValues), {
+        loading: 'Updating release...',
+        success: () => {
+          onOpenChange?.(false)
+          return 'Release updated'
+        },
+        error: (e) => ({
+          message: e.message,
+          description: e.reason,
+        }),
+      })
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...createData } = data
+
+      toast.promise(createRelease(createData as CreateFormValues), {
+        loading: 'Creating release...',
+        success: () => {
+          onOpenChange?.(false)
+          return 'Release create'
+        },
+        error: (e) => ({
+          message: e.message,
+          description: e.reason,
+        }),
+      })
+    }
   }
 
   return (
-    <Sheet {...props}>
-      <SheetContent className='flex flex-col gap-6 sm:max-w-md'>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className='overflow-y-auto'>
         <SheetHeader className='text-left'>
           <SheetTitle>Update release</SheetTitle>
           <SheetDescription>Update the release details and save the changes</SheetDescription>
@@ -81,19 +132,21 @@ export function UpdateReleaseSheet({ release, ...props }: UpdateReleaseSheetProp
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
-            <FormField
-              control={form.control}
-              name='id'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ID</FormLabel>
-                  <FormControl>
-                    <Input placeholder='' {...field} disabled />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isUpdating && (
+              <FormField
+                control={form.control}
+                name='id'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ID</FormLabel>
+                    <FormControl>
+                      <Input placeholder='' {...field} disabled />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -102,7 +155,7 @@ export function UpdateReleaseSheet({ release, ...props }: UpdateReleaseSheetProp
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Textarea className='resize-none' placeholder='' {...field} />
+                    <Input placeholder='' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -164,7 +217,13 @@ export function UpdateReleaseSheet({ release, ...props }: UpdateReleaseSheetProp
                 <FormItem>
                   <FormLabel>Test Time</FormLabel>
                   <FormControl>
-                    <Input type='date' placeholder='' {...field} />
+                    <AntdDatePicker
+                      data={field.value}
+                      onChange={(date) => {
+                        field.onChange(date?.format('YYYY-MM-DD'))
+                      }}
+                      placeholder='Select start time'
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -178,7 +237,13 @@ export function UpdateReleaseSheet({ release, ...props }: UpdateReleaseSheetProp
                 <FormItem>
                   <FormLabel>Release Time</FormLabel>
                   <FormControl>
-                    <Input type='date' placeholder='' {...field} />
+                    <AntdDatePicker
+                      data={field.value}
+                      onChange={(date) => {
+                        field.onChange(date?.format('YYYY-MM-DD'))
+                      }}
+                      placeholder='Select release time'
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -192,7 +257,97 @@ export function UpdateReleaseSheet({ release, ...props }: UpdateReleaseSheetProp
                 <FormItem>
                   <FormLabel>Production Time</FormLabel>
                   <FormControl>
-                    <Input type='date' placeholder='' {...field} />
+                    <AntdDatePicker
+                      data={field.value}
+                      onChange={(date) => {
+                        field.onChange(date?.format('YYYY-MM-DD'))
+                      }}
+                      placeholder='Select production time'
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='teamId'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Workspace</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select workspace' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {teams.map((team) => (
+                          <SelectItem key={team.id} value={team.id}>
+                            <div className='flex items-center gap-2'>
+                              <IconCube className='size-4' />
+                              {team.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='applicationId'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Application</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!watchedTeamId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select application' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {applications?.map((application) => (
+                          <SelectItem key={application.id} value={application.id}>
+                            <div className='flex items-center gap-2'>
+                              <IconCode className='size-4' />
+                              {application.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='principalId'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Principal</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!watchedTeamId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select principal' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {members.map((member) => (
+                          <SelectItem key={member.id} value={member.id}>
+                            <div className='flex items-center gap-2'>
+                              <IconUserCircle className='size-4' />
+                              {member.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -205,9 +360,8 @@ export function UpdateReleaseSheet({ release, ...props }: UpdateReleaseSheetProp
                   Cancel
                 </Button>
               </SheetClose>
-              <Button disabled={isUpdatePending}>
-                {isUpdatePending && <Loader className='mr-2 size-4 animate-spin' aria-hidden='true' />}
-                Save
+              <Button type='submit' disabled={isUpdatePending || isCreatePending}>
+                {isUpdatePending ? 'Updating...' : isCreatePending ? 'Creating...' : isUpdating ? 'Update' : 'Create'}
               </Button>
             </SheetFooter>
           </form>

@@ -127,7 +127,7 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Release
                   <Avatar className='h-6 w-6 cursor-pointer'>
                     <AvatarImage src={row.original.principal.avatar} />
                     <AvatarFallback className='bg-gray-200 text-gray-400 text-[10px] font-bold'>
-                      {row.original.principal.name.slice(0, 2)}
+                      {row.original.principal.name.slice(0, 1)}
                     </AvatarFallback>
                   </Avatar>
                 </TooltipTrigger>
