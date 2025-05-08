@@ -22,7 +22,7 @@ import { Issue, issueStatus } from './types'
 const IssuePage: FC = () => {
   const { id: teamId } = useCurrentTeam()
   const { teams } = useTeamStore()
-  const { data: issues, isLoading } = useIssues()
+  const { data: issues, isLoading } = useIssues(teamId)
 
   // 获取当前工作区名称
   const workspaceName = teamId ? teams.find((t) => t.id === teamId)?.name || '工作区' : undefined
@@ -30,10 +30,8 @@ const IssuePage: FC = () => {
   // 根据团队 ID 过滤数据
   const filteredIssues = React.useMemo(() => {
     if (!issues) return []
-    if (!teamId) return issues
-
-    return issues.filter((issue) => issue.team?.id === teamId)
-  }, [issues, teamId])
+    return issues
+  }, [issues])
 
   return (
     <>

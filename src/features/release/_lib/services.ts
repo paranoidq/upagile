@@ -5,8 +5,8 @@ import { http } from '@/lib/axios'
 import { createReleaseSchema, Release, ReleaseSchema, updateReleaseSchema } from '../types'
 
 // 获取releases
-export const listReleases = async (): Promise<Release[]> => {
-  const response = await http.post('/releases')
+export const listReleases = async (teamId?: string): Promise<Release[]> => {
+  const response = await http.post('/releases', { teamId })
   if (!response) {
     return []
   }
@@ -14,10 +14,10 @@ export const listReleases = async (): Promise<Release[]> => {
   return z.array(ReleaseSchema).parse(response)
 }
 
-export const useReleases = () => {
+export const useReleases = (teamId?: string) => {
   return useQuery({
-    queryKey: ['releases'],
-    queryFn: () => listReleases(),
+    queryKey: ['releases', teamId],
+    queryFn: () => listReleases(teamId),
     enabled: useAuthStore.getState().auth.user !== null,
   })
 }

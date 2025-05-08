@@ -23,7 +23,7 @@ const ReleasePage: FC = () => {
   const { id: teamId } = useCurrentTeam()
 
   const { teams } = useTeamStore()
-  const { data: releases, isLoading } = useReleases()
+  const { data: releases, isLoading } = useReleases(teamId)
 
   // 获取当前工作区名称
   const workspaceName = teamId ? teams.find((t) => t.id === teamId)?.name || '工作区' : undefined
@@ -31,15 +31,7 @@ const ReleasePage: FC = () => {
   // 根据团队 ID 过滤数据
   const filteredReleases = React.useMemo(() => {
     if (!releases) return []
-    if (!teamId) return releases
-
-    // 假设 release 对象中有 application 字段，且 application 对象中有 teamId 字段
-    // 如果数据结构不同，请根据实际情况调整过滤条件
-    return releases.filter((release) => {
-      // 根据实际数据结构调整过滤条件
-      // 这里假设 release 通过 application.teamId 关联到团队
-      return release.application?.teamId === teamId
-    })
+    return releases
   }, [releases, teamId])
 
   return (

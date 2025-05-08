@@ -6,8 +6,8 @@ import { createRequestConfig } from '@/lib/types'
 import { CreateIssueSchema, Issue, IssueSchema, updateIssueSchema } from '../types'
 
 // 获取issues
-export const listIssues = async (): Promise<Issue[]> => {
-  const response = await http.post('/issues')
+export const listIssues = async (teamId?: string): Promise<Issue[]> => {
+  const response = await http.post('/issues', { teamId })
   if (!response) {
     return []
   }
@@ -16,10 +16,10 @@ export const listIssues = async (): Promise<Issue[]> => {
   return parsedIssues as Issue[]
 }
 
-export const useIssues = () => {
+export const useIssues = (teamId?: string) => {
   return useQuery({
-    queryKey: ['issues'],
-    queryFn: () => listIssues(),
+    queryKey: ['issues', teamId],
+    queryFn: () => listIssues(teamId),
     enabled: useAuthStore.getState().auth.user !== null,
   })
 }
