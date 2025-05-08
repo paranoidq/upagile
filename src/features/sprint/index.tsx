@@ -5,7 +5,8 @@ import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs'
 import { useNavigate } from 'react-router-dom'
 import { useCurrentTeam, useTeamStore } from '@/stores/teamStore'
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
@@ -90,6 +91,20 @@ function SprintTable({ data: sprints }: SprintTableProps) {
 
   const pageCount = sprints?.length % 10 === 0 ? sprints?.length / 10 : Math.floor(sprints?.length / 10) + 1
 
+  // display recent
+  const [showRecent, setShowRecent] = useQueryState('showRecent', parseAsBoolean.withDefault(false))
+
+  const filteredSprints = React.useMemo(() => {
+    if (showRecent) {
+      return sprints?.filter(
+        (sprint) =>
+          !sprint.startTime ||
+          (sprint.startTime && new Date(sprint.startTime) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
+      )
+    }
+    return sprints
+  }, [sprints, showRecent])
+
   const [rowAction, setRowAction] = React.useState<DataTableRowAction<Sprint> | null>(null)
 
   const columns = React.useMemo(() => getColumns({ setRowAction, navigate }), [])
@@ -146,7 +161,7 @@ function SprintTable({ data: sprints }: SprintTableProps) {
   const enableFloatingBar = featureFlags.includes('floatingBar')
 
   const { table } = useDataTable({
-    data: sprints,
+    data: filteredSprints,
     columns,
     pageCount,
     filterFields,
@@ -160,22 +175,20 @@ function SprintTable({ data: sprints }: SprintTableProps) {
     clearOnDefault: true,
   })
 
-  // display recent
-  const [displayRecent, setDisplayRecent] = useQueryState('displayRecent', parseAsBoolean.withDefault(true))
-
   return (
     <>
       <DataTable table={table} floatingBar={enableFloatingBar ? <SprintTableFloatingBar table={table} /> : null}>
         <div className='flex justify-between gap-2'>
           <div className='items-center flex space-x-2'>
-            <Switch
-              id='displayOnlyRecent'
-              checked={displayRecent}
-              onCheckedChange={(value) => setDisplayRecent(value)}
+            {/* 仅展示近30天内的releases的勾选框 */}
+            <Checkbox
+              id='showRecent'
+              checked={showRecent}
+              onCheckedChange={(checked) => {
+                setShowRecent(checked === true)
+              }}
             />
-            <label htmlFor='displayOnlyRecent' className=' text-gray-500'>
-              Only show recent sprints
-            </label>
+            <Label htmlFor='showRecent'>Show recent 30 days sprints</Label>
           </div>
 
           <div className='flex items-center'>

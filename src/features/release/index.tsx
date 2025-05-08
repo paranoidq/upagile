@@ -1,7 +1,10 @@
 import React, { type FC } from 'react'
 import { IconCopyPlus, IconFlag3, IconPlus } from '@tabler/icons-react'
+import { parseAsBoolean, useQueryState } from 'nuqs'
 import { useCurrentTeam, useTeamStore } from '@/stores/teamStore'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DataTableSkeleton } from '@/components/data-table/components/data-table-skeleton'
 import { FeatureFlagsProvider, useFeatureFlags } from '@/components/data-table/components/feature-flags-provider'
@@ -28,12 +31,6 @@ const ReleasePage: FC = () => {
   // 获取当前工作区名称
   const workspaceName = teamId ? teams.find((t) => t.id === teamId)?.name || '工作区' : undefined
 
-  // 根据团队 ID 过滤数据
-  const filteredReleases = React.useMemo(() => {
-    if (!releases) return []
-    return releases
-  }, [releases, teamId])
-
   return (
     <>
       {/* common header */}
@@ -49,11 +46,7 @@ const ReleasePage: FC = () => {
       </Header>
       <Main>
         <FeatureFlagsProvider>
-          {isLoading ? (
-            <DataTableSkeleton columnCount={10} rowCount={10} />
-          ) : (
-            <ReleaseTable data={filteredReleases ?? []} />
-          )}
+          {isLoading ? <DataTableSkeleton columnCount={10} rowCount={10} /> : <ReleaseTable data={releases ?? []} />}
         </FeatureFlagsProvider>
       </Main>
     </>
@@ -70,6 +63,21 @@ function ReleaseTable({ data: releases }: ReleaseTableProps) {
   const { featureFlags } = useFeatureFlags()
 
   const pageCount = releases?.length % 10 === 0 ? releases?.length / 10 : Math.floor(releases?.length / 10) + 1
+
+  // display releases in 30 days
+  const [showRecent, setShowRecent] = useQueryState('showRecent', parseAsBoolean.withDefault(false))
+
+  const filteredReleases = React.useMemo(() => {
+    if (!releases) return []
+    if (showRecent) {
+      return releases?.filter(
+        (release) =>
+          !release.testTime ||
+          (release.testTime && new Date(release.testTime) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
+      )
+    }
+    return releases
+  }, [releases, showRecent])
 
   const [rowAction, setRowAction] = React.useState<DataTableRowAction<Release> | null>(null)
 
@@ -127,7 +135,7 @@ function ReleaseTable({ data: releases }: ReleaseTableProps) {
   const enableFloatingBar = featureFlags.includes('floatingBar')
 
   const { table } = useDataTable({
-    data: releases,
+    data: filteredReleases,
     columns,
     pageCount,
     filterFields,
@@ -145,7 +153,16 @@ function ReleaseTable({ data: releases }: ReleaseTableProps) {
     <>
       <DataTable table={table} floatingBar={enableFloatingBar ? <ReleaseTableFloatingBar table={table} /> : null}>
         <div className='flex justify-between gap-2'>
-          <div className='items-center flex space-x-2'></div>
+          <div className='items-center flex space-x-2'>
+            {/* 仅展示近30天内的releases的勾选框 */}
+            <Checkbox
+              id='show-recent-releases'
+              onCheckedChange={(checked) => {
+                setShowRecent(checked === true)
+              }}
+            />
+            <Label htmlFor='show-recent-releases'>Show recent 30 days releases</Label>
+          </div>
 
           <div className='flex items-center'>
             <TooltipProvider delayDuration={100}>
