@@ -13,10 +13,10 @@ import { Main } from '@/components/layout/main.tsx'
 import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
 import { ThemeSwitch } from '@/components/theme-switch.tsx'
 import { useIssues } from './_lib/services'
+import { getColumns } from './columns'
 import { DeleteIssuesDialog } from './components/delete-dialog'
 import { IssueTableFloatingBar } from './components/table-floating-bar'
 import { UpdateOrCreateIssueSheet } from './components/update-sheet'
-import { getColumns } from './data/columns'
 import { Issue, issueStatus } from './types'
 
 const IssuePage: FC = () => {

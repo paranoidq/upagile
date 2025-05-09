@@ -1,13 +1,11 @@
 import React from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
 import { IconCalendar, IconLayoutKanban, IconPencil, IconTrash } from '@tabler/icons-react'
-import { Tooltip } from 'antd'
-import { Ellipsis } from 'lucide-react'
 import { NavigateFunction } from 'react-router-dom'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DataTableColumnHeader } from '@/components/data-table/components/data-table-column-header'
 import { DataTableRowAction } from '@/components/data-table/types'
 import { Sprint, sprintStatus } from '../types'
@@ -112,47 +110,49 @@ export function getColumns({ setRowAction, navigate }: GetColumnsProps): ColumnD
       cell: function Cell({ row }) {
         return (
           <div className='flex items-center gap-0'>
-            {/* plan action */}
-            <Tooltip title='plan sprint issues'>
-              <Button
-                variant='ghost'
-                size='icon'
-                onClick={() => {
-                  navigate(`/sprints/${row.original.id}`)
-                }}
-              >
-                <IconLayoutKanban className='size-4' />
-              </Button>
-            </Tooltip>
+            <TooltipProvider key={row.original.id} delayDuration={500}>
+              {/* plan action */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    onClick={() => {
+                      navigate(`/sprints/${row.original.id}`)
+                    }}
+                  >
+                    <IconLayoutKanban className='size-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>plan sprint issues</p>
+                </TooltipContent>
+              </Tooltip>
 
-            {/* edit action */}
-            <Tooltip title='edit sprint'>
-              <Button variant='ghost' size='icon' onClick={() => setRowAction({ row, type: 'update' })}>
-                <IconPencil className='size-4' />
-              </Button>
-            </Tooltip>
+              {/* edit action */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant='ghost' size='icon' onClick={() => setRowAction({ row, type: 'update' })}>
+                    <IconPencil className='size-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>edit sprint</p>
+                </TooltipContent>
+              </Tooltip>
 
-            {/* delete action */}
-            <Tooltip title='remove sprint'>
-              <Button variant='ghost' size='icon' onClick={() => setRowAction({ row, type: 'delete' })}>
-                <IconTrash className='size-4 text-red-500' />
-              </Button>
-            </Tooltip>
-
-            {/* other actions */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button aria-label='Open menu' variant='ghost' size='icon'>
-                  <Ellipsis className='size-4' aria-hidden='true' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end'>
-                {/* <DropdownMenuItem>
-                  <IconPencil className='size-4' />
-                  Edit
-                </DropdownMenuItem> */}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              {/* delete action */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant='ghost' size='icon' onClick={() => setRowAction({ row, type: 'delete' })}>
+                    <IconTrash className='size-4 text-red-500' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>remove sprint</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         )
       },

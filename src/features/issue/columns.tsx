@@ -1,18 +1,24 @@
 import React from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
-import { IconCalendar, IconCube, IconFlag3Filled, IconUserCircle } from '@tabler/icons-react'
+import {
+  IconCalendar,
+  IconCube,
+  IconEye,
+  IconFlag3Filled,
+  IconPencil,
+  IconTrash,
+  IconUserCircle,
+} from '@tabler/icons-react'
 import { PRIORITIES } from '@/consts/enums'
-import { Ellipsis } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DataTableColumnHeader } from '@/components/data-table/components/data-table-column-header'
 import { DataTableRowAction } from '@/components/data-table/types'
-import { Issue, issueStatus, issueType } from '../types'
+import { Issue, issueStatus, issueType } from './types'
 
 interface GetColumnsProps {
   setRowAction: React.Dispatch<React.SetStateAction<DataTableRowAction<Issue> | null>>
@@ -179,17 +185,39 @@ export function getColumns({ setRowAction }: GetColumnsProps): ColumnDef<Issue>[
       id: 'actions',
       cell: function Cell({ row }) {
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button aria-label='Open menu' variant='ghost' className='flex size-8 p-0 data-[state=open]:bg-muted'>
-                <Ellipsis className='size-4' aria-hidden='true' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='w-40'>
-              <DropdownMenuItem onSelect={() => setRowAction({ row, type: 'update' })}>Edit</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setRowAction({ row, type: 'delete' })}>Delete</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className='flex items-center gap-0'>
+            <TooltipProvider key={row.original.id} delayDuration={500}>
+              {/* view */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant='ghost' size='icon' onClick={() => setRowAction({ row, type: 'view' })}>
+                    <IconEye className='size-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>View</TooltipContent>
+              </Tooltip>
+
+              {/* edit */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant='ghost' size='icon' onClick={() => setRowAction({ row, type: 'update' })}>
+                    <IconPencil className='size-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit</TooltipContent>
+              </Tooltip>
+
+              {/* delete */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant='ghost' size='icon' onClick={() => setRowAction({ row, type: 'delete' })}>
+                    <IconTrash className='size-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Delete</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         )
       },
       size: 40,

@@ -91,7 +91,7 @@ export const getSidebarData = (workspaces: Workspace[] = []): SidebarData => {
                 icon: IconBug,
               },
               {
-                title: 'Systems',
+                title: 'Applications',
                 url: `/workspace/${workspace.id}/systems`,
                 icon: IconDeviceDesktop,
               },

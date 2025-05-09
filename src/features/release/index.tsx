@@ -16,10 +16,10 @@ import { Main } from '@/components/layout/main.tsx'
 import { ProfileDropdown } from '@/components/profile-dropdown.tsx'
 import { ThemeSwitch } from '@/components/theme-switch.tsx'
 import { useReleases } from './_lib/services'
+import { getColumns } from './columns'
 import { DeleteReleasesDialog } from './components/delete-dialog'
 import { ReleaseTableFloatingBar } from './components/table-floating-bar'
 import { UpdateReleaseSheet } from './components/update-sheet'
-import { getColumns } from './data/columns'
 import { Release, releaseStatus } from './types'
 
 const ReleasePage: FC = () => {
